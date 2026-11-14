@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cart_custom" inherit_id="website_sale.cart" name="Custom Store Cart Page">
+        <xpath expr="//div[@id='shop_cart']" position="attributes">
+            <attribute name="class" add="o_custom_store_cart" separator=" "/>
+        </xpath>
+
+        <xpath expr="//t[@t-call='website_sale.cart_lines']" position="after">
+            <div class="o_custom_store_cart_notice rounded p-3 mt-3 small">
+                <div class="fw-semibold mb-1">
+                    <i class="fa fa-bolt me-1 text-primary" aria-hidden="true"/>Fast Dispatch, Promo Codes &amp; Easy Exchanges
+                </div>
+                <div class="mb-1">
+                    Apply any promo or loyalty code directly inside the order summary panel before checkout. Prepaid UPI / card orders receive priority dispatch and instant GST invoicing.
+                </div>
+                <div>
+                    Need sizing clarity before checking out? View the <a href="/size-guide" class="fw-semibold">Size Guide</a> &#183; <a href="/return-policy" class="fw-semibold">Return &amp; Exchange Policy</a>.
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

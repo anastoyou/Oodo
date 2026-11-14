@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="page_size_guide_tmpl" name="Size Guide Page">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="pt48 pb48">
+                    <div class="container">
+                        <h1 class="mb-3">Apparel Size Guide</h1>
+                        <p class="lead text-muted mb-4">Standard body measurements in inches (garments include comfortable wearing ease).</p>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Size</th>
+                                        <th>Bust / Chest (in)</th>
+                                        <th>Waist (in)</th>
+                                        <th>Hip (in)</th>
+                                        <th>Kurti Length (in)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>XS</td><td>34</td><td>28</td><td>36</td><td>44</td></tr>
+                                    <tr><td>S</td><td>36</td><td>30</td><td>38</td><td>44</td></tr>
+                                    <tr><td>M</td><td>38</td><td>32</td><td>40</td><td>45</td></tr>
+                                    <tr><td>L</td><td>40</td><td>34</td><td>42</td><td>45</td></tr>
+                                    <tr><td>XL</td><td>42</td><td>36</td><td>44</td><td>46</td></tr>
+                                    <tr><td>XXL</td><td>44</td><td>38</td><td>46</td><td>46</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-light border">
+                            <strong>Fit tip:</strong> If you are between sizes, we recommend choosing the next size up for cotton and rayon silhouettes. Need sizing help? <a href="/contactus">Message our support team</a>.
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <record id="page_size_guide" model="website.page">
+        <field name="url">/size-guide</field>
+        <field name="is_published">True</field>
+        <field name="website_indexed">True</field>
+        <field name="view_id" ref="page_size_guide_tmpl"/>
+    </record>
+</odoo>
+

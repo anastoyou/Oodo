@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="shop_products_custom" inherit_id="website_sale.products" name="Custom Store Shop Page">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class" add="o_custom_store_shop" separator=" "/>
+        </xpath>
+
+        <xpath expr="//header[@id='o_wsale_products_header']" position="before">
+            <div class="o_custom_store_shop_banner p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                    <span class="badge text-bg-primary text-uppercase mb-2">Season Collection</span>
+                    <h2 class="h4 text-white mb-1">Curated Apparel, Fabrics &amp; Everyday Essentials</h2>
+                    <p class="small text-white-50 mb-0">
+                        Use category filters and search to browse by silhouette, size, or fabric &#183; Priority dispatch on prepaid orders.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2 flex-shrink-0">
+                    <a href="/size-guide" class="btn btn-outline-light btn-sm">Size Guide</a>
+                    <a href="/return-policy" class="btn btn-light btn-sm text-dark">Exchange Policy</a>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

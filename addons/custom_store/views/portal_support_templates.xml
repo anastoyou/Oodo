@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 10. Helpdesk Customer Portal Views (/my/tickets & /my/tickets/<id>) -->
+    <template id="portal_my_home_menu_tickets" name="Portal Layout: Support Ticket Breadcrumbs" inherit_id="portal.portal_breadcrumbs" priority="25">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li id="portal_breadcrumbs_tickets" t-if="page_name == 'support_ticket'" t-attf-class="breadcrumb-item #{'active ' if not ticket else ''}">
+                <a t-if="ticket" href="/my/tickets">Support Tickets</a>
+                <t t-else="">Support Tickets</t>
+            </li>
+            <li t-if="ticket" class="breadcrumb-item active">
+                <t t-out="ticket.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_tickets" name="My Support &amp; Exchange Tickets">
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" breadcrumbs_searchbar="True" title.translate="Support Tickets"/>
+
+            <div class="d-flex justify-content-end mb-3">
+                <a href="/support" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus me-1" aria-hidden="true"/>New Support / Exchange Ticket
+                </a>
+            </div>
+
+            <div t-if="not tickets" class="alert alert-light border" role="alert">
+                <strong>No support tickets yet.</strong> Need help with a size exchange, delivery update, or GST invoice? <a href="/support" class="fw-semibold">Open a new request</a>.
+            </div>
+
+            <t t-if="tickets" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Ticket #</th>
+                        <th>Subject</th>
+                        <th>Issue Type</th>
+                        <th>Order</th>
+                        <th class="text-end">Created</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <t t-foreach="tickets" t-as="ticket">
+                    <tr>
+                        <td>
+                            <a t-att-href="ticket.get_portal_url()" class="fw-semibold">
+                                <t t-out="ticket.name"/>
+                            </a>
+                        </td>
+                        <td>
+                            <a t-att-href="ticket.get_portal_url()" class="text-decoration-none text-reset">
+                                <t t-out="ticket.subject"/>
+                            </a>
+                        </td>
+                        <td><span t-field="ticket.category"/></td>
+                        <td>
+                            <a t-if="ticket.sale_order_id" t-att-href="ticket.sale_order_id.get_portal_url()">
+                                <t t-out="ticket.sale_order_id.name"/>
+                            </a>
+                            <span t-else="" class="text-muted">&#8212;</span>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="ticket.create_date" t-options="{'widget': 'date'}"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-if="ticket.stage == 'new'" class="badge rounded-pill text-bg-info">New</span>
+                            <span t-elif="ticket.stage == 'in_progress'" class="badge rounded-pill text-bg-primary">In Progress</span>
+                            <span t-elif="ticket.stage == 'waiting_customer'" class="badge rounded-pill text-bg-warning">Waiting on You</span>
+                            <span t-elif="ticket.stage == 'resolved'" class="badge rounded-pill text-bg-success">Resolved</span>
+                            <span t-else="" class="badge rounded-pill text-bg-secondary">Closed</span>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_ticket_detail" name="Support Ticket Detail">
+        <t t-call="portal.portal_layout">
+            <div class="row g-4 mt-1">
+                <div class="col-lg-4">
+                    <div class="card border shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <strong t-out="ticket.name"/>
+                            <span t-if="ticket.stage == 'new'" class="badge rounded-pill text-bg-info">New</span>
+                            <span t-elif="ticket.stage == 'in_progress'" class="badge rounded-pill text-bg-primary">In Progress</span>
+                            <span t-elif="ticket.stage == 'waiting_customer'" class="badge rounded-pill text-bg-warning">Waiting on You</span>
+                            <span t-elif="ticket.stage == 'resolved'" class="badge rounded-pill text-bg-success">Resolved</span>
+                            <span t-else="" class="badge rounded-pill text-bg-secondary">Closed</span>
+                        </div>
+                        <div class="card-body small d-flex flex-column gap-2">
+                            <div>
+                                <span class="text-muted d-block">Issue Type</span>
+                                <strong t-field="ticket.category"/>
+                            </div>
+                            <div t-if="ticket.sale_order_id">
+                                <span class="text-muted d-block">Related Order</span>
+                                <a t-att-href="ticket.sale_order_id.get_portal_url()" class="fw-semibold">
+                                    <t t-out="ticket.sale_order_id.name"/>
+                                </a>
+                            </div>
+                            <div>
+                                <span class="text-muted d-block">Submitted On</span>
+                                <span t-field="ticket.create_date" t-options="{'widget': 'datetime'}"/>
+                            </div>
+                            <div t-if="ticket.user_id">
+                                <span class="text-muted d-block">Assigned Specialist</span>
+                                <span t-out="ticket.user_id.name"/>
+                            </div>
+                            <div class="pt-2">
+                                <a href="/my/tickets" class="btn btn-sm btn-outline-secondary w-100">Back to All Tickets</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card border shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h3 class="h4 mb-2" t-out="ticket.subject"/>
+                            <p class="text-muted mb-0" style="white-space: pre-line;" t-out="ticket.description"/>
+                            <div t-if="ticket.resolution_notes" class="alert alert-success mt-3 mb-0 small">
+                                <strong class="d-block mb-1">Resolution Summary</strong>
+                                <div style="white-space: pre-line;" t-out="ticket.resolution_notes"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ticket_communication" class="p-3 p-lg-4 rounded-3 border bg-white">
+                        <h4 class="pb-1">Messages &amp; Updates</h4>
+                        <t t-call="portal.message_thread" hide_header="True"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
+

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Upgrade-safe Homepage (website.homepage) managed inside addons/custom_store. -->
+    <template id="homepage_custom" inherit_id="website.homepage" name="Custom Store Homepage">
+        <xpath expr="//div[@id='wrap']" position="replace">
+            <div id="wrap" class="oe_structure">
+                <!-- 1. Hero Banner -->
+                <section class="s_cover parallax s_parallax_is_fixed o_cc o_cc5 pt72 pb72" data-scroll-background-ratio="1" data-snippet="s_cover">
+                    <span class="s_parallax_bg_wrap">
+                        <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.landscape_xl_1'); background-position: 50% 60%;"/>
+                    </span>
+                    <div class="o_we_bg_filter bg-black-50"/>
+                    <div class="container s_allow_columns">
+                        <div class="row">
+                            <div class="col-lg-10 mx-auto pt128 pb128 text-center">
+                                <span class="badge text-bg-primary text-uppercase mb-3 px-3 py-2">New Season &#183; Breathable Cotton &amp; Festive Linen</span>
+                                <h1 class="display-3 fw-bold text-white mb-3">Everyday Comfort. Tailored Fit.</h1>
+                                <p class="lead text-white-75 mb-4">
+                                    Crafted for effortless daily wear and celebration silhouettes &#8212; true Indian sizing from XS to XXL with Pan-India priority dispatch.
+                                </p>
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <a class="btn btn-primary btn-lg px-4 o_translate_inline" href="/shop">Shop Collection</a>
+                                    <a class="btn btn-outline-light btn-lg px-4 o_translate_inline" href="/size-guide">Size Guide</a>
+                                    <a class="btn btn-link text-white text-decoration-underline o_translate_inline" href="/support">Need Help?</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. D2C Trust Pillars -->
+                <section class="pt40 pb24 bg-white" data-snippet="s_text_block">
+                    <div class="container">
+                        <div class="row g-3 text-center text-md-start">
+                            <div class="col-6 col-lg-3">
+                                <div class="o_custom_store_trust_card p-3 h-100">
+                                    <div class="fw-semibold mb-1"><i class="fa fa-truck text-primary me-2" aria-hidden="true"/>Fast Pan-India Dispatch</div>
+                                    <div class="small text-muted">Priority dispatch on UPI/card orders with live portal tracking.</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="o_custom_store_trust_card p-3 h-100">
+                                    <div class="fw-semibold mb-1"><i class="fa fa-exchange text-primary me-2" aria-hidden="true"/>7-Day Easy Size Exchange</div>
+                                    <div class="small text-muted">Between sizes? One-click exchange support right from your account.</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="o_custom_store_trust_card p-3 h-100">
+                                    <div class="fw-semibold mb-1"><i class="fa fa-shield text-primary me-2" aria-hidden="true"/>Verified COD &amp; UPI</div>
+                                    <div class="small text-muted">Secure Razorpay checkout, cards, UPI, and confirmed COD delivery.</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="o_custom_store_trust_card p-3 h-100">
+                                    <div class="fw-semibold mb-1"><i class="fa fa-check-circle text-primary me-2" aria-hidden="true"/>QC-Checked Fabrics</div>
+                                    <div class="small text-muted">Breathable cotton, rayon blends, and GST-invoiced orders.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Curated Collections Navigation -->
+                <section class="pt32 pb48" data-snippet="s_text_block">
+                    <div class="container">
+                        <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
+                            <div>
+                                <span class="text-primary text-uppercase small fw-semibold">Explore Catalog</span>
+                                <h2 class="h3 mb-0">Shop by Category</h2>
+                            </div>
+                            <a href="/shop" class="btn btn-outline-dark btn-sm">Browse All Products</a>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/shop?search=Kurti" class="text-decoration-none text-reset">
+                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="badge bg-white border text-dark mb-2">Apparel</span>
+                                            <h3 class="h5 mb-2">Women's Kurtis &amp; Sets</h3>
+                                            <p class="small text-muted mb-3">Straight-fit cotton kurtis, festive prints, and coordinated two-piece sets.</p>
+                                        </div>
+                                        <span class="small fw-semibold text-primary">Explore Women's &#8594;</span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/shop?search=Shirt" class="text-decoration-none text-reset">
+                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="badge bg-white border text-dark mb-2">Everyday</span>
+                                            <h3 class="h5 mb-2">Men's Shirts &amp; Casuals</h3>
+                                            <p class="small text-muted mb-3">Tailored polos, relaxed linen shirts, and breathable daily staples.</p>
+                                        </div>
+                                        <span class="small fw-semibold text-primary">Explore Men's &#8594;</span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/shop?search=Fabric" class="text-decoration-none text-reset">
+                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="badge bg-white border text-dark mb-2">By the Metre</span>
+                                            <h3 class="h5 mb-2">Running Fabrics</h3>
+                                            <p class="small text-muted mb-3">Handpicked cotton &amp; rayon yardage sold per metre for custom tailoring.</p>
+                                        </div>
+                                        <span class="small fw-semibold text-primary">Shop Fabrics &#8594;</span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/shop" class="text-decoration-none text-reset">
+                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="badge bg-white border text-dark mb-2">Complete the Look</span>
+                                            <h3 class="h5 mb-2">Footwear &amp; Accessories</h3>
+                                            <p class="small text-muted mb-3">Everyday ethnic pairs and lifestyle accessories tested for all-day comfort.</p>
+                                        </div>
+                                        <span class="small fw-semibold text-primary">View Catalog &#8594;</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Brand Story & Fit Guidance -->
+                <section class="s_text_image pt56 pb56 bg-light" data-snippet="s_text_image">
+                    <div class="container">
+                        <div class="row align-items-center g-4">
+                            <div class="col-lg-5">
+                                <span class="text-primary text-uppercase small fw-semibold">Built for Real Fits</span>
+                                <h2 class="mt-1 mb-3">Confidence in every silhouette, zero guesswork on size</h2>
+                                <p class="text-muted">
+                                    Every garment lists transparent fabric weight, wash-care instructions, and verified dispatch timelines right on the product page.
+                                </p>
+                                <p class="text-muted">
+                                    Unsure between two sizes? Check our bust, waist, and length chart before you order &#8212; or log a 1-minute exchange request anytime.
+                                </p>
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    <a href="/shop" class="btn btn-primary o_translate_inline">Shop Now</a>
+                                    <a href="/size-guide" class="btn btn-outline-secondary o_translate_inline">View Size Chart</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 offset-lg-1">
+                                <img src="/web/image/website.landscape_md_9" class="img img-fluid mx-auto rounded shadow-sm" alt="Featured apparel craftsmanship" loading="lazy"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Numbers & Support CTA -->
+                <section class="s_numbers o_cc o_cc1 pt56 pb56" data-snippet="s_numbers">
+                    <div class="container">
+                        <div class="row s_nb_column_fixed align-items-center">
+                            <div class="col-lg-5 mb-4 mb-lg-0">
+                                <h2 class="mb-2 h3">Designed for repeat wear</h2>
+                                <p class="text-muted mb-3">Direct-to-customer pricing with transparent GST invoicing, fast exchanges, and dedicated ticket support.</p>
+                                <a href="/support" class="btn btn-outline-dark btn-sm">Open Support &amp; Exchange Desk</a>
+                            </div>
+                            <div class="col-4 col-lg-2 offset-lg-1 text-center">
+                                <span class="s_number display-5 fw-bold text-primary">48h</span><br/>
+                                <span class="small text-muted">Typical Dispatch</span>
+                            </div>
+                            <div class="col-4 col-lg-2 text-center">
+                                <span class="s_number display-5 fw-bold text-primary">7-Day</span><br/>
+                                <span class="small text-muted">Easy Size Swap</span>
+                            </div>
+                            <div class="col-4 col-lg-2 text-center">
+                                <span class="s_number display-5 fw-bold text-primary">100%</span><br/>
+                                <span class="small text-muted">QC Verified</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </xpath>
+    </template>
+</odoo>

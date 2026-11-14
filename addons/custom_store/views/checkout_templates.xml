@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 4. Checkout Flow: Shared Layout, Customer Details, Payment & Confirmation -->
+    <template id="checkout_layout_custom" inherit_id="website_sale.checkout_layout" name="Custom Store Checkout Layout">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class" add="o_custom_store_checkout" separator=" "/>
+        </xpath>
+    </template>
+
+    <template id="checkout_address_custom" inherit_id="website_sale.checkout" name="Custom Store Checkout Address">
+        <xpath expr="//div[@id='shop_checkout']" position="before">
+            <div class="o_custom_store_checkout_strip p-3 mb-4 small">
+                <div class="fw-semibold mb-1">
+                    <i class="fa fa-truck me-1 text-primary" aria-hidden="true"/>Delivery &amp; Size Assurance
+                </div>
+                <div class="text-muted">
+                    Enter your reachable mobile number for courier updates and COD verification calls. Need GST input credit on bulk or business orders? Add your company GSTIN in billing details.
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="checkout_payment_custom" inherit_id="website_sale.payment" name="Custom Store Checkout Payment">
+        <xpath expr="//div[@id='payment_method']" position="before">
+            <div class="o_custom_store_checkout_strip p-3 mb-3 small">
+                <div class="fw-semibold mb-1">
+                    <i class="fa fa-shield me-1 text-primary" aria-hidden="true"/>Choose Prepaid (Priority Dispatch) or Cash on Delivery
+                </div>
+                <div class="text-muted">
+                    UPI, Credit/Debit Cards, and Netbanking orders qualify for priority dispatch and digital GST invoice downloads right from your portal. COD orders may receive a quick WhatsApp confirmation before dispatch.
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="checkout_confirmation_custom" inherit_id="website_sale.confirmation" name="Custom Store Order Confirmation">
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_1']" position="inside">
+            <div class="o_custom_store_checkout_strip p-4 mt-4">
+                <h5 class="mb-2">What happens next with your order?</h5>
+                <div class="row g-3 small text-muted">
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block mb-1">1. QC &amp; Packing</strong>
+                        Your garments are quality-checked, folded, and labelled for dispatch from our warehouse.
+                    </div>
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block mb-1">2. Track Any Time</strong>
+                        Visit <a href="/my/orders" class="fw-semibold">My Orders</a> in Customer Portal to view shipping progress and GST invoices.
+                    </div>
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block mb-1">3. Easy 7-Day Exchanges</strong>
+                        Need a different size once delivered? Open a ticket on our <a href="/support" class="fw-semibold">Support &amp; Exchange Desk</a>.
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>
+

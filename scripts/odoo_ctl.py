@@ -50,6 +50,9 @@ def load_env(root: Path = ROOT) -> dict[str, str]:
         key = key.strip()
         if key:
             cfg[key] = val.strip().strip('"').strip("'")
+    for key in list(cfg.keys()) + ["ODOO_ENV", "ODOO_WORKERS", "ODOO_CRON_THREADS", "ODOO_LIMIT_TIME_CPU", "ODOO_LIMIT_TIME_REAL"]:
+        if key in os.environ and os.environ[key] != "":
+            cfg[key] = os.environ[key]
     return cfg
 
 
@@ -139,7 +142,54 @@ def stop_local_odoo() -> None:
                 proc.kill()
 
 
-def write_runtime_conf(root: Path, cfg: dict[str, str]) -> Path:
+def _is_module_dir(path: Path) -> bool:
+    return path.is_dir() and ((path / "__manifest__.py").is_file() or (path / "__openerp__.py").is_file())
+
+
+def discover_addons_paths(root: Path) -> list[Path]:
+    """Return ordered addons_path entries: core odoo/addons first, then addons/ and nested OCA repos."""
+    paths: list[Path] = []
+    core_addons = root / "odoo" / "addons"
+    if core_addons.is_dir():
+        paths.append(core_addons)
+
+    custom_root = root / "addons"
+    if not custom_root.is_dir():
+        return paths
+
+    candidates = [custom_root]
+    for entry in sorted(custom_root.iterdir()):
+        if not entry.is_dir() or entry.name.startswith(".") or _is_module_dir(entry):
+            continue
+        if any(_is_module_dir(sub) for sub in entry.iterdir()):
+            candidates.append(entry)
+        else:
+            for nested in sorted(entry.iterdir()):
+                if nested.is_dir() and not nested.name.startswith(".") and any(_is_module_dir(sub) for sub in nested.iterdir()):
+                    candidates.append(nested)
+
+    seen = {p.resolve() for p in paths}
+    for cand in candidates:
+        resolved = cand.resolve()
+        if resolved not in seen and any(_is_module_dir(sub) for sub in cand.iterdir()):
+            paths.append(cand)
+            seen.add(resolved)
+    return paths
+
+
+def discover_custom_modules(root: Path) -> list[str]:
+    """Return technical names of custom modules located outside odoo/ under addons/."""
+    names: list[str] = []
+    for addons_dir in discover_addons_paths(root):
+        if addons_dir.resolve() == (root / "odoo" / "addons").resolve():
+            continue
+        for entry in sorted(addons_dir.iterdir()):
+            if _is_module_dir(entry) and entry.name not in names:
+                names.append(entry.name)
+    return names
+
+
+def write_runtime_conf(root: Path, cfg: dict[str, str], prod: bool | None = None) -> Path:
     """Generate data/odoo.runtime.conf by merging structural odoo.conf with .env DB settings."""
     parser = configparser.ConfigParser(interpolation=None)
     base_conf = root / "odoo.conf"
@@ -148,6 +198,7 @@ def write_runtime_conf(root: Path, cfg: dict[str, str]) -> Path:
     if "options" not in parser:
         parser["options"] = {}
 
+    is_prod = prod if prod is not None else cfg.get("ODOO_ENV", "").lower() == "production"
     opts = parser["options"]
     opts["admin_passwd"] = cfg["ADMIN_PASSWORD"]
     opts["db_host"] = cfg["DB_HOST"]
@@ -155,6 +206,22 @@ def write_runtime_conf(root: Path, cfg: dict[str, str]) -> Path:
     opts["db_user"] = cfg["DB_USER"]
     opts["db_password"] = cfg["DB_PASSWORD"]
     opts["http_port"] = cfg["ODOO_PORT"]
+    opts["data_dir"] = str(root / "data")
+
+    discovered = discover_addons_paths(root)
+    if discovered:
+        opts["addons_path"] = ",".join(str(p) for p in discovered)
+
+    if is_prod:
+        opts["list_db"] = "False"
+        opts["proxy_mode"] = "True"
+        opts["log_level"] = "warn"
+        opts["without_demo"] = "all"
+        if os.name != "nt":
+            opts["workers"] = cfg.get("ODOO_WORKERS", "2")
+            opts["max_cron_threads"] = cfg.get("ODOO_CRON_THREADS", "1")
+            opts["limit_time_cpu"] = cfg.get("ODOO_LIMIT_TIME_CPU", "120")
+            opts["limit_time_real"] = cfg.get("ODOO_LIMIT_TIME_REAL", "240")
 
     runtime_conf = root / "data" / "odoo.runtime.conf"
     runtime_conf.parent.mkdir(parents=True, exist_ok=True)
@@ -325,7 +392,7 @@ def cmd_start(args: argparse.Namespace) -> int:
     has_custom_conf = any(a in ("-c", "--config") or a.startswith("--config=") for a in extra)
     cmd = [sys.executable, str(odoo_bin)]
     if not has_custom_conf:
-        runtime_conf = write_runtime_conf(ROOT, cfg)
+        runtime_conf = write_runtime_conf(ROOT, cfg, prod=True if getattr(args, "prod", False) else None)
         cmd.extend(["-c", str(runtime_conf)])
     cmd.extend(extra)
 
@@ -354,6 +421,36 @@ def cmd_stop(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _save_backup_archive(root: Path, cfg: dict[str, str], db_name: str, out_zip: Path) -> bool:
+    """Dump database SQL + manifest.json + filestore into out_zip atomically. Returns has_filestore."""
+    out_zip.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".tmp_save_", dir=out_zip.parent) as tmp:
+        stage = Path(tmp)
+        _dump_sql_via_pg(cfg, db_name, stage / "dump.sql")
+        manifest = build_manifest(root, cfg, db_name)
+        (stage / "manifest.json").write_text(json.dumps(manifest, indent=4), encoding="utf-8")
+
+        filestore_src = root / "data" / "filestore" / db_name
+        has_filestore = filestore_src.is_dir()
+        if has_filestore:
+            shutil.copytree(filestore_src, stage / "filestore")
+
+        part_zip = out_zip.with_name(out_zip.name + ".part")
+        try:
+            with zipfile.ZipFile(part_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.write(stage / "dump.sql", "dump.sql")
+                zf.write(stage / "manifest.json", "manifest.json")
+                if has_filestore:
+                    for file_path in sorted((stage / "filestore").rglob("*")):
+                        if file_path.is_file():
+                            zf.write(file_path, file_path.relative_to(stage).as_posix())
+            os.replace(part_zip, out_zip)
+        except Exception:
+            part_zip.unlink(missing_ok=True)
+            raise
+    return has_filestore
+
+
 def cmd_save(args: argparse.Namespace) -> int:
     """Dump an Odoo database and its filestore to backups/<db>_<timestamp>.zip."""
     cfg = load_env(ROOT)
@@ -375,39 +472,73 @@ def cmd_save(args: argparse.Namespace) -> int:
 
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     backups_dir = ROOT / "backups"
-    backups_dir.mkdir(parents=True, exist_ok=True)
     out_zip = Path(args.output).resolve() if args.output else backups_dir / f"{db_name}_{stamp}.zip"
-    out_zip.parent.mkdir(parents=True, exist_ok=True)
 
     print(f'\nSaving database "{db_name}" (SQL + manifest + filestore)...')
-    with tempfile.TemporaryDirectory(prefix=".tmp_save_", dir=backups_dir) as tmp:
-        stage = Path(tmp)
-        _dump_sql_via_pg(cfg, db_name, stage / "dump.sql")
-        manifest = build_manifest(ROOT, cfg, db_name)
-        (stage / "manifest.json").write_text(json.dumps(manifest, indent=4), encoding="utf-8")
-
-        filestore_src = ROOT / "data" / "filestore" / db_name
-        has_filestore = filestore_src.is_dir()
-        if has_filestore:
-            shutil.copytree(filestore_src, stage / "filestore")
-
-        part_zip = out_zip.with_name(out_zip.name + ".part")
-        try:
-            with zipfile.ZipFile(part_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-                zf.write(stage / "dump.sql", "dump.sql")
-                zf.write(stage / "manifest.json", "manifest.json")
-                if has_filestore:
-                    for file_path in sorted((stage / "filestore").rglob("*")):
-                        if file_path.is_file():
-                            zf.write(file_path, file_path.relative_to(stage).as_posix())
-            os.replace(part_zip, out_zip)
-        except Exception:
-            part_zip.unlink(missing_ok=True)
-            raise
-
+    has_filestore = _save_backup_archive(ROOT, cfg, db_name, out_zip)
     size_mb = out_zip.stat().st_size / (1024 * 1024)
     print(f"[SUCCESS] Saved backup: {out_zip} ({size_mb:.2f} MB, filestore={'yes' if has_filestore else 'none'})")
     return 0
+
+
+def cmd_upgrade(args: argparse.Namespace) -> int:
+    """Safely back up DB, pull upstream odoo/ updates without core conflicts, and upgrade custom addons."""
+    cfg = load_env(ROOT)
+    odoo_dir = ROOT / "odoo"
+    odoo_bin = odoo_dir / "odoo-bin"
+    if not odoo_bin.is_file():
+        raise RuntimeError(f"Odoo source not found at {odoo_bin}")
+
+    if not args.skip_pull:
+        dirty = subprocess.run(
+            ["git", "-C", str(odoo_dir), "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        if dirty.stdout.strip():
+            raise RuntimeError(f"Upstream {odoo_dir} has uncommitted local edits; aborting pull to keep core clean.")
+        print(f"Pulling latest upstream Odoo ({cfg.get('ODOO_BRANCH', '20.0')}) in {odoo_dir}...")
+        subprocess.run(["git", "-C", str(odoo_dir), "pull", "--ff-only"], check=True)
+
+    ensure_postgres(ROOT, cfg)
+    avail = list_user_databases(cfg)
+    db_name = args.database or (cfg["ODOO_DB"] if cfg["ODOO_DB"] in avail else (avail[0] if avail else ""))
+    if not db_name or db_name not in avail:
+        raise RuntimeError(f'Target database "{db_name}" not found. Available: {", ".join(avail)}')
+
+    stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    pre_zip = ROOT / "backups" / f"{db_name}_pre_upgrade_{stamp}.zip"
+    print(f'Creating safety backup "{pre_zip.name}" before upgrading...')
+    _save_backup_archive(ROOT, cfg, db_name, pre_zip)
+
+    if args.modules:
+        custom_mods = [m.strip() for m in args.modules.split(",") if m.strip()]
+    else:
+        custom_mods = discover_custom_modules(ROOT)
+        if not args.install:
+            with connect_pg(cfg, db_name) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT name FROM ir_module_module WHERE state = 'installed'")
+                    installed = {row[0] for row in cur.fetchall()}
+            installed_custom = [m for m in custom_mods if m in installed]
+            if installed_custom:
+                custom_mods = installed_custom
+    if not custom_mods:
+        raise RuntimeError("No custom modules found in addons/.")
+
+    stop_local_odoo()
+    runtime_conf = write_runtime_conf(ROOT, cfg, prod=True if args.prod else None)
+    flag = "-i" if args.install else "-u"
+    mod_arg = ",".join(custom_mods)
+    print(f'Running Odoo {flag} {mod_arg} on database "{db_name}"...')
+    rc = subprocess.run(
+        [sys.executable, str(odoo_bin), "-c", str(runtime_conf), "-d", db_name, flag, mod_arg, "--stop-after-init", "--no-http"],
+        cwd=ROOT,
+    ).returncode
+    if rc == 0:
+        print(f'\n[SUCCESS] Upgraded {", ".join(custom_mods)} on "{db_name}". Pre-upgrade backup: {pre_zip}')
+    return rc
 
 
 def _pick_backup_interactive(backups_dir: Path) -> Path:
@@ -558,8 +689,17 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_start = sub.add_parser("start", help="Start Odoo using .env DB config")
+    p_start.add_argument("--prod", action="store_true", help="Apply production runtime conf overrides")
     p_start.add_argument("extra", nargs=argparse.REMAINDER, help="Arguments passed through to odoo-bin")
     p_start.set_defaults(func=cmd_start, pause=False)
+
+    p_upgrade = sub.add_parser("upgrade", help="Back up DB, pull odoo/, and upgrade addons/ modules")
+    p_upgrade.add_argument("-d", "--database", help="Target database name (defaults to ODOO_DB)")
+    p_upgrade.add_argument("-m", "--modules", help="Comma-separated modules (defaults to all addons/ modules)")
+    p_upgrade.add_argument("-i", "--install", action="store_true", help="Install (-i) instead of upgrade (-u)")
+    p_upgrade.add_argument("--skip-pull", action="store_true", help="Skip git pull inside odoo/")
+    p_upgrade.add_argument("--prod", action="store_true", help="Use production runtime conf")
+    p_upgrade.set_defaults(func=cmd_upgrade, pause=False)
 
     p_stop = sub.add_parser("stop", help="Stop local Odoo and PostgreSQL container")
     p_stop.add_argument("-y", "--yes", action="store_true", help="Do not pause on exit")

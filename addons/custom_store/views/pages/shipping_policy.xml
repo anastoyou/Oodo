@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="page_shipping_policy_tmpl" name="Shipping &amp; Delivery Policy Page">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="pt48 pb48">
+                    <div class="container">
+                        <h1 class="mb-3">Shipping &amp; Delivery Policy</h1>
+                        <p class="lead text-muted mb-4">Pan-India doorstep delivery with live tracking updates.</p>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h5>Dispatch Time</h5>
+                                <p>Orders placed before 2:00 PM IST are typically dispatched within 1–2 business days (excluding Sundays and public holidays).</p>
+                                <h5>Delivery Timeline</h5>
+                                <p>Metro cities receive orders in 3–5 business days. Rest of India delivery usually completes in 4–7 business days.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Shipping Charges &amp; COD</h5>
+                                <p>Enjoy free Pan-India delivery above the threshold shown at checkout. Cash on Delivery (COD) orders may require a quick WhatsApp or phone confirmation prior to dispatch.</p>
+                                <h5>Order Tracking</h5>
+                                <p>Tracking details are sent automatically via Email/WhatsApp once handed over to our courier partner.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <record id="page_shipping_policy" model="website.page">
+        <field name="url">/shipping-policy</field>
+        <field name="is_published">True</field>
+        <field name="website_indexed">True</field>
+        <field name="view_id" ref="page_shipping_policy_tmpl"/>
+    </record>
+</odoo>
+

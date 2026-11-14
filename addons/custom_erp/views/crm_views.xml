@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_view_form_custom_erp" model="ir.ui.view">
+        <field name="name">crm.lead.form.custom_erp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_partner']" position="inside">
+                <field name="x_inquiry_channel"/>
+                <field name="x_product_interest"/>
+                <field name="x_preferred_size" placeholder="e.g. M / L, custom blouse query"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_case_kanban_view_leads_custom_erp" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.custom_erp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/field[@name='team_id']" position="after">
+                <field name="x_inquiry_channel"/>
+                <field name="x_product_interest"/>
+            </xpath>
+            <xpath expr="//t[@t-name='card']//field[@name='tag_ids']" position="after">
+                <div class="d-flex flex-wrap gap-1 mt-1 small">
+                    <field name="x_inquiry_channel" widget="badge" decoration-info="1" invisible="not x_inquiry_channel"/>
+                    <field name="x_product_interest" widget="badge" decoration-muted="1" invisible="not x_product_interest"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_case_tree_view_oppor_custom_erp" model="ir.ui.view">
+        <field name="name">crm.lead.list.custom_erp</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="x_inquiry_channel" optional="show"/>
+                <field name="x_product_interest" optional="show"/>
+                <field name="x_preferred_size" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_custom_erp" model="ir.ui.view">
+        <field name="name">res.partner.form.custom_erp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_view_support_tickets"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="chat_bubble"
+                    groups="base.group_user">
+                    <field string="Tickets" name="x_ticket_count" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

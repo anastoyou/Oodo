@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_custom_erp" model="ir.ui.view">
+        <field name="name">stock.picking.form.custom_erp</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="x_packing_status" widget="badge"
+                    decoration-warning="x_packing_status == 'pending'"
+                    decoration-info="x_packing_status == 'qc_passed'"
+                    decoration-primary="x_packing_status == 'packed'"
+                    decoration-success="x_packing_status == 'handed_to_courier'"
+                    decoration-danger="x_packing_status == 'rto_received'"/>
+                <field name="x_qc_verified"/>
+                <field name="x_dispatch_note" placeholder="e.g. Shiprocket pickup / hang-tag checked"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="vpicktree_custom_erp" model="ir.ui.view">
+        <field name="name">stock.picking.list.custom_erp</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="x_qc_verified" string="QC" optional="show"/>
+                <field name="x_packing_status" widget="badge"
+                    decoration-warning="x_packing_status == 'pending'"
+                    decoration-info="x_packing_status == 'qc_passed'"
+                    decoration-primary="x_packing_status == 'packed'"
+                    decoration-success="x_packing_status == 'handed_to_courier'"
+                    decoration-danger="x_packing_status == 'rto_received'"
+                    optional="show"/>
+                <field name="x_dispatch_note" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_warehouse_custom_erp" model="ir.ui.view">
+        <field name="name">stock.warehouse.form.custom_erp</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//group[1]" position="before">
+                <div class="alert alert-info mb-3" role="status">
+                    <strong>Warehouse Code Standard:</strong> Use <code>CWH</code> for Central Warehouse, <code>ST01</code>–<code>ST05</code> for Retail Stores, and <code>FR01</code>+ for Franchise locations.
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_stock_quant_tree_editable_custom_erp" model="ir.ui.view">
+        <field name="name">stock.quant.list.custom_erp</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_categ_id']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='available_quantity']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

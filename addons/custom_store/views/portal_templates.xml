@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 5. Customer Portal: Login, Registration, Dashboard, Details & Order History -->
+    <template id="login_layout_custom" inherit_id="website.login_layout" name="Custom Store Login Card">
+        <xpath expr="//div[hasclass('oe_website_login_container')]" position="attributes">
+            <attribute name="class" add="o_custom_store_auth" separator=" "/>
+        </xpath>
+    </template>
+
+    <template id="login_page_custom" inherit_id="web.login" name="Custom Store Login Header">
+        <xpath expr="//form[contains(@t-attf-class, 'oe_login_form')]/input[@name='csrf_token']" position="after">
+            <div class="text-center mb-3 pb-2 border-bottom">
+                <span class="badge text-bg-light border text-uppercase mb-2">Customer Account</span>
+                <h4 class="mb-1">Sign in to Your Store</h4>
+                <p class="small text-muted mb-0">
+                    Track deliveries, download GST invoices, and request 7-day size exchanges.
+                </p>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="signup_page_custom" inherit_id="auth_signup.signup" name="Custom Store Signup Header">
+        <xpath expr="//form[hasclass('oe_signup_form')]/input[@name='csrf_token']" position="after">
+            <div class="text-center mb-3 pb-2 border-bottom">
+                <span class="badge text-bg-light border text-uppercase mb-2">Join Us</span>
+                <h4 class="mb-1">Create Your Account</h4>
+                <p class="small text-muted mb-0">
+                    Save shipping addresses, manage exchanges in one click, and view order updates.
+                </p>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_custom" inherit_id="portal.portal_my_home" name="Custom Store Portal Hero">
+        <xpath expr="//div[@id='oe_structure_portal_my_home_1']" position="inside">
+            <div class="o_custom_store_portal_hero p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                    <span class="badge text-bg-primary text-uppercase mb-2">Customer Portal</span>
+                    <h2 class="h4 text-white mb-1">
+                        Welcome back, <t t-out="request.env.user.partner_id.name or 'Guest'"/>
+                    </h2>
+                    <p class="small text-white-50 mb-0">
+                        Manage your apparel orders, shipping addresses, GST invoices, and size exchange requests.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2 flex-shrink-0">
+                    <a href="/my/orders" class="btn btn-light btn-sm text-dark">My Orders</a>
+                    <a href="/my/tickets" class="btn btn-outline-light btn-sm">My Tickets</a>
+                    <a href="/support" class="btn btn-primary btn-sm">Request Exchange / Help</a>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_my_details_custom" inherit_id="portal.portal_my_details" name="Custom Store Portal Profile">
+        <xpath expr="//div[@id='errors']" position="before">
+            <div class="alert alert-light border small mb-3">
+                <strong>Delivery &amp; Billing Tip:</strong> Keep your mobile number current for courier alerts and COD verification. Business buyers can enter a valid GSTIN to receive GST tax-credit invoices.
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_my_orders_custom" inherit_id="sale.portal_my_orders" name="Custom Store Portal Orders">
+        <xpath expr="//th[@name='order_delivery']" position="after">
+            <th class="text-end" name="order_payment_mode">Payment</th>
+        </xpath>
+        <xpath expr="//td[@name='order_delivery_status']" position="after">
+            <td class="text-end" name="order_payment_mode_col">
+                <span t-if="order.x_payment_mode == 'prepaid'" class="badge rounded-pill text-bg-success">
+                    Prepaid
+                </span>
+                <span t-elif="order.x_payment_mode == 'cod'" class="badge rounded-pill text-bg-warning">
+                    COD
+                </span>
+                <span t-else="" class="badge rounded-pill text-bg-info">
+                    Partial
+                </span>
+            </td>
+        </xpath>
+    </template>
+
+    <template id="sale_order_portal_custom" inherit_id="sale.sale_order_portal_template" name="Custom Store Order Sidebar Support">
+        <xpath expr="//div[@id='print_invoice_sidebar_button']" position="after">
+            <a class="btn btn-outline-primary o_translate_inline"
+                t-attf-href="/support?order_id=#{sale_order.id}&amp;order_ref=#{sale_order.name}">
+                <i class="fa fa-life-ring me-1" aria-hidden="true"/>Need Exchange / Order Help?
+            </a>
+        </xpath>
+    </template>
+</odoo>
+

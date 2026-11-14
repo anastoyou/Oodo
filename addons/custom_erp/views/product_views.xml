@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_custom_erp" model="ir.ui.view">
+        <field name="name">product.template.form.custom_erp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning" role="alert" invisible="not x_gst_slab_warning">
+                    <field name="x_gst_slab_warning"/>
+                </div>
+            </xpath>
+            <xpath expr="//page[@name='general_information']/group" position="after">
+                <group name="custom_erp_apparel" string="Apparel &amp; Storefront Specifications">
+                    <group>
+                        <field name="x_fabric" placeholder="e.g. Rayon 14kg / Pure Cotton"/>
+                        <field name="x_fit_type"/>
+                        <field name="x_dispatch_days"/>
+                    </group>
+                    <group>
+                        <field name="x_wash_care" placeholder="Care instructions shown on storefront and labels"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_tree_view_custom_erp" model="ir.ui.view">
+        <field name="name">product.template.list.custom_erp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='list_price']" position="after">
+                <field name="x_fabric" optional="show"/>
+                <field name="x_fit_type" optional="hide"/>
+                <field name="x_dispatch_days" string="Dispatch (Days)" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

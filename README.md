@@ -1,33 +1,32 @@
-# Odoo 20.0 ERP (Direct Source Setup + `.env` Single Config)
+# Odoo 20.0 ERP — Production-Ready Custom Addons & `.env` Architecture
 
-This project runs **Odoo 20.0** directly from the GitHub source repository ([`odoo/odoo`](https://github.com/odoo/odoo)) in a Python `3.12` virtual environment (`.venv`), connected to a **PostgreSQL 16** container (`odoo-db`).
+This project runs **Odoo 20.0** directly from upstream [`odoo/odoo`](https://github.com/odoo/odoo) (kept completely unmodified in `odoo/`) alongside custom version-controlled addons in `addons/` and a Linux VPS production stack in `deploy/`.
 
-All database credentials, ports, and MCP settings live in **one single file: `.env`**.
+All database credentials, ports, workers, and MCP settings live in **one file: `.env`** (see `.env.example` for the committed template).
 
 ---
 
 ## 📁 Project Layout
 
-- **`.env`**: **Single source of truth** for DB connection (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`), Odoo server (`ADMIN_PASSWORD`, `ODOO_PORT`, `ODOO_BRANCH`), and MCP (`ODOO_URL`, `ODOO_DB`, `ODOO_USER`, `ODOO_PASSWORD`).
-- **`odoo.conf`**: Structural Odoo paths and interface only (no DB host/user/password duplicated here). `start.bat` merges `.env` + `odoo.conf` into `data\odoo.runtime.conf` on launch.
-- **`docker-compose.yml`**: Runs PostgreSQL 16 (`odoo-db`) using `DB_USER`, `DB_PASSWORD`, and `DB_PORT` from `.env`.
-- **`scripts/odoo_ctl.py`**: Shared controller reading `.env` for all batch launchers.
-- **`start.bat` / `stop.bat`**: Start or stop Odoo and PostgreSQL.
-- **`save_db.bat` / `load_db.bat`**: Back up or restore any Odoo database + filestore `.zip` to/from `backups\`.
-- **`reset-db.bat`**: Wipe the PostgreSQL volume and `data\filestore` + `data\sessions` to start fresh.
-- **`addons/`**: Custom Odoo modules.
-- **`docs/`**: Project notes and roadmaps.
-- **`odoo/`**, **`.venv/`**, **`data/`**, **`backups/`**: Local source clone, virtualenv, runtime data, and backups (all gitignored).
+- **`.env` / `.env.example`**: Single source of truth for DB credentials (`DB_*`), Odoo settings (`ADMIN_PASSWORD`, `ODOO_PORT`, `ODOO_BRANCH`, `ODOO_ENV`, `ODOO_WORKERS`), and MCP settings. `.env` is gitignored so secrets stay off Git.
+- **`odoo.conf`**: Structural defaults (`http_interface`, `addons_path`, `data_dir`, `list_db`). `scripts/odoo_ctl.py` generates `data/odoo.runtime.conf` with auto-discovered `addons/` (including nested OCA repos) and `.env` overrides.
+- **`addons/custom_erp/`**: Backend D2C Apparel & Phase-1 stack (`sale_management`, `sale_stock_margin`, `purchase`, `stock_dropshipping`, Indian GST `l10n_in*`, `payment_razorpay`, `crm`, `im_livechat`, `mass_mailing`, `website_blog`), Day-1 category tree & size/color/fabric attributes, Indian 5%/18% GST slab advisory, and COD verification / RTO tracking queues.
+- **`addons/custom_store/`**: Version-controlled Website & eCommerce theme, exported homepage/header/footer/colors, `/shop` public categories, trust pages (`/size-guide`, `/shipping-policy`, `/return-policy`), and product/cart storefront hooks.
+- **`deploy/` & `docker-compose.prod.yml`**: Production Docker stack (PostgreSQL 16 + Python 3.12 multi-worker Odoo + Nginx reverse proxy + cron backups + upgrade script).
+- **`scripts/odoo_ctl.py`**: Shared controller powering `start.bat`, `stop.bat`, `save_db.bat`, `load_db.bat`, `reset-db.bat`, and `upgrade.bat`.
+- **`docs/`**: Scaling roadmap (`SCALING_ROADMAP.md`) and local notes.
+- **`odoo/`**, **`.venv/`**, **`data/`**, **`backups/`**: Local core clone, virtualenv, runtime data, and DB snapshots (gitignored).
 
 ---
 
-## 🚀 Common Commands
+## 🚀 Common Commands (Windows Dev)
 
-- **Start Odoo**: Double-click `start.bat` (or pass Odoo flags like `start.bat -u all`). Open [http://localhost:8069](http://localhost:8069).
-- **Stop Odoo & DB**: Run `stop.bat`.
-- **Save DB backup**: Run `save_db.bat` (or `save_db.bat localhost`).
-- **Restore DB backup**: Run `load_db.bat` (or `load_db.bat backups\<file>.zip localhost -y`).
-- **Pull latest Odoo `20.0` updates**:
-  ```powershell
-  git -C e:\Code\Oodo\odoo pull --ff-only
+- **Start Odoo**: `start.bat` (or `start.bat --prod` to preview production flags) -> [http://localhost:8069](http://localhost:8069)
+- **Safe Odoo Core Pull + Custom Addons Upgrade**:
+  ```bat
+  upgrade.bat
   ```
+  *(Takes a pre-upgrade DB backup, verifies `odoo/` has no local edits, pulls latest upstream `20.0`, and runs `-u custom_erp,custom_store`.)*
+- **Stop Odoo & DB**: `stop.bat`
+- **Save / Restore DB Backup**: `save_db.bat` / `load_db.bat`
+- **Production Deployment**: See [`deploy/README.md`](deploy/README.md) and [`docker-compose.prod.yml`](docker-compose.prod.yml).

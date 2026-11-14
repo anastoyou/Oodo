@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_custom_erp" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@id='informations']" position="inside">
+            <div class="col" t-if="o.x_sales_channel" name="x_sales_channel">
+                <strong>Sales Channel</strong>
+                <div t-field="o.x_sales_channel"/>
+            </div>
+            <div class="col" t-if="o.x_payment_mode" name="x_payment_mode">
+                <strong>Payment Mode</strong>
+                <div t-field="o.x_payment_mode"/>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@id='payment_term']" position="inside">
+            <div
+                t-if="o.move_type in ('out_invoice', 'out_refund')"
+                class="mt-4 pt-3 border-top small text-muted"
+                style="border-top: 2px solid #f06030 !important;"
+            >
+                <strong style="color: #0c151b;">Thank you for shopping with us!</strong>
+                <div class="mt-1">
+                    Need help with sizing, exchanges, or delivery? Visit our Customer Support portal at
+                    <span class="fw-semibold">/support</span> or refer to your Return &amp; Exchange terms within 7 days of delivery.
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>
+

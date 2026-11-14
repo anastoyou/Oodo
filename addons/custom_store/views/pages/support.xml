@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 10. Helpdesk & Customer Support Desk (/support & /support/submit) -->
+    <template id="support_center_page" name="Customer Support &amp; Size Exchange Desk">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="pt48 pb56">
+                    <div class="container">
+                        <div class="row g-4">
+                            <div class="col-lg-4">
+                                <div class="o_custom_store_portal_hero p-4 mb-3">
+                                    <span class="badge text-bg-primary text-uppercase mb-2">Customer Care</span>
+                                    <h1 class="h3 text-white mb-2">Support &amp; Exchange Desk</h1>
+                                    <p class="small text-white-50 mb-0">
+                                        Log a 7-day size exchange, delivery status query, COD verification, or GST invoice request directly with our operations team.
+                                    </p>
+                                </div>
+
+                                <div class="border rounded p-3 bg-light small">
+                                    <h6 class="fw-semibold mb-2">Quick Self-Service Links</h6>
+                                    <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                                        <li>
+                                            <i class="fa fa-arrows-h me-2 text-primary" aria-hidden="true"/>
+                                            <a href="/size-guide">Apparel Size Guide</a>
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-refresh me-2 text-primary" aria-hidden="true"/>
+                                            <a href="/return-policy">7-Day Return &amp; Exchange Policy</a>
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-truck me-2 text-primary" aria-hidden="true"/>
+                                            <a href="/shipping-policy">Shipping &amp; Dispatch Timelines</a>
+                                        </li>
+                                        <li t-if="is_logged_in">
+                                            <i class="fa fa-ticket me-2 text-primary" aria-hidden="true"/>
+                                            <a href="/my/tickets">View My Support Tickets</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8">
+                                <div t-if="created_ticket" class="alert alert-success border shadow-sm mb-4" role="status">
+                                    <h5 class="alert-heading mb-1">
+                                        <i class="fa fa-check-circle me-2" aria-hidden="true"/>
+                                        Ticket <t t-out="created_ticket.name"/> Created
+                                    </h5>
+                                    <p class="mb-2 small">
+                                        We received your request (<strong t-out="created_ticket.subject"/>) and our support team will respond shortly.
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2" t-if="is_logged_in">
+                                        <a t-att-href="created_ticket.get_portal_url()" class="btn btn-sm btn-success">View Ticket Thread</a>
+                                        <a href="/my/tickets" class="btn btn-sm btn-outline-success">All My Tickets</a>
+                                    </div>
+                                    <div class="small" t-else="">
+                                        Keep your ticket reference <strong t-out="created_ticket.name"/> handy for follow-up via email.
+                                    </div>
+                                </div>
+
+                                <div t-if="error_message" class="alert alert-danger mb-4" role="alert">
+                                    <t t-out="error_message"/>
+                                </div>
+
+                                <div class="card border shadow-sm">
+                                    <div class="card-header bg-white py-3">
+                                        <h4 class="mb-0">Submit a Support or Size Exchange Ticket</h4>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <form action="/support/submit" method="post" class="row g-3">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="cs_contact_name">Full Name *</label>
+                                                <input id="cs_contact_name" type="text" name="contact_name" required="required"
+                                                    class="form-control" t-att-value="contact_name" placeholder="Your full name"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="cs_contact_email">Email Address *</label>
+                                                <input id="cs_contact_email" type="email" name="contact_email" required="required"
+                                                    class="form-control" t-att-value="contact_email" placeholder="you@example.com"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="cs_contact_phone">Mobile / WhatsApp</label>
+                                                <input id="cs_contact_phone" type="text" name="contact_phone"
+                                                    class="form-control" t-att-value="contact_phone" placeholder="+91 ..."/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="cs_category">Request Type *</label>
+                                                <select id="cs_category" name="category" class="form-select">
+                                                    <option value="size_exchange" t-att-selected="'selected' if selected_category == 'size_exchange' else None">Size / Fit Exchange</option>
+                                                    <option value="delivery_tracking" t-att-selected="'selected' if selected_category == 'delivery_tracking' else None">Delivery / Tracking Status</option>
+                                                    <option value="cod_verification" t-att-selected="'selected' if selected_category == 'cod_verification' else None">COD Order Verification</option>
+                                                    <option value="defect_damage" t-att-selected="'selected' if selected_category == 'defect_damage' else None">Damaged / Incorrect Item</option>
+                                                    <option value="return_refund" t-att-selected="'selected' if selected_category == 'return_refund' else None">Return &amp; Refund Request</option>
+                                                    <option value="payment_gst" t-att-selected="'selected' if selected_category == 'payment_gst' else None">Payment / GST Invoice</option>
+                                                    <option value="other" t-att-selected="'selected' if selected_category == 'other' else None">General Inquiry</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-12" t-if="is_logged_in and user_orders">
+                                                <label class="form-label fw-semibold" for="cs_sale_order">Related Order (Optional)</label>
+                                                <select id="cs_sale_order" name="sale_order_id" class="form-select">
+                                                    <option value="">-- Select an order --</option>
+                                                    <t t-foreach="user_orders" t-as="ord">
+                                                        <option t-att-value="ord.id"
+                                                            t-att-selected="'selected' if str(ord.id) == str(selected_order_id) else None">
+                                                            <t t-out="ord.name"/> &#8212; <t t-out="ord.date_order" t-options="{'widget': 'date'}"/> (<t t-out="ord.amount_total" t-options="{'widget': 'monetary', 'display_currency': ord.currency_id}"/>)
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold" for="cs_subject">Subject *</label>
+                                                <input id="cs_subject" type="text" name="subject" required="required"
+                                                    class="form-control" t-att-value="subject"
+                                                    placeholder="e.g., Request exchange from M to L for Order S00012"/>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold" for="cs_description">Details (Order Ref, Item &amp; Preferred Size)</label>
+                                                <textarea id="cs_description" name="description" rows="4" class="form-control"
+                                                    placeholder="Share your order number, item name, and how our team can help..."><t t-out="description"/></textarea>
+                                            </div>
+                                            <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2">
+                                                <span class="small text-muted">
+                                                    <i class="fa fa-clock-o me-1" aria-hidden="true"/>Typical reply within 1 business day.
+                                                </span>
+                                                <button type="submit" class="btn btn-primary px-4">Submit Support Ticket</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

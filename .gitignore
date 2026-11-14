@@ -1,3 +1,7 @@
+# Local secrets and operator credential notes (use .env.example as template)
+.env
+docs/credentials
+
 # Cloned upstream Odoo source repository
 odoo/
 
