@@ -1,0 +1,19 @@
+# Cloned upstream Odoo source repository
+odoo/
+
+# Python virtual environment
+.venv/
+
+# Odoo runtime data, filestore, sessions, backups, and logs
+data/
+filestore/
+backups/
+logs/
+*.log
+*.pid
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.egg-info/
+

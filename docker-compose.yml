@@ -11,28 +11,7 @@ services:
     volumes:
       - odoo-db-data:/var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
-
-  odoo:
-    image: odoo:${ODOO_VERSION:-18.0}
-    container_name: odoo-erp
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "${ODOO_PORT:-8069}:8069"
-    env_file:
-      - .env
-    environment:
-      - HOST=db
-      - PORT=5432
-      - USER=${DB_USER:-odoo}
-      - PASSWORD=${DB_PASSWORD:-odoo}
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo
-      - ./addons:/mnt/extra-addons
+      - "${DB_PORT:-5432}:5432"
 
 volumes:
-  odoo-web-data:
   odoo-db-data:
