@@ -17,7 +17,7 @@
         </xpath>
 
         <xpath expr="//div[@id='o_wsale_product_cta_section']" position="after">
-            <div class="border rounded p-3 mb-3 bg-light small o_custom_store_specs"
+            <div class="border rounded p-3 mb-3 small o_custom_store_specs"
                 t-if="product.x_fabric or product.x_fit_type or product.x_wash_care or product.x_dispatch_days">
                 <div t-if="product.x_dispatch_days" class="mb-1">
                     <strong>Dispatch:</strong> Within <t t-out="product.x_dispatch_days"/> business days &#183; 7-day easy size exchange

@@ -3,11 +3,11 @@
     <!-- Exported & customized Footer (website.footer_custom) outside core odoo/. -->
     <template id="footer_custom" inherit_id="website.footer_custom" name="Custom Store Footer">
         <xpath expr="//div[@id='footer']" position="replace">
-            <div id="footer" class="oe_structure oe_structure_solo o_custom_store_footer text-break" t-ignore="true" t-if="not no_footer">
-                <section class="s_text_block pt40 pb24" data-snippet="s_text_block" data-name="Container">
+            <div id="footer" class="oe_structure oe_structure_solo o_custom_store_footer border text-break" t-ignore="true" t-if="not no_footer" style="--box-border-left-width: 0px; --box-border-right-width: 0px;">
+                <section class="s_text_block pt40 pb24 o_colored_level" data-snippet="s_text_block" data-name="Container">
                     <div class="container">
                         <div class="row g-4">
-                            <div class="col-lg-3 col-sm-6 pt16 pb16">
+                            <div class="col-lg-3 col-sm-6 pt16 pb16 o_colored_level">
                                 <h5>Shop &amp; Catalog</h5>
                                 <ul class="list-unstyled d-flex flex-column gap-1">
                                     <li><a href="/">Home</a></li>
@@ -17,7 +17,7 @@
                                     <li><a href="/my">My Account &amp; Orders</a></li>
                                 </ul>
                             </div>
-                            <div class="col-lg-3 col-sm-6 pt16 pb16">
+                            <div class="col-lg-3 col-sm-6 pt16 pb16 o_colored_level">
                                 <h5>Policies &amp; Care</h5>
                                 <ul class="list-unstyled d-flex flex-column gap-1">
                                     <li><a href="/shipping-policy">Shipping &amp; Dispatch</a></li>
@@ -30,7 +30,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="col-lg-3 col-sm-6 pt16 pb16">
+                            <div class="col-lg-3 col-sm-6 pt16 pb16 o_colored_level">
                                 <h5>About the Brand</h5>
                                 <p class="small mb-2">
                                     Curated everyday and festive Indian apparel crafted for comfort, true sizing, and lasting wear with Pan-India doorstep delivery.
@@ -39,7 +39,7 @@
                                     GST-compliant billing &#183; Prepaid UPI/Card priority dispatch &#183; Verified COD support.
                                 </p>
                             </div>
-                            <div class="col-lg-3 col-sm-6 pt16 pb16">
+                            <div class="col-lg-3 col-sm-6 pt16 pb16 o_colored_level">
                                 <h5>Customer Care</h5>
                                 <ul class="list-unstyled d-flex flex-column gap-2 small">
                                     <li>

@@ -1,18 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="header_custom" inherit_id="website.template_header_default" name="Custom Store Header">
-        <xpath expr="//t[@t-call='website.navbar']" position="before">
-            <div class="o_custom_store_announcement w-100 py-1 px-3 text-center d-print-none">
-                <span>Free Pan-India shipping on prepaid orders above Rs. 999 &#183; 7-day easy size exchanges</span>
-                <span class="d-none d-md-inline ms-2">
-                    &#183; <a href="/size-guide">Size Guide</a>
-                    &#183; <a href="/support">Help &amp; Exchanges</a>
-                </span>
-            </div>
-        </xpath>
-
-        <xpath expr="//div[@id='o_main_nav']" position="attributes">
+    <!-- Hook every Theme Builder Header preset cleanly via website.layout -->
+    <template id="header_custom" inherit_id="website.layout" name="Custom Store Header" priority="25">
+        <xpath expr="//header[@id='top']" position="attributes">
             <attribute name="t-attf-class" add="o_custom_store_header" separator=" "/>
         </xpath>
     </template>
+
+    <!-- Customize Odoo's built-in Header Disclaimer bar so Show Disclaimer + Header Presets + Builder Save work cleanly -->
+    <template id="header_disclaimer_custom" inherit_id="website.option_header_disclaimer" name="Custom Store Header Announcement" priority="20">
+        <xpath expr="//div[hasclass('s_headline')]" position="replace">
+            <div class="s_headline oe_no_drop_above o_colored_level o_cc o_cc5 pt4 pb4">
+                <div class="text-center px-3">
+                    <small>
+                        Free Pan-India shipping on prepaid orders above Rs. 999 &#183; 7-day easy size exchanges
+                        <span class="d-none d-md-inline ms-2">
+                            &#183; <a href="/size-guide" class="text-decoration-underline">Size Guide</a>
+                            &#183; <a href="/support" class="text-decoration-underline">Help &amp; Exchanges</a>
+                        </span>
+                    </small>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Enable announcement bar on fresh installs without blocking Theme Builder toggle afterward -->
+    <data noupdate="1">
+        <function model="ir.ui.view" name="write">
+            <value eval="[ref('website.option_header_disclaimer')]"/>
+            <value eval="{'active': True}"/>
+        </function>
+    </data>
 </odoo>

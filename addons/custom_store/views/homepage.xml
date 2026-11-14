@@ -5,7 +5,7 @@
         <xpath expr="//div[@id='wrap']" position="replace">
             <div id="wrap" class="oe_structure">
                 <!-- 1. Hero Banner -->
-                <section class="s_cover parallax s_parallax_is_fixed o_cc o_cc5 pt72 pb72" data-scroll-background-ratio="1" data-snippet="s_cover">
+                <section class="s_cover parallax s_parallax_is_fixed o_cc o_cc5 pt72 pb72 o_colored_level" data-scroll-background-ratio="1" data-snippet="s_cover" data-name="Cover">
                     <span class="s_parallax_bg_wrap">
                         <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.landscape_xl_1'); background-position: 50% 60%;"/>
                     </span>
@@ -29,31 +29,31 @@
                 </section>
 
                 <!-- 2. D2C Trust Pillars -->
-                <section class="pt40 pb24 bg-white" data-snippet="s_text_block">
-                    <div class="container">
-                        <div class="row g-3 text-center text-md-start">
-                            <div class="col-6 col-lg-3">
-                                <div class="o_custom_store_trust_card p-3 h-100">
-                                    <div class="fw-semibold mb-1"><i class="fa fa-truck text-primary me-2" aria-hidden="true"/>Fast Pan-India Dispatch</div>
-                                    <div class="small text-muted">Priority dispatch on UPI/card orders with live portal tracking.</div>
+                <section class="s_three_columns o_cc o_cc1 pt40 pb24 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Trust Pillars">
+                    <div class="container s_allow_columns">
+                        <div class="row d-flex align-items-stretch g-3 text-center text-md-start">
+                            <div data-name="Trust Pillar" class="col-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_trust_card card h-100 o_cc o_cc1 my-0 p-3" data-vxml="001" data-snippet="s_card" data-name="Trust Pillar Card">
+                                    <h3 class="h6 card-title fw-semibold mb-1"><i class="fa fa-truck text-primary me-2" aria-hidden="true"/>Fast Pan-India Dispatch</h3>
+                                    <p class="card-text small text-muted mb-0">Priority dispatch on UPI/card orders with live portal tracking.</p>
                                 </div>
                             </div>
-                            <div class="col-6 col-lg-3">
-                                <div class="o_custom_store_trust_card p-3 h-100">
-                                    <div class="fw-semibold mb-1"><i class="fa fa-exchange text-primary me-2" aria-hidden="true"/>7-Day Easy Size Exchange</div>
-                                    <div class="small text-muted">Between sizes? One-click exchange support right from your account.</div>
+                            <div data-name="Trust Pillar" class="col-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_trust_card card h-100 o_cc o_cc1 my-0 p-3" data-vxml="001" data-snippet="s_card" data-name="Trust Pillar Card">
+                                    <h3 class="h6 card-title fw-semibold mb-1"><i class="fa fa-exchange text-primary me-2" aria-hidden="true"/>7-Day Easy Size Exchange</h3>
+                                    <p class="card-text small text-muted mb-0">Between sizes? One-click exchange support right from your account.</p>
                                 </div>
                             </div>
-                            <div class="col-6 col-lg-3">
-                                <div class="o_custom_store_trust_card p-3 h-100">
-                                    <div class="fw-semibold mb-1"><i class="fa fa-shield text-primary me-2" aria-hidden="true"/>Verified COD &amp; UPI</div>
-                                    <div class="small text-muted">Secure Razorpay checkout, cards, UPI, and confirmed COD delivery.</div>
+                            <div data-name="Trust Pillar" class="col-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_trust_card card h-100 o_cc o_cc1 my-0 p-3" data-vxml="001" data-snippet="s_card" data-name="Trust Pillar Card">
+                                    <h3 class="h6 card-title fw-semibold mb-1"><i class="fa fa-shield text-primary me-2" aria-hidden="true"/>Verified COD &amp; UPI</h3>
+                                    <p class="card-text small text-muted mb-0">Secure Razorpay checkout, cards, UPI, and confirmed COD delivery.</p>
                                 </div>
                             </div>
-                            <div class="col-6 col-lg-3">
-                                <div class="o_custom_store_trust_card p-3 h-100">
-                                    <div class="fw-semibold mb-1"><i class="fa fa-check-circle text-primary me-2" aria-hidden="true"/>QC-Checked Fabrics</div>
-                                    <div class="small text-muted">Breathable cotton, rayon blends, and GST-invoiced orders.</div>
+                            <div data-name="Trust Pillar" class="col-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_trust_card card h-100 o_cc o_cc1 my-0 p-3" data-vxml="001" data-snippet="s_card" data-name="Trust Pillar Card">
+                                    <h3 class="h6 card-title fw-semibold mb-1"><i class="fa fa-check-circle text-primary me-2" aria-hidden="true"/>QC-Checked Fabrics</h3>
+                                    <p class="card-text small text-muted mb-0">Breathable cotton, rayon blends, and GST-invoiced orders.</p>
                                 </div>
                             </div>
                         </div>
@@ -61,70 +61,62 @@
                 </section>
 
                 <!-- 3. Curated Collections Navigation -->
-                <section class="pt32 pb48" data-snippet="s_text_block">
-                    <div class="container">
+                <section class="s_three_columns o_cc o_cc1 pt32 pb48 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Shop by Category">
+                    <div class="container s_allow_columns">
                         <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
                             <div>
                                 <span class="text-primary text-uppercase small fw-semibold">Explore Catalog</span>
                                 <h2 class="h3 mb-0">Shop by Category</h2>
                             </div>
-                            <a href="/shop" class="btn btn-outline-dark btn-sm">Browse All Products</a>
+                            <a href="/shop" class="btn btn-outline-secondary btn-sm o_translate_inline">Browse All Products</a>
                         </div>
-                        <div class="row g-3">
-                            <div class="col-md-6 col-lg-3">
-                                <a href="/shop?search=Kurti" class="text-decoration-none text-reset">
-                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="badge bg-white border text-dark mb-2">Apparel</span>
-                                            <h3 class="h5 mb-2">Women's Kurtis &amp; Sets</h3>
-                                            <p class="small text-muted mb-3">Straight-fit cotton kurtis, festive prints, and coordinated two-piece sets.</p>
-                                        </div>
-                                        <span class="small fw-semibold text-primary">Explore Women's &#8594;</span>
+                        <div class="row d-flex align-items-stretch g-3">
+                            <div data-name="Category Card" class="col-md-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_collection_card card h-100 o_cc o_cc2 my-0 p-4 d-flex flex-column justify-content-between" data-vxml="001" data-snippet="s_card" data-name="Category Card">
+                                    <div>
+                                        <span class="badge text-bg-light border mb-2">Apparel</span>
+                                        <h3 class="card-title h5 mb-2">Women's Kurtis &amp; Sets</h3>
+                                        <p class="card-text small text-muted mb-3">Straight-fit cotton kurtis, festive prints, and coordinated two-piece sets.</p>
                                     </div>
-                                </a>
+                                    <a href="/shop?search=Kurti" class="stretched-link small fw-semibold text-primary text-decoration-none">Explore Women's &#8594;</a>
+                                </div>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <a href="/shop?search=Shirt" class="text-decoration-none text-reset">
-                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="badge bg-white border text-dark mb-2">Everyday</span>
-                                            <h3 class="h5 mb-2">Men's Shirts &amp; Casuals</h3>
-                                            <p class="small text-muted mb-3">Tailored polos, relaxed linen shirts, and breathable daily staples.</p>
-                                        </div>
-                                        <span class="small fw-semibold text-primary">Explore Men's &#8594;</span>
+                            <div data-name="Category Card" class="col-md-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_collection_card card h-100 o_cc o_cc2 my-0 p-4 d-flex flex-column justify-content-between" data-vxml="001" data-snippet="s_card" data-name="Category Card">
+                                    <div>
+                                        <span class="badge text-bg-light border mb-2">Everyday</span>
+                                        <h3 class="card-title h5 mb-2">Men's Shirts &amp; Casuals</h3>
+                                        <p class="card-text small text-muted mb-3">Tailored polos, relaxed linen shirts, and breathable daily staples.</p>
                                     </div>
-                                </a>
+                                    <a href="/shop?search=Shirt" class="stretched-link small fw-semibold text-primary text-decoration-none">Explore Men's &#8594;</a>
+                                </div>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <a href="/shop?search=Fabric" class="text-decoration-none text-reset">
-                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="badge bg-white border text-dark mb-2">By the Metre</span>
-                                            <h3 class="h5 mb-2">Running Fabrics</h3>
-                                            <p class="small text-muted mb-3">Handpicked cotton &amp; rayon yardage sold per metre for custom tailoring.</p>
-                                        </div>
-                                        <span class="small fw-semibold text-primary">Shop Fabrics &#8594;</span>
+                            <div data-name="Category Card" class="col-md-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_collection_card card h-100 o_cc o_cc2 my-0 p-4 d-flex flex-column justify-content-between" data-vxml="001" data-snippet="s_card" data-name="Category Card">
+                                    <div>
+                                        <span class="badge text-bg-light border mb-2">By the Metre</span>
+                                        <h3 class="card-title h5 mb-2">Running Fabrics</h3>
+                                        <p class="card-text small text-muted mb-3">Handpicked cotton &amp; rayon yardage sold per metre for custom tailoring.</p>
                                     </div>
-                                </a>
+                                    <a href="/shop?search=Fabric" class="stretched-link small fw-semibold text-primary text-decoration-none">Shop Fabrics &#8594;</a>
+                                </div>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <a href="/shop" class="text-decoration-none text-reset">
-                                    <div class="o_custom_store_collection_card p-4 h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="badge bg-white border text-dark mb-2">Complete the Look</span>
-                                            <h3 class="h5 mb-2">Footwear &amp; Accessories</h3>
-                                            <p class="small text-muted mb-3">Everyday ethnic pairs and lifestyle accessories tested for all-day comfort.</p>
-                                        </div>
-                                        <span class="small fw-semibold text-primary">View Catalog &#8594;</span>
+                            <div data-name="Category Card" class="col-md-6 col-lg-3 pt8 pb8">
+                                <div class="s_card o_custom_store_collection_card card h-100 o_cc o_cc2 my-0 p-4 d-flex flex-column justify-content-between" data-vxml="001" data-snippet="s_card" data-name="Category Card">
+                                    <div>
+                                        <span class="badge text-bg-light border mb-2">Complete the Look</span>
+                                        <h3 class="card-title h5 mb-2">Footwear &amp; Accessories</h3>
+                                        <p class="card-text small text-muted mb-3">Everyday ethnic pairs and lifestyle accessories tested for all-day comfort.</p>
                                     </div>
-                                </a>
+                                    <a href="/shop" class="stretched-link small fw-semibold text-primary text-decoration-none">View Catalog &#8594;</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- 4. Brand Story & Fit Guidance -->
-                <section class="s_text_image pt56 pb56 bg-light" data-snippet="s_text_image">
+                <section class="s_text_image o_cc o_cc2 pt56 pb56 o_colored_level" data-snippet="s_text_image" data-name="Text - Image">
                     <div class="container">
                         <div class="row align-items-center g-4">
                             <div class="col-lg-5">
@@ -149,13 +141,13 @@
                 </section>
 
                 <!-- 5. Numbers & Support CTA -->
-                <section class="s_numbers o_cc o_cc1 pt56 pb56" data-snippet="s_numbers">
+                <section class="s_numbers o_cc o_cc1 pt56 pb56 o_colored_level" data-snippet="s_numbers" data-name="Numbers">
                     <div class="container">
                         <div class="row s_nb_column_fixed align-items-center">
                             <div class="col-lg-5 mb-4 mb-lg-0">
                                 <h2 class="mb-2 h3">Designed for repeat wear</h2>
                                 <p class="text-muted mb-3">Direct-to-customer pricing with transparent GST invoicing, fast exchanges, and dedicated ticket support.</p>
-                                <a href="/support" class="btn btn-outline-dark btn-sm">Open Support &amp; Exchange Desk</a>
+                                <a href="/support" class="btn btn-outline-secondary btn-sm o_translate_inline">Open Support &amp; Exchange Desk</a>
                             </div>
                             <div class="col-4 col-lg-2 offset-lg-1 text-center">
                                 <span class="s_number display-5 fw-bold text-primary">48h</span><br/>

@@ -34,7 +34,11 @@
     ],
     "assets": {
         "web._assets_primary_variables": [
-            "custom_store/static/src/scss/primary_variables.scss",
+            (
+                "before",
+                "website/static/src/scss/options/user_values.scss",
+                "custom_store/static/src/scss/primary_variables.scss",
+            ),
         ],
         "web.assets_frontend": [
             "custom_store/static/src/scss/custom_store.scss",
