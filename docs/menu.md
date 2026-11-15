@@ -10,3 +10,4 @@
 | `PARTNER_VERTICAL_ACCESS_CONTROL.md` | Giving separate ERP control for Ladies, Children, Gadgets, and Custom Stitches (Teams/Roles, `ir.access`, Multi-Company) |
 | `PARTNER_ACCOUNTING_AND_SALARIES.md` | 2-Partner Indian accounting (`l10n_in`): initial capital, expenses (`Bills` / `hr_expense`), and salaries/drawings |
 | `ROADMAP_MODULE_STATUS.md` | Phase 1–5 live database & `odoo/addons/` module coverage against `SCALING_ROADMAP.md` |
+| `SETUP_ERP_FLOW.md` | Complete 1-to-End ERP setup sequence (Steps 1–67) from Odoo/DB install to Production & Phase 1–5 Gates |

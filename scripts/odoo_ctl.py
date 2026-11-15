@@ -573,6 +573,20 @@ def _select_existing_db(cfg: dict[str, str], action_label: str, explicit_db: str
     return db_name
 
 
+def _prune_sessions_for_db(root: Path, db_name: str) -> None:
+    """Delete Odoo session files tied to db_name so removed/replaced DBs are not queried by stale cookies."""
+    sessions_dir = root / "data" / "sessions"
+    if not sessions_dir.is_dir():
+        return
+    for sess_file in sessions_dir.rglob("*"):
+        if not sess_file.is_file():
+            continue
+        with suppress(OSError, ValueError):
+            data = json.loads(sess_file.read_text(encoding="utf-8"))
+            if data.get("db") == db_name:
+                sess_file.unlink(missing_ok=True)
+
+
 def _drop_database(cfg: dict[str, str], db_name: str) -> None:
     """Terminate active connections and drop db_name."""
     conn = connect_pg(cfg, "postgres")
@@ -650,6 +664,7 @@ def cmd_remove(args: argparse.Namespace) -> int:
     if has_db:
         print(f'Dropping PostgreSQL database "{db_name}"...')
         _drop_database(cfg, db_name)
+    _prune_sessions_for_db(ROOT, db_name)
     if has_fs:
         print(f'Removing filestore "{filestore_dst}"...')
         shutil.rmtree(filestore_dst)
@@ -791,7 +806,8 @@ def cmd_load(args: argparse.Namespace) -> int:
 
     with tempfile.TemporaryDirectory(prefix=".tmp_load_", dir=backups_dir) as tmp:
         stage = Path(tmp)
-        suggested_db = _extract_backup(backup_file, stage, cfg["ODOO_DB"])
+        manifest_db = _extract_backup(backup_file, stage, cfg["ODOO_DB"])
+        suggested_db = cfg.get("ODOO_DB") or manifest_db
 
         if args.database:
             target_db = args.database
@@ -814,6 +830,7 @@ def cmd_load(args: argparse.Namespace) -> int:
         stop_local_odoo()
         print(f'Recreating PostgreSQL database "{target_db}"...')
         _drop_database(cfg, target_db)
+        _prune_sessions_for_db(ROOT, target_db)
         conn = connect_pg(cfg, "postgres")
         try:
             conn.autocommit = True

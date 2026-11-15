@@ -38,7 +38,7 @@ Best when all 4 divisions operate under **one legal company / GSTIN**, but each 
 
 Best when a vertical has its **own partner ownership, bank account, GSTIN, or separate P&L** — especially **Gadgets** or independent divisions:
 
-1. Core models in `localhost` (`product.template`, `sale.order`, `stock.picking`, `crm.lead`, `custom.support.ticket`) **already enforce Multi-Company `ir.access` restrictions** (`[('company_id', 'in', company_ids)]`).
+1. Core models in `zoeemasterdb` (`product.template`, `sale.order`, `stock.picking`, `crm.lead`, `custom.support.ticket`) **already enforce Multi-Company `ir.access` restrictions** (`[('company_id', 'in', company_ids)]`).
 2. Create separate Companies under **Settings → Companies** (e.g. *Apparel Studio*, *Gadgets Division*).
 3. On each manager's User record (**Settings → Users & Companies → Users**), set `company_ids` (Allowed Companies) and default `company_id` **only to their company**; give **Founders** access to **all companies** for consolidated visibility.
 4. Assign each company its own Warehouses, Journals, Products (`company_id` set instead of blank), and Website (`website.company_id`).

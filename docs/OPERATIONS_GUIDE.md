@@ -13,4 +13,5 @@
 | [`PARTNER_VERTICAL_ACCESS_CONTROL.md`](./PARTNER_VERTICAL_ACCESS_CONTROL.md) | Isolating Ladies, Children, Gadgets, and Custom Stitches managers (Roles/Teams, `ir.access`, Multi-Company) |
 | [`PARTNER_ACCOUNTING_AND_SALARIES.md`](./PARTNER_ACCOUNTING_AND_SALARIES.md) | 2-Partner Indian accounting (`l10n_in`): initial capital, expenses (`Bills` / `hr_expense`), and salaries/drawings |
 | [`ROADMAP_MODULE_STATUS.md`](./ROADMAP_MODULE_STATUS.md) | Phase 1–5 live database & `odoo/addons/` module coverage against `SCALING_ROADMAP.md` |
+| [`SETUP_ERP_FLOW.md`](./SETUP_ERP_FLOW.md) | Complete 1-to-End ERP setup sequence (Steps 1–67) from Odoo/DB install to Production & Phase 1–5 Gates |
 | [`SCALING_ROADMAP.md`](./SCALING_ROADMAP.md) | Full business & ERP scaling plan (Phase 1 → Phase 5) |

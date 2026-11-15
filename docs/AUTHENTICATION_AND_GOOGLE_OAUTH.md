@@ -4,7 +4,7 @@
 
 ## 1. Current Authentication Setup in This Project
 
-* **Already installed in `localhost`:** `auth_signup` (`auth_signup.invitation_scope = b2c` — customer self-signup enabled), `auth_passkey` + `auth_passkey_portal` (Passkeys), and `auth_totp` + `auth_totp_portal` (2FA).
+* **Already installed in `zoeemasterdb`:** `auth_signup` (`auth_signup.invitation_scope = b2c` — customer self-signup enabled), `auth_passkey` + `auth_passkey_portal` (Passkeys), and `auth_totp` + `auth_totp_portal` (2FA).
 * **Already styled in `addons/custom_store/`:** [`views/portal_templates.xml`](../addons/custom_store/views/portal_templates.xml) customizes `/web/login` and `/web/signup` via `website.login_layout`, `web.login`, and `auth_signup.signup`.
 * **Built-in OAuth2 ready on disk:** `odoo/addons/auth_oauth/` (currently `uninstalled`), which already ships pre-configured provider records in [`auth_oauth_data.xml`](../odoo/addons/auth_oauth/data/auth_oauth_data.xml) for **Google OAuth2** (`auth_oauth.provider_google`) and **Facebook Graph** (`auth_oauth.provider_facebook`).
 

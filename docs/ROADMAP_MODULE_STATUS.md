@@ -1,6 +1,6 @@
 # Scaling Roadmap Module Coverage Status
 
-> Status verified against the live `localhost` database, `odoo/addons/`, and `addons/` relative to [`SCALING_ROADMAP.md`](./SCALING_ROADMAP.md).
+> Status verified against the live `zoeemasterdb` database, `odoo/addons/`, and `addons/` relative to [`SCALING_ROADMAP.md`](./SCALING_ROADMAP.md).
 
 ---
 
@@ -19,5 +19,5 @@
 ## Notes
 
 * **`stock_picking_batch` in Odoo `20.0`:** Core Batch Transfers (`stock.picking.batch`) are built directly into `odoo/addons/stock/` ([`stock_picking_batch.py`](../odoo/addons/stock/models/stock_picking_batch.py)) rather than a separate module; toggle `group_stock_picking_batch` in Inventory settings when ready.
-* **`odoo` MCP Server DB Configuration:** Ensure any configured `odoo` MCP plugin targets `ODOO_DB=localhost` to match [`.env`](../.env) (rather than any stale database name such as `fairtag`).
+* **`odoo` MCP Server DB Configuration:** Ensure any configured `odoo` MCP plugin targets `ODOO_DB=zoeemasterdb` to match [`.env`](../.env) (rather than any stale database name such as `fairtag` or `localhost`).
 
