@@ -88,6 +88,18 @@ header#top.o_custom_store_header {
     }
 }
 
+.oe_product_cart[data-cs-product-new-tab="1"] {
+    cursor: pointer;
+
+    .o_wsale_product_btn,
+    .o_wsale_attribute_previewer,
+    input,
+    select,
+    textarea {
+        cursor: default;
+    }
+}
+
 #wrap.o_custom_store_product {
     .o_custom_store_specs {
         border-left: 3px solid var(--cs-accent) !important;

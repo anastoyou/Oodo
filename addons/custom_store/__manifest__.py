@@ -43,6 +43,7 @@
         "web.assets_frontend": [
             "custom_store/static/src/scss/custom_store.scss",
             "custom_store/static/src/js/custom_store.js",
+            'custom_store/static/src/js/product_new_tab.js'
         ],
     },
     "installable": True,

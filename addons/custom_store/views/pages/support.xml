@@ -101,10 +101,10 @@
                                                 <label class="form-label fw-semibold" for="cs_sale_order">Related Order (Optional)</label>
                                                 <select id="cs_sale_order" name="sale_order_id" class="form-select">
                                                     <option value="">-- Select an order --</option>
-                                                    <t t-foreach="user_orders" t-as="ord">
-                                                        <option t-att-value="ord.id"
-                                                            t-att-selected="'selected' if str(ord.id) == str(selected_order_id) else None">
-                                                            <t t-out="ord.name"/> &#8212; <t t-out="ord.date_order" t-options="{'widget': 'date'}"/> (<t t-out="ord.amount_total" t-options="{'widget': 'monetary', 'display_currency': ord.currency_id}"/>)
+                                                    <t t-foreach="user_orders" t-as="sale_order">
+                                                        <option t-att-value="sale_order.id"
+                                                            t-att-selected="'selected' if str(sale_order.id) == str(selected_order_id) else None">
+                                                            <t t-out="sale_order.name"/> &#8212; <t t-out="sale_order.date_order" t-options="{'widget': 'date'}"/> (<t t-out="sale_order.amount_total" t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"/>)
                                                         </option>
                                                     </t>
                                                 </select>
