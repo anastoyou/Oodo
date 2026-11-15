@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_custom_comms_root" name="Comms &amp; Frontdesk" sequence="38"/>
+
+    <menuitem id="menu_custom_comms_whatsapp_section" name="WhatsApp Business" parent="menu_custom_comms_root" sequence="10"/>
+    <menuitem id="menu_custom_whatsapp_messages" name="WhatsApp Messages" parent="menu_custom_comms_whatsapp_section" action="action_custom_whatsapp_message" sequence="10"/>
+    <menuitem id="menu_custom_whatsapp_templates" name="Templates" parent="menu_custom_comms_whatsapp_section" action="action_custom_whatsapp_template" sequence="20"/>
+    <menuitem id="menu_custom_whatsapp_config" name="Cloud API Config" parent="menu_custom_comms_whatsapp_section" action="action_custom_whatsapp_config" sequence="30"/>
+
+    <menuitem id="menu_custom_comms_voip_section" name="VoIP &amp; Reception" parent="menu_custom_comms_root" sequence="20"/>
+    <menuitem id="menu_custom_voip_calls" name="VoIP Call Logs" parent="menu_custom_comms_voip_section" action="action_custom_voip_call" sequence="10"/>
+    <menuitem id="menu_custom_frontdesk_visitors" name="Frontdesk Visitors" parent="menu_custom_comms_voip_section" action="action_custom_frontdesk_visitor" sequence="20"/>
+    <menuitem id="menu_custom_frontdesk_kiosk_open" name="Launch Reception Kiosk" parent="menu_custom_comms_voip_section" action="action_open_frontdesk_kiosk_url" sequence="30"/>
+</odoo>
+

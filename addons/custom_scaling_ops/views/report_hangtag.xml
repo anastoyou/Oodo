@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_apparel_hangtag_document">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-foreach="docs" t-as="tmpl">
+                    <t t-foreach="tmpl.product_variant_ids" t-as="prod">
+                        <div style="border: 1px solid #222; padding: 14px; margin: 10px auto; max-width: 320px; text-align: center; page-break-inside: avoid;">
+                            <div style="font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">
+                                <span t-out="tmpl.company_id.name or 'CUSTOM STORE'"/>
+                            </div>
+                            <hr style="margin: 6px 0;"/>
+                            <div style="font-size: 14px; font-weight: bold; margin-bottom: 4px;" t-out="prod.display_name"/>
+                            <div style="font-size: 11px; color: #444; margin-bottom: 6px;">
+                                SKU: <strong t-out="prod.default_code or ('SKU-' + str(prod.id))"/>
+                                <t t-if="tmpl.x_fabric"> · Fabric: <span t-out="tmpl.x_fabric"/></t>
+                            </div>
+                            <div style="font-size: 15px; font-weight: bold; margin-bottom: 8px;">
+                                MRP: ₹<span t-out="int(round(prod.lst_price))"/> (Incl. of all taxes)
+                            </div>
+                            <t t-set="bc" t-value="prod.barcode or prod.default_code or ('SKU' + str(prod.id))"/>
+                            <img t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=%s&amp;width=420&amp;height=90' % bc" style="max-width: 240px; height: 55px;"/>
+                            <div style="font-size: 11px; margin-top: 4px; letter-spacing: 2px;" t-out="bc"/>
+                        </div>
+                    </t>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_apparel_hangtag" model="ir.actions.report">
+        <field name="name">Apparel Hang-Tag Barcode Labels</field>
+        <field name="model">product.template</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_scaling_ops.report_apparel_hangtag_document</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

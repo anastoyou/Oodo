@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_custom_operations_ui_root" name="Operations UI &amp; BI" sequence="42"/>
+
+    <menuitem id="menu_custom_shopfloor_section" name="Shop Floor &amp; Barcode" parent="menu_custom_operations_ui_root" sequence="10"/>
+    <menuitem id="menu_custom_shopfloor_workorders" name="Shop Floor Work Orders" parent="menu_custom_shopfloor_section" action="action_custom_shopfloor_workorder" sequence="10"/>
+    <menuitem id="menu_custom_shopfloor_kiosk_open" name="Launch Shop Floor Tablet (/shopfloor)" parent="menu_custom_shopfloor_section" action="action_open_shopfloor_kiosk_url" sequence="20"/>
+    <menuitem id="menu_custom_barcode_pwa_open" name="Launch Camera Barcode PWA (/barcode)" parent="menu_custom_shopfloor_section" action="action_open_barcode_pwa_url" sequence="30"/>
+
+    <menuitem id="menu_custom_timesheets_bi_section" name="Timesheets, BI &amp; Studio" parent="menu_custom_operations_ui_root" sequence="20"/>
+    <menuitem id="menu_custom_timesheets" name="Timesheets &amp; Live Timers" parent="menu_custom_timesheets_bi_section" action="action_custom_timesheet_entry" sequence="10"/>
+    <menuitem id="menu_custom_spreadsheets" name="Live Formula Spreadsheets" parent="menu_custom_timesheets_bi_section" action="action_custom_spreadsheet_sheet" sequence="20"/>
+    <menuitem id="menu_custom_studio_app_wizard" name="Studio-Lite App / Model Builder" parent="menu_custom_timesheets_bi_section" action="action_custom_studio_app_wizard" sequence="30"/>
+</odoo>
+

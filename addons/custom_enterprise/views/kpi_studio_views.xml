@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_kpi_snapshot_list" model="ir.ui.view">
+        <field name="name">custom.kpi.snapshot.list</field>
+        <field name="model">custom.kpi.snapshot</field>
+        <field name="arch" type="xml">
+            <list string="Executive KPI Snapshots">
+                <field name="snapshot_date"/>
+                <field name="name"/>
+                <field name="sales_30d"/>
+                <field name="gross_margin_30d"/>
+                <field name="cod_orders_30d"/>
+                <field name="rto_rate_pct"/>
+                <field name="monthly_mrr"/>
+                <field name="open_tickets"/>
+                <field name="sla_breached_tickets"/>
+                <field name="pending_approvals"/>
+                <field name="asset_net_book_value"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_kpi_snapshot_form" model="ir.ui.view">
+        <field name="name">custom.kpi.snapshot.form</field>
+        <field name="model">custom.kpi.snapshot</field>
+        <field name="arch" type="xml">
+            <form string="Executive KPI Snapshot">
+                <header>
+                    <button name="action_refresh_kpis" string="Compute Live KPIs" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Snapshot">
+                            <field name="name"/>
+                            <field name="snapshot_date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Sales &amp; RTO (30 Days)">
+                            <field name="sales_30d"/>
+                            <field name="gross_margin_30d"/>
+                            <field name="cod_orders_30d"/>
+                            <field name="rto_orders_30d"/>
+                            <field name="rto_rate_pct"/>
+                        </group>
+                        <group string="Subscriptions, Support &amp; Finance">
+                            <field name="active_subscriptions"/>
+                            <field name="monthly_mrr"/>
+                            <field name="open_tickets"/>
+                            <field name="sla_breached_tickets"/>
+                            <field name="pending_approvals"/>
+                            <field name="asset_net_book_value"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_studio_field_wizard_form" model="ir.ui.view">
+        <field name="name">custom.studio.field.wizard.form</field>
+        <field name="model">custom.studio.field.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Studio-Lite: Add Custom Field">
+                <group>
+                    <field name="model_id"/>
+                    <field name="field_label" placeholder="e.g. WhatsApp Opt-In"/>
+                    <field name="field_name" placeholder="x_studio_whatsapp_optin"/>
+                    <field name="ttype"/>
+                    <field name="add_to_default_form"/>
+                </group>
+                <footer>
+                    <button name="action_create_field" string="Create Field" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_kpi_snapshot" model="ir.actions.act_window">
+        <field name="name">Executive KPIs</field>
+        <field name="res_model">custom.kpi.snapshot</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_studio_field_wizard" model="ir.actions.act_window">
+        <field name="name">Studio-Lite Field Builder</field>
+        <field name="res_model">custom.studio.field.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Knowledge Base SOP Wiki -->
+    <record id="view_custom_knowledge_article_list" model="ir.ui.view">
+        <field name="name">custom.knowledge.article.list</field>
+        <field name="model">custom.knowledge.article</field>
+        <field name="arch" type="xml">
+            <list string="Knowledge Base &amp; SOPs">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="parent_id"/>
+                <field name="author_id"/>
+                <field name="is_published"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_knowledge_article_form" model="ir.ui.view">
+        <field name="name">custom.knowledge.article.form</field>
+        <field name="model">custom.knowledge.article</field>
+        <field name="arch" type="xml">
+            <form string="SOP Article">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Article Title..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category"/>
+                            <field name="parent_id"/>
+                        </group>
+                        <group>
+                            <field name="is_published"/>
+                            <field name="author_id"/>
+                        </group>
+                    </group>
+                    <field name="body"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Online Appointments -->
+    <record id="view_custom_appointment_type_list" model="ir.ui.view">
+        <field name="name">custom.appointment.type.list</field>
+        <field name="model">custom.appointment.type</field>
+        <field name="arch" type="xml">
+            <list string="Appointment Types" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="duration_minutes"/>
+                <field name="location"/>
+                <field name="staff_user_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_appointment_booking_list" model="ir.ui.view">
+        <field name="name">custom.appointment.booking.list</field>
+        <field name="model">custom.appointment.booking</field>
+        <field name="arch" type="xml">
+            <list string="Customer Appointments">
+                <field name="name"/>
+                <field name="appointment_type_id"/>
+                <field name="customer_name"/>
+                <field name="customer_phone"/>
+                <field name="start_datetime"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_appointment_booking_form" model="ir.ui.view">
+        <field name="name">custom.appointment.booking.form</field>
+        <field name="model">custom.appointment.booking</field>
+        <field name="arch" type="xml">
+            <form string="Appointment Booking">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" invisible="state != 'booked'"/>
+                    <button name="action_done" string="Complete" type="object" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="appointment_type_id"/>
+                            <field name="start_datetime"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="customer_name"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_email"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Custom stitching measurements, styling preferences, or store branch..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_knowledge_article" model="ir.actions.act_window">
+        <field name="name">Knowledge Base (SOPs)</field>
+        <field name="res_model">custom.knowledge.article</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_appointment_type" model="ir.actions.act_window">
+        <field name="name">Appointment Types</field>
+        <field name="res_model">custom.appointment.type</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_custom_appointment_booking" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">custom.appointment.booking</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+

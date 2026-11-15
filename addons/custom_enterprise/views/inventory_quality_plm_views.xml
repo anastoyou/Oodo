@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Barcode Scan Console -->
+    <record id="view_custom_barcode_session_list" model="ir.ui.view">
+        <field name="name">custom.barcode.session.list</field>
+        <field name="model">custom.barcode.session</field>
+        <field name="arch" type="xml">
+            <list string="Barcode Scan Sessions">
+                <field name="name"/>
+                <field name="operation_mode"/>
+                <field name="picking_id"/>
+                <field name="location_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_barcode_session_form" model="ir.ui.view">
+        <field name="name">custom.barcode.session.form</field>
+        <field name="model">custom.barcode.session</field>
+        <field name="arch" type="xml">
+            <form string="Warehouse Barcode Scan Console">
+                <header>
+                    <button name="action_process_scan" string="Scan Item" type="object" class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_apply_session" string="Apply Quantities" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="operation_mode"/>
+                            <field name="picking_id" invisible="operation_mode != 'picking'"/>
+                            <field name="location_id" invisible="operation_mode != 'inventory'"/>
+                        </group>
+                        <group>
+                            <field name="scan_input" placeholder="Scan barcode or SKU here..."/>
+                            <field name="last_scan_message"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="scanned_code"/>
+                            <field name="expected_qty"/>
+                            <field name="scanned_qty"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Quality Control -->
+    <record id="view_custom_quality_point_list" model="ir.ui.view">
+        <field name="name">custom.quality.point.list</field>
+        <field name="model">custom.quality.point</field>
+        <field name="arch" type="xml">
+            <list string="Quality Control Points">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="picking_type_code"/>
+                <field name="product_categ_id"/>
+                <field name="check_type"/>
+                <field name="block_picking_validation"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_quality_point_form" model="ir.ui.view">
+        <field name="name">custom.quality.point.form</field>
+        <field name="model">custom.quality.point</field>
+        <field name="arch" type="xml">
+            <form string="Quality Control Point">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="picking_type_code"/>
+                            <field name="product_categ_id"/>
+                            <field name="block_picking_validation"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="check_type"/>
+                            <field name="norm_min" invisible="check_type != 'measure'"/>
+                            <field name="norm_max" invisible="check_type != 'measure'"/>
+                        </group>
+                    </group>
+                    <field name="instructions" placeholder="Checklist instructions for QC inspector..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_quality_check_list" model="ir.ui.view">
+        <field name="name">custom.quality.check.list</field>
+        <field name="model">custom.quality.check</field>
+        <field name="arch" type="xml">
+            <list string="Quality Checks">
+                <field name="name"/>
+                <field name="picking_id"/>
+                <field name="product_id"/>
+                <field name="check_type"/>
+                <field name="measure_value"/>
+                <field name="inspector_id"/>
+                <field name="quality_state" widget="badge"
+                    decoration-warning="quality_state == 'none'"
+                    decoration-success="quality_state == 'pass'"
+                    decoration-danger="quality_state == 'fail'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_quality_check_form" model="ir.ui.view">
+        <field name="name">custom.quality.check.form</field>
+        <field name="model">custom.quality.check</field>
+        <field name="arch" type="xml">
+            <form string="Quality Check">
+                <header>
+                    <button name="action_pass" string="Pass QC" type="object" class="oe_highlight" invisible="quality_state == 'pass'"/>
+                    <button name="action_fail" string="Fail QC" type="object" class="btn-outline-danger" invisible="quality_state == 'fail'"/>
+                    <field name="quality_state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="point_id"/>
+                            <field name="picking_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="check_type"/>
+                            <field name="measure_value" invisible="check_type != 'measure'"/>
+                            <field name="inspector_id"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Stitching, size tag, fabric defect, or gadget test observations..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Add QC smart button & generate button to stock.picking -->
+    <record id="view_picking_form_quality_enterprise" model="ir.ui.view">
+        <field name="name">stock.picking.form.quality.enterprise</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_quality_checks"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-check-square-o"
+                    invisible="x_quality_check_count == 0">
+                    <field name="x_quality_check_count" widget="statinfo" string="QC Checks"/>
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_quality_checks"
+                    string="Create QC Checks"
+                    type="object"
+                    class="btn-secondary"
+                    invisible="state in ('done', 'cancel')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- PLM Tech Packs & ECOs -->
+    <record id="view_custom_plm_techpack_list" model="ir.ui.view">
+        <field name="name">custom.plm.techpack.list</field>
+        <field name="model">custom.plm.techpack</field>
+        <field name="arch" type="xml">
+            <list string="PLM Tech Packs">
+                <field name="name"/>
+                <field name="product_tmpl_id"/>
+                <field name="revision"/>
+                <field name="fabric_gsm"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_plm_techpack_form" model="ir.ui.view">
+        <field name="name">custom.plm.techpack.form</field>
+        <field name="model">custom.plm.techpack</field>
+        <field name="arch" type="xml">
+            <form string="PLM Tech Pack">
+                <header>
+                    <button name="action_activate" string="Activate Production Spec" type="object" class="oe_highlight" invisible="state == 'active'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="product_tmpl_id"/>
+                            <field name="revision"/>
+                            <field name="fabric_gsm"/>
+                        </group>
+                        <group>
+                            <field name="attachment_data" filename="attachment_name"/>
+                            <field name="attachment_name" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Measurement Spec">
+                            <field name="measurement_spec"/>
+                        </page>
+                        <page string="Trims &amp; Packaging BOM">
+                            <field name="trim_packaging_notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_plm_eco_list" model="ir.ui.view">
+        <field name="name">custom.plm.eco.list</field>
+        <field name="model">custom.plm.eco</field>
+        <field name="arch" type="xml">
+            <list string="Engineering Change Orders (ECO)">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="product_tmpl_id"/>
+                <field name="new_revision"/>
+                <field name="stage" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_plm_eco_form" model="ir.ui.view">
+        <field name="name">custom.plm.eco.form</field>
+        <field name="model">custom.plm.eco</field>
+        <field name="arch" type="xml">
+            <form string="Engineering Change Order">
+                <header>
+                    <button name="action_submit_review" string="Submit for Review" type="object" class="btn-secondary" invisible="stage != 'draft'"/>
+                    <button name="action_approve" string="Approve ECO" type="object" class="oe_highlight" invisible="stage != 'in_review'"/>
+                    <button name="action_apply_changes" string="Apply Revision" type="object" class="oe_highlight" invisible="stage != 'approved'"/>
+                    <field name="stage" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="title"/>
+                            <field name="product_tmpl_id"/>
+                        </group>
+                        <group>
+                            <field name="techpack_id"/>
+                            <field name="new_revision"/>
+                        </group>
+                    </group>
+                    <field name="change_summary" placeholder="Describe stitching, fabric, or component change..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_custom_barcode_session" model="ir.actions.act_window">
+        <field name="name">Barcode Scan Console</field>
+        <field name="res_model">custom.barcode.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_quality_point" model="ir.actions.act_window">
+        <field name="name">Quality Control Points</field>
+        <field name="res_model">custom.quality.point</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_quality_check" model="ir.actions.act_window">
+        <field name="name">Quality Checks</field>
+        <field name="res_model">custom.quality.check</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_plm_techpack" model="ir.actions.act_window">
+        <field name="name">PLM Tech Packs</field>
+        <field name="res_model">custom.plm.techpack</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_plm_eco" model="ir.actions.act_window">
+        <field name="name">Engineering Change Orders</field>
+        <field name="res_model">custom.plm.eco</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Master Production & Replenishment Schedule (MPS) -->
+    <record id="view_custom_mrp_mps_list" model="ir.ui.view">
+        <field name="name">custom.mrp.mps.list</field>
+        <field name="model">custom.mrp.mps</field>
+        <field name="arch" type="xml">
+            <list string="Replenishment &amp; MPS Schedule">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="vendor_id"/>
+                <field name="forecast_demand"/>
+                <field name="safety_stock"/>
+                <field name="on_hand_qty"/>
+                <field name="incoming_qty"/>
+                <field name="suggested_replenish_qty"/>
+                <field name="purchase_order_id"/>
+                <button name="action_create_rfq" string="Order / Create RFQ" type="object" class="btn-link" invisible="suggested_replenish_qty &lt;= 0"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_mrp_mps_form" model="ir.ui.view">
+        <field name="name">custom.mrp.mps.form</field>
+        <field name="model">custom.mrp.mps</field>
+        <field name="arch" type="xml">
+            <form string="MPS Replenishment Line">
+                <header>
+                    <button name="action_create_rfq" string="Generate Purchase RFQ" type="object" class="oe_highlight" invisible="suggested_replenish_qty &lt;= 0"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="product_id"/>
+                            <field name="vendor_id"/>
+                        </group>
+                        <group>
+                            <field name="forecast_demand"/>
+                            <field name="safety_stock"/>
+                            <field name="on_hand_qty"/>
+                            <field name="incoming_qty"/>
+                            <field name="suggested_replenish_qty"/>
+                            <field name="purchase_order_id" invisible="not purchase_order_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_mrp_mps" model="ir.actions.act_window">
+        <field name="name">MPS &amp; Demand Replenishment</field>
+        <field name="res_model">custom.mrp.mps</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+

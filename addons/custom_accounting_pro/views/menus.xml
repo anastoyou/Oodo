@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_custom_bank_reconcile_console" name="Interactive Bank Reconcile" parent="custom_enterprise.menu_custom_accounting_enterprise" action="action_custom_bank_reconcile_wizard" sequence="42"/>
+    <menuitem id="menu_custom_bill_ocr" name="Vendor Bill OCR Extractor" parent="custom_enterprise.menu_custom_accounting_enterprise" action="action_custom_bill_ocr_wizard" sequence="48"/>
+    <menuitem id="menu_custom_consolidation" name="Consolidation &amp; Cash Flow" parent="custom_enterprise.menu_custom_accounting_enterprise" action="action_custom_consolidation_wizard" sequence="50"/>
+    <menuitem id="menu_custom_tax_lock" name="Tax &amp; Period Locks" parent="custom_enterprise.menu_custom_accounting_enterprise" action="action_custom_tax_lock_wizard" sequence="55"/>
+    <menuitem id="menu_custom_equity_cap_table" name="Equity Cap Table" parent="custom_enterprise.menu_custom_accounting_enterprise" action="action_custom_equity_holder" sequence="60"/>
+</odoo>
+

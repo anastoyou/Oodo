@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_support_ticket_form_enterprise" model="ir.ui.view">
+        <field name="name">custom.support.ticket.form.enterprise</field>
+        <field name="model">custom.support.ticket</field>
+        <field name="inherit_id" ref="custom_erp.view_custom_support_ticket_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="before">
+                <field name="team_id"/>
+                <field name="sla_id"/>
+                <field name="sla_deadline"/>
+                <field name="sla_status" widget="badge"
+                    decoration-success="sla_status in ('on_track', 'met')"
+                    decoration-warning="sla_status == 'due_soon'"
+                    decoration-danger="sla_status == 'breached'"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Canned Reply &amp; CSAT" name="enterprise_sla_csat">
+                    <group>
+                        <group string="Quick Canned Response">
+                            <field name="canned_response_id"/>
+                            <button name="action_post_canned_response" string="Post Canned Reply to Chatter" type="object" class="btn-secondary" invisible="not canned_response_id"/>
+                        </group>
+                        <group string="Customer Satisfaction (CSAT)">
+                            <field name="rating_score"/>
+                            <field name="rating_date"/>
+                            <field name="rating_comment"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_custom_support_ticket_tree_enterprise" model="ir.ui.view">
+        <field name="name">custom.support.ticket.list.enterprise</field>
+        <field name="model">custom.support.ticket</field>
+        <field name="inherit_id" ref="custom_erp.view_custom_support_ticket_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage']" position="before">
+                <field name="team_id" optional="show"/>
+                <field name="sla_status" widget="badge"
+                    decoration-success="sla_status in ('on_track', 'met')"
+                    decoration-warning="sla_status == 'due_soon'"
+                    decoration-danger="sla_status == 'breached'"
+                    optional="show"/>
+                <field name="rating_score" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_custom_support_team_list" model="ir.ui.view">
+        <field name="name">custom.support.team.list</field>
+        <field name="model">custom.support.team</field>
+        <field name="arch" type="xml">
+            <list string="Support Teams">
+                <field name="name"/>
+                <field name="auto_assign_round_robin"/>
+                <field name="member_ids" widget="many2many_tags"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_support_sla_list" model="ir.ui.view">
+        <field name="name">custom.support.sla.list</field>
+        <field name="model">custom.support.sla</field>
+        <field name="arch" type="xml">
+            <list string="SLA Policies" editable="bottom">
+                <field name="name"/>
+                <field name="team_id"/>
+                <field name="category"/>
+                <field name="priority"/>
+                <field name="resolution_hours"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_support_canned_list" model="ir.ui.view">
+        <field name="name">custom.support.canned.response.list</field>
+        <field name="model">custom.support.canned.response</field>
+        <field name="arch" type="xml">
+            <list string="Canned Responses" editable="bottom">
+                <field name="shortcut"/>
+                <field name="name"/>
+                <field name="body"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_custom_support_team" model="ir.actions.act_window">
+        <field name="name">Support Teams</field>
+        <field name="res_model">custom.support.team</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_support_sla" model="ir.actions.act_window">
+        <field name="name">SLA Policies</field>
+        <field name="res_model">custom.support.sla</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_custom_support_canned" model="ir.actions.act_window">
+        <field name="name">Canned Responses</field>
+        <field name="res_model">custom.support.canned.response</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>
+

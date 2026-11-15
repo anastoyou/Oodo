@@ -1,6 +1,6 @@
 # End-to-End ERP Setup Flow (`1 → 67`): Base Engine to Production & Phase 1–5 Scaling
 
-> **Target Stack:** Odoo 20.0 Community Edition (`odoo/`) + Custom Addons (`addons/custom_erp`, `addons/custom_store`) + Standalone PostgreSQL 16 (`shared-postgres`) + Linux Docker Production (`deploy/`)
+> **Target Stack:** Odoo 20.0 Community Edition (`odoo/`) + Custom Addons (`addons/custom_erp`, `addons/custom_store`, `addons/custom_enterprise`) + Standalone PostgreSQL 16 (`shared-postgres`) + Linux Docker Production (`deploy/`)
 > **Company:** `ZOEE GLOBAL PRIVATE LIMITED` (India / INR / Surat Base)
 > **Brands:** `FAIRTAG`, `ZOIRA`, `GADGETS`
 > **Database:** `zoeemasterdb`
@@ -567,7 +567,7 @@ Every step from **1 to 67** is documented in **strict setup dependency order** a
 - **When:** `Phase 1 (Monthly GST + P&L)` → `Phase 2–4 (OCA Reports)` | **Layer:** `Odoo 20.0 Built-In` + `OCA Extensions`
 - **Built-in Reports (`Accounting → Reporting`):**
   - `Profit and Loss`, `Balance Sheet`, `Partner Ledger`, `Aged Receivable / Payable`, `General Ledger`, `Tax Report` + **Indian GST Reports** (`l10n_in`: GSTR-1 B2B/B2CS/HSN summaries, GSTR-3B).
-- **Community vs Enterprise Note ([`ROADMAP_MODULE_STATUS.md`](./ROADMAP_MODULE_STATUS.md)):** Odoo Community lacks full Enterprise `account_accountant` dynamic drill-down and automated bank sync. At Phase 2–3, add **OCA `account_financial_report`**, **OCA `account_reconcile_oca`**, and **OCA `mis_builder`** (or connect Metabase/Excel exports) for CA-ready multi-period financial packs, bank reconciliation rules, and budgets.
+- **Community vs Enterprise Note ([`ROADMAP_MODULE_STATUS.md`](./ROADMAP_MODULE_STATUS.md)):** While Odoo Community lacks Enterprise `account_accountant` out-of-the-box, **`addons/custom_enterprise/`** now adds built-in **Fixed Assets & Depreciation (`custom.asset`)**, **Deferred Revenue / Prepaid Expense Schedules (`custom.deferred.schedule`)**, **GL & Analytic Budgets (`custom.account.budget`)**, and **CSV Bank/UPI Import & Auto-Reconciliation Rules (`custom.bank.import.wizard`, `custom.bank.reconcile.rule`)** under `Invoicing → Enterprise Finance`. You can also optionally add **OCA `account_financial_report`** / **`mis_builder`** for additional CA packs.
 
 ### 54. Email Server Configuration
 - **When:** `Phase 1 (Day-1)` | **Layer:** `Odoo 20.0 Built-In` (`mail`)
@@ -587,26 +587,23 @@ Every step from **1 to 67** is documented in **strict setup dependency order** a
   5. **Support Ticket Auto-Acknowledge:** When `custom.support.ticket` is created from `/support` or `/my/tickets`, assign round-robin agent and send ticket reference email.
 
 ### 56. Approval Workflow Configuration
-- **When:** `Phase 2–4` | **Layer:** `Odoo 20.0 Built-In` + `OCA / Custom State Guards`
-- **Community Reality Note:** Odoo's standalone `approvals` app is Enterprise-only. Implement multi-tier approvals natively using Community mechanisms:
-  - **Purchase Approvals:** Built-in `Purchase Order Approval` amount threshold (Step 35).
-  - **Expense Approvals (`hr_expense`):** Built-in `Draft → Submitted → Approved → Posted` team-leader + accountant flow.
-  - **High-Discount / Credit Note Approvals:** Lock Salesperson max discount (e.g., `> 10%`) or Credit Note posting via `base_automation` + `ir.access` restrictions requiring Sales/Accounting Manager approval.
-  - **Custom `Approvals` (Phase 4+):** Install OCA `tier_validation` (`base_tier_validation`) if formal multi-level sign-off chains are needed on POs, Bills, or Stock Write-offs.
+- **When:** `Phase 2–4` (Ready Day-1 via `custom_enterprise`) | **Layer:** `Custom Addon (custom_enterprise)` + `Odoo 20.0 Built-In`
+- **Built-in Custom Approvals Engine (`Approvals` app in `addons/custom_enterprise/`):**
+  - **`custom.approval.category` & `custom.approval.request`:** Multi-approver workflow (`Draft → Pending Approval → Approved / Refused`) with default categories for `Purchase / Capex Above Threshold`, `High Discount / Credit Note / Refund`, and `Partner Salary / Drawings Payout`, linked directly to `sale.order`, `purchase.order`, and `account.move`.
+  - **Plus Native Guards:** `Purchase Order Approval` amount threshold (Step 35), `hr_expense` approvals, and `base_automation` + `ir.access` restrictions.
 
 ### 57. Document Management
-- **When:** `Phase 1 (Chatter Attachments)` → `Phase 4 (Structured DMS)` | **Layer:** `Odoo 20.0 Built-In` (`mail` / `ir.attachment`) + `OCA DMS`
-- **Community Reality Note:** Odoo Enterprise `documents` app is not in Community.
-  - **Phases 1–3:** Attach GST Vendor Bills, Packaging Artwork PDFs, Courier Manifests, Custom Stitch Measurement Sheets, and Partner KYC directly to each record's **Chatter** (stored safely inside `data/filestore/zoeemasterdb/` and backed up automatically by `save_db.bat`!).
-  - **Phase 4+ (`5+ stores`, heavy PDFs/design files):** Install **OCA `dms`** (`Document Management System`) or link structured Google Drive / S3 folders per SKU & Store Compliance Certificate.
+- **When:** `Phase 1 (Ready Day-1 via custom_enterprise)` → `Phase 4 (Scale)` | **Layer:** `Custom Addon (custom_enterprise)` + `Odoo 20.0 Built-In` (`mail` / `ir.attachment`)
+- **Built-in Custom DMS (`Documents` app in `addons/custom_enterprise/`):**
+  - **`custom.document.folder`, `custom.document.tag`, `custom.document`:** Central folders (`GST Invoices & Vendor Bills`, `Vendor KYC, Leases & Compliance`, `Brand Artwork & Garment Tech Packs`), versioning, expiry dates, and 1-click **Create Vendor Bill**, **Create Support Ticket**, and **Request Approval** actions.
+  - **Chatter Attachments:** Record-level attachments still store cleanly in `data/filestore/zoeemasterdb/` and back up via `save_db.bat`.
 
 ### 58. Helpdesk Configuration
-- **When:** `Phase 1 (Day-1)` | **Layer:** `Custom Addon (Included)` + `Odoo 20.0 Built-In` (`im_livechat`)
-- **Included Custom Engine ([`addons/custom_erp/models/support_ticket.py`](../addons/custom_erp/models/support_ticket.py) + `addons/custom_store/`):**
-  - Model: `custom.support.ticket` (sequence from `support_sequence_data.xml`), accessible in Backend menu, Website `/support` page, and Customer Portal `/my/tickets`.
-  - Pre-configured Ticket Types & Links: Order Reference, Size Exchange / Return, Payment / Refund Issue, Shipping Delay, Customer Chatter thread.
+- **When:** `Phase 1 (Day-1)` | **Layer:** `Custom Addon (custom_erp + custom_enterprise)` + `Odoo 20.0 Built-In` (`im_livechat`)
+- **Included Custom Engine ([`addons/custom_erp/models/support_ticket.py`](../addons/custom_erp/models/support_ticket.py) + [`addons/custom_enterprise/models/helpdesk_enterprise.py`](../addons/custom_enterprise/models/helpdesk_enterprise.py)):**
+  - Model: `custom.support.ticket` accessible in Backend `Helpdesk`, Website `/support`, and Customer Portal `/my/tickets`.
+  - **Enterprise Upgrades (`custom_enterprise`):** **Support Teams (`custom.support.team`) with Round-Robin Auto-Assignment**, **SLA Policies & Breach Tracking (`custom.support.sla`, hourly cron)**, **Canned Responses (`custom.support.canned.response`)**, and **CSAT Ratings** (`/my/tickets/<id>/rate`).
   - Live Chat (`im_livechat`): Embedded Website chat widget routed to Support users during business hours.
-- **Phase 3+ Upgrade:** Keep using `custom.support.ticket` or migrate/extend with **OCA `helpdesk_mgmt`** + WhatsApp Business API integration (`Interakt` / `Wati` / `AiSensy`) when ticket volume exceeds `50+/day`.
 
 ### 59. Return & Refund Workflow
 - **When:** `Phase 1 (Day-1)` | **Layer:** `Odoo 20.0 Built-In` + `Custom Addon (Included)` → `Phase 2–3 OCA RMA`
@@ -621,13 +618,15 @@ Every step from **1 to 67** is documented in **strict setup dependency order** a
 - **Phase 2–3 Scaling:** Install **OCA `rma`** for formal portal RMA numbers, automated exchange shipments, and defect analytics by vendor/fabric.
 
 ### 60. Dashboard Configuration
-- **When:** `Phase 1 (Built-in)` → `Phase 3–4 (BI / Executive)` | **Layer:** `Odoo 20.0 Built-In` (`spreadsheet_dashboard`) + `External BI`
-- **Built-in Odoo 20.0 Dashboards (`Dashboards` app):**
-  - Customize KPI Spreadsheets (`spreadsheet_dashboard`) & saved Pivot/Graph favorites tracking:
+- **When:** `Phase 1 (Built-in + custom_enterprise)` → `Phase 3–4 (BI / Executive)` | **Layer:** `Odoo 20.0 Built-In` (`spreadsheet_dashboard`) + `Custom Addon (custom_enterprise)` + `External BI`
+- **Built-in & Custom Executive Dashboards:**
+  - **Executive KPIs (`Enterprise Suite → Executive KPIs` / `custom.kpi.snapshot`):** One-click live snapshots across Sales (30d), Gross Margin, COD vs RTO Rate %, Active Subscriptions & MRR, Open Helpdesk Tickets & SLA Breaches, Pending Approvals, and Fixed Assets Net Book Value.
+  - **KPI Spreadsheets (`spreadsheet_dashboard` & saved Pivot/Graph favorites):**
     - **Daily Sales by `x_sales_channel`** (`Website`, `WhatsApp`, `Myntra`, `Retail POS`)
     - **Prepaid vs COD Ratio & COD Confirmation Backlog** (`x_payment_mode`, `x_cod_verification_status`)
     - **RTO Rate % by SKU, Pin/State, & Reason** (`x_is_rto`, `x_rto_reason`)
     - **Gross Margin by Brand (`FAIRTAG`, `ZOIRA`, `GADGETS`)** & Inventory Days-on-Hand
+- **Studio-Lite Custom Fields (`Enterprise Suite → Studio-Lite Field Builder`):** Safely add `x_studio_*` custom fields onto core business models without Enterprise Studio.
 - **Phase 4+ Executive BI:** Connect read-only **Metabase** or **Looker Studio** directly to a read-replica of PostgreSQL for multi-store cohorts, CAC vs LTV, and supplier defect trends.
 
 ---
@@ -673,15 +672,15 @@ Every step from **1 to 67** is documented in **strict setup dependency order** a
   8. `Opening Accounting Balances`: Opening Trial Balance (AR/AP open bills/invoices, Bank balance, Partner Capital) checked with your CA!
 
 ### 64. Custom Module Development
-- **When:** `Phase 1 (Foundation Included)` → `Phase 2–5 (Targeted Extensions)` | **Layer:** `Custom Addon` (`addons/custom_erp/`, `addons/custom_store/`)
+- **When:** `Phase 1 (Foundation Included)` → `Phase 2–5 (Targeted Extensions)` | **Layer:** `Custom Addon` (`addons/custom_erp/`, `addons/custom_store/`, `addons/custom_enterprise/`)
 - **Strict Engineering Rules:**
-  - **Never edit core files under [`odoo/addons/`](../odoo/addons/).** Put all business logic in `addons/custom_erp/` and all storefront UI/templates in `addons/custom_store/` (plus future modular addons under `addons/`—e.g. `custom_shiprocket`, `custom_marketplace_sync`, `custom_gadgets` at Gates 2–4).
+  - **Never edit core files under [`odoo/addons/`](../odoo/addons/).** Put core D2C apparel ERP logic in `addons/custom_erp/`, storefront UI/templates in `addons/custom_store/`, and Community-built Enterprise equivalents (Finance+, Helpdesk SLA/CSAT, Payroll & Appraisals, Approvals, DMS, Barcode Scan Console, QC, PLM, e-Sign, Subscriptions, Rentals, Marketing Automation, Social, Field Service, Planning, Executive KPIs & Studio-Lite) in `addons/custom_enterprise/`.
   - Keep **Odoo 20.0 conventions**: `<list>` instead of `<tree>`, `ir.access.csv` instead of `ir.rule`, `Goods` + `Track Inventory`, `env.company` awareness.
   - **Upgrade workflow after every XML/Python/JS edit:**
     ```powershell
     .\upgrade.bat
     ```
-    (Or selectively: `.\upgrade.bat -u custom_erp,custom_store` and restart `odoo-bin`).
+    (Or selectively: `.\upgrade.bat --skip-pull --modules custom_erp,custom_store,custom_enterprise,custom_accounting_pro,custom_comms,custom_omnichannel,custom_operations_ui,custom_scaling_ops` and restart `odoo-bin`).
 
 ### 65. Integration Testing
 - **When:** `Phase 1 (Pre-Launch)` & Every Module Upgrade | **Layer:** `QA / Verification`

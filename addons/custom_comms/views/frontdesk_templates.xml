@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="frontdesk_kiosk_page" name="Frontdesk Reception Check-In Kiosk">
+        <t t-call="website.layout">
+            <div class="container py-5" style="max-width: 720px;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <h1 class="h3 mb-2">Studio Reception Check-In</h1>
+                        <p class="text-muted mb-4">Welcome! Please sign in so your host is notified immediately.</p>
+
+                        <t t-if="checked_in">
+                            <div class="alert alert-success mb-4" role="alert">
+                                Thank you for checking in. Your host has been notified and will welcome you shortly.
+                            </div>
+                        </t>
+
+                        <form action="/frontdesk/checkin" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" name="name" class="form-control" required="required" placeholder="Your full name"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mobile / Phone</label>
+                                    <input type="text" name="phone" class="form-control" placeholder="+91 ..."/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Company / Courier</label>
+                                    <input type="text" name="company_name" class="form-control" placeholder="Optional"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Visit Purpose</label>
+                                    <select name="purpose" class="form-select">
+                                        <option value="tailoring_fitting">Custom Tailoring / Fitting</option>
+                                        <option value="pickup_delivery">Order Pickup / Return</option>
+                                        <option value="vendor_sample">Vendor / Fabric Sample</option>
+                                        <option value="interview">Job Interview</option>
+                                        <option value="meeting" selected="selected">Partner / Business Meeting</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Person to Meet (Host)</label>
+                                    <select name="host_employee_id" class="form-select">
+                                        <option value="">Reception Desk / Any Available Host</option>
+                                        <t t-foreach="employees" t-as="emp">
+                                            <option t-att-value="emp.id"><t t-esc="emp.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Notes</label>
+                                    <input type="text" name="notes" class="form-control" placeholder="Order number or brief note"/>
+                                </div>
+                                <div class="col-12 pt-2">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">Check In Now</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
+

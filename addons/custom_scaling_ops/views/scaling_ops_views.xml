@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- RMA & Size Exchange Views -->
+    <record id="view_custom_rma_request_list" model="ir.ui.view">
+        <field name="name">custom.rma.request.list</field>
+        <field name="model">custom.rma.request</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'approved'" decoration-success="state == 'done'">
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="request_type"/>
+                <field name="reason"/>
+                <field name="return_picking_id"/>
+                <field name="exchange_order_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_rma_request_form" model="ir.ui.view">
+        <field name="name">custom.rma.request.form</field>
+        <field name="model">custom.rma.request</field>
+        <field name="arch" type="xml">
+            <form string="Return &amp; Size Exchange RMA">
+                <header>
+                    <button name="action_create_return_picking" string="Create Return Receipt" type="object" class="btn-primary" invisible="return_picking_id"/>
+                    <button name="action_mark_received" string="QC Pass Received" type="object" class="btn-secondary" invisible="state != 'approved'"/>
+                    <button name="action_create_exchange_order" string="Create Free Size-Exchange Order" type="object" class="btn-success" invisible="exchange_order_id"/>
+                    <button name="action_create_credit_note" string="Issue Refund Credit Note" type="object" class="btn-warning" invisible="credit_note_id"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sale_order_id"/>
+                            <field name="partner_id"/>
+                            <field name="picking_id"/>
+                            <field name="request_type"/>
+                            <field name="reason"/>
+                        </group>
+                        <group>
+                            <field name="return_picking_id"/>
+                            <field name="exchange_order_id"/>
+                            <field name="credit_note_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Returned / Exchange Items">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="exchange_product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Inspection Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_rma_request" model="ir.actions.act_window">
+        <field name="name">Returns &amp; Size Exchanges (RMA)</field>
+        <field name="res_model">custom.rma.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Courier Config & Pincode Rules -->
+    <record id="view_custom_courier_config_list" model="ir.ui.view">
+        <field name="name">custom.courier.config.list</field>
+        <field name="model">custom.courier.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="pickup_location_name"/>
+                <field name="sandbox_mode"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_courier_config_form" model="ir.ui.view">
+        <field name="name">custom.courier.config.form</field>
+        <field name="model">custom.courier.config</field>
+        <field name="arch" type="xml">
+            <form string="Courier Aggregator Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="provider"/>
+                            <field name="sandbox_mode"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="pickup_location_name"/>
+                            <field name="api_email"/>
+                            <field name="api_token" password="True"/>
+                            <field name="webhook_secret"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_courier_config" model="ir.actions.act_window">
+        <field name="name">Courier Aggregators (Shiprocket/Delhivery)</field>
+        <field name="res_model">custom.courier.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_custom_courier_pincode_rule_list" model="ir.ui.view">
+        <field name="name">custom.courier.pincode.rule.list</field>
+        <field name="model">custom.courier.pincode.rule</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="pincode"/>
+                <field name="city"/>
+                <field name="state_name"/>
+                <field name="allow_cod"/>
+                <field name="is_serviceable"/>
+                <field name="risk_note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_custom_courier_pincode_rule" model="ir.actions.act_window">
+        <field name="name">COD Pincode Blocklist &amp; Rules</field>
+        <field name="res_model">custom.courier.pincode.rule</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Marketplace Hub & Order Importer -->
+    <record id="view_custom_marketplace_channel_list" model="ir.ui.view">
+        <field name="name">custom.marketplace.channel.list</field>
+        <field name="model">custom.marketplace.channel</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="channel_code"/>
+                <field name="default_pricelist_multiplier"/>
+                <field name="last_export_at"/>
+                <button name="action_export_catalog_csv" string="Export Catalog CSV" type="object"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_marketplace_channel_form" model="ir.ui.view">
+        <field name="name">custom.marketplace.channel.form</field>
+        <field name="model">custom.marketplace.channel</field>
+        <field name="arch" type="xml">
+            <form string="Marketplace Channel">
+                <header>
+                    <button name="action_export_catalog_csv" string="Generate Catalog Feed CSV" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="channel_code"/>
+                            <field name="default_pricelist_multiplier"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="last_export_at"/>
+                            <field name="exported_csv" filename="exported_filename"/>
+                            <field name="exported_filename" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_marketplace_channel" model="ir.actions.act_window">
+        <field name="name">Marketplace Catalog Channels</field>
+        <field name="res_model">custom.marketplace.channel</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_custom_marketplace_import_wizard_form" model="ir.ui.view">
+        <field name="name">custom.marketplace.import.wizard.form</field>
+        <field name="model">custom.marketplace.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Marketplace Orders CSV">
+                <sheet>
+                    <group>
+                        <field name="channel_id"/>
+                        <field name="auto_confirm"/>
+                        <field name="csv_file"/>
+                        <field name="csv_text" placeholder="OrderNo,CustomerName,Phone,SKU,Qty,UnitPrice,PaymentMode"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_import_orders" string="Import Orders to Sales" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_marketplace_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Marketplace Orders CSV</field>
+        <field name="res_model">custom.marketplace.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Warranty Claims -->
+    <record id="view_custom_warranty_claim_list" model="ir.ui.view">
+        <field name="name">custom.warranty.claim.list</field>
+        <field name="model">custom.warranty.claim</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="serial_imei"/>
+                <field name="claim_type"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_warranty_claim_form" model="ir.ui.view">
+        <field name="name">custom.warranty.claim.form</field>
+        <field name="model">custom.warranty.claim</field>
+        <field name="arch" type="xml">
+            <form string="Gadget Warranty Claim">
+                <header>
+                    <button name="action_diagnose" string="Start Inspection" type="object" invisible="state != 'new'"/>
+                    <button name="action_resolve" string="Mark Repaired/Replaced" type="object" class="btn-primary" invisible="state in ('resolved', 'closed')"/>
+                    <button name="action_close" string="Close Claim" type="object" invisible="state == 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                            <field name="serial_imei"/>
+                        </group>
+                        <group>
+                            <field name="claim_type"/>
+                            <field name="sale_order_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="issue_description"/>
+                        <field name="resolution_notes"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_warranty_claim" model="ir.actions.act_window">
+        <field name="name">Warranty &amp; Serial Claims</field>
+        <field name="res_model">custom.warranty.claim</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Inter-Company Rules -->
+    <record id="view_custom_intercompany_rule_list" model="ir.ui.view">
+        <field name="name">custom.intercompany.rule.list</field>
+        <field name="model">custom.intercompany.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="buyer_company_id"/>
+                <field name="supplier_company_id"/>
+                <field name="auto_confirm_so"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_intercompany_rule_form" model="ir.ui.view">
+        <field name="name">custom.intercompany.rule.form</field>
+        <field name="model">custom.intercompany.rule</field>
+        <field name="arch" type="xml">
+            <form string="Franchise Inter-Company Rule">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                        <field name="buyer_company_id"/>
+                        <field name="supplier_partner_id"/>
+                        <field name="supplier_company_id"/>
+                        <field name="buyer_customer_id"/>
+                        <field name="auto_confirm_so"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_intercompany_rule" model="ir.actions.act_window">
+        <field name="name">Inter-Company Franchise Rules</field>
+        <field name="res_model">custom.intercompany.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Inherit Stock Picking: Courier AWB Generation -->
+    <record id="view_picking_form_custom_courier" model="ir.ui.view">
+        <field name="name">stock.picking.form.custom.courier</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_awb" string="Generate Courier AWB" type="object" class="btn-secondary" invisible="x_awb_number or state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//field[@name='x_dispatch_note']" position="after">
+                <field name="x_courier_config_id"/>
+                <field name="x_awb_number"/>
+                <field name="x_courier_status" widget="badge"/>
+                <field name="x_courier_label_url" widget="url"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Sale Order: Quick RMA / Size Exchange Button -->
+    <record id="view_order_form_custom_rma" model="ir.ui.view">
+        <field name="name">sale.order.form.custom.rma</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_rma" string="Return / Exchange (RMA)" type="object" class="btn-secondary" invisible="state != 'sale'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Purchase Order: Show Mirrored Inter-Company SO -->
+    <record id="view_purchase_order_form_custom_ic" model="ir.ui.view">
+        <field name="name">purchase.order.form.custom.ic</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="x_intercompany_so_id" invisible="not x_intercompany_so_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend /barcode PWA to Push Camera Scans directly into Active Barcode Scan Session -->
+    <template id="barcode_pwa_page_push" inherit_id="custom_operations_ui.barcode_pwa_page" name="Barcode PWA Session Push">
+        <xpath expr="//div[@id='barcodeResult']" position="after">
+            <div class="mt-3 d-flex align-items-center gap-2">
+                <button type="button" id="pushSessionBtn" class="btn btn-success btn-sm">Add Scanned Item to Active Scan Session</button>
+                <span id="pushSessionStatus" class="small text-muted"/>
+            </div>
+            <script>
+                (function () {
+                    const pushBtn = document.getElementById('pushSessionBtn');
+                    const input = document.getElementById('barcodeInput');
+                    const statusEl = document.getElementById('pushSessionStatus');
+                    if (!pushBtn || !input || !statusEl) return;
+                    pushBtn.addEventListener('click', async () => {
+                        const code = (input.value || '').trim();
+                        if (!code) { statusEl.textContent = 'Enter or scan a code first.'; return; }
+                        const resp = await fetch('/barcode/push', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({jsonrpc: '2.0', method: 'call', params: {code}, id: Date.now()}),
+                        });
+                        const data = await resp.json();
+                        const res = data.result || {};
+                        statusEl.textContent = res.ok
+                            ? 'Added ' + res.product + ' (Qty ' + res.qty + ') to ' + res.session
+                            : (res.message || 'Could not add');
+                    });
+                })();
+            </script>
+        </xpath>
+    </template>
+</odoo>
+

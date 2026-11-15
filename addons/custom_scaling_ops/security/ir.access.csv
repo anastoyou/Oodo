@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_rma_request_user,custom.rma.request.user,custom.rma.request,base.group_user,crud,
+access_custom_rma_line_user,custom.rma.line.user,custom.rma.line,base.group_user,crud,
+access_custom_courier_config_user,custom.courier.config.user,custom.courier.config,base.group_user,crud,
+access_custom_courier_pincode_rule_user,custom.courier.pincode.rule.user,custom.courier.pincode.rule,base.group_user,crud,
+access_custom_marketplace_channel_user,custom.marketplace.channel.user,custom.marketplace.channel,base.group_user,crud,
+access_custom_marketplace_import_wizard_user,custom.marketplace.import.wizard.user,custom.marketplace.import.wizard,base.group_user,crud,
+access_custom_warranty_claim_user,custom.warranty.claim.user,custom.warranty.claim,base.group_user,crud,
+access_custom_intercompany_rule_user,custom.intercompany.rule.user,custom.intercompany.rule,base.group_user,crud,
+

@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- e-Signature -->
+    <record id="view_custom_sign_template_list" model="ir.ui.view">
+        <field name="name">custom.sign.template.list</field>
+        <field name="model">custom.sign.template</field>
+        <field name="arch" type="xml">
+            <list string="e-Sign Templates">
+                <field name="name"/>
+                <field name="document_filename"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_sign_template_form" model="ir.ui.view">
+        <field name="name">custom.sign.template.form</field>
+        <field name="model">custom.sign.template</field>
+        <field name="arch" type="xml">
+            <form string="e-Sign Template">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="document_pdf" filename="document_filename"/>
+                        <field name="document_filename" invisible="1"/>
+                    </group>
+                    <field name="agreement_body"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_sign_request_list" model="ir.ui.view">
+        <field name="name">custom.sign.request.list</field>
+        <field name="model">custom.sign.request</field>
+        <field name="arch" type="xml">
+            <list string="e-Signature Requests">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="template_id"/>
+                <field name="sale_order_id"/>
+                <field name="state" widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-warning="state == 'sent'"
+                    decoration-success="state == 'signed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_sign_request_form" model="ir.ui.view">
+        <field name="name">custom.sign.request.form</field>
+        <field name="model">custom.sign.request</field>
+        <field name="arch" type="xml">
+            <form string="e-Signature Request">
+                <header>
+                    <button name="action_send" string="Generate Sign Links &amp; Send" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('signed', 'cancel')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="o_form_label"><field name="name"/></span>
+                        <h1><field name="subject" placeholder="e.g. Vendor NDA / Store Lease / Custom Order Agreement"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="template_id"/>
+                            <field name="sale_order_id"/>
+                        </group>
+                        <group>
+                            <field name="document_pdf" filename="document_filename"/>
+                            <field name="document_filename" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Signers &amp; Links">
+                            <field name="signer_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="email"/>
+                                    <field name="role"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="sign_url" widget="url"/>
+                                    <field name="signed_name"/>
+                                    <field name="signed_on"/>
+                                    <field name="signed_ip"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Agreement Body">
+                            <field name="agreement_body"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Subscriptions -->
+    <record id="view_custom_subscription_plan_list" model="ir.ui.view">
+        <field name="name">custom.subscription.plan.list</field>
+        <field name="model">custom.subscription.plan</field>
+        <field name="arch" type="xml">
+            <list string="Subscription Plans" editable="bottom">
+                <field name="name"/>
+                <field name="billing_period"/>
+                <field name="interval_count"/>
+                <field name="auto_post_invoice"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_subscription_list" model="ir.ui.view">
+        <field name="name">custom.subscription.list</field>
+        <field name="model">custom.subscription</field>
+        <field name="arch" type="xml">
+            <list string="Subscriptions">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="plan_id"/>
+                <field name="next_invoice_date"/>
+                <field name="recurring_total"/>
+                <field name="mrr_amount"/>
+                <field name="state" widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-success="state == 'active'"
+                    decoration-warning="state == 'paused'"
+                    decoration-muted="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_subscription_form" model="ir.ui.view">
+        <field name="name">custom.subscription.form</field>
+        <field name="model">custom.subscription</field>
+        <field name="arch" type="xml">
+            <form string="Subscription">
+                <header>
+                    <button name="action_activate" string="Activate" type="object" class="oe_highlight" invisible="state not in ('draft', 'paused')"/>
+                    <button name="action_generate_invoice" string="Create Invoice Now" type="object" class="btn-secondary" invisible="state != 'active'"/>
+                    <button name="action_pause" string="Pause" type="object" invisible="state != 'active'"/>
+                    <button name="action_close" string="Close" type="object" invisible="state == 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="plan_id"/>
+                            <field name="start_date"/>
+                            <field name="next_invoice_date"/>
+                        </group>
+                        <group>
+                            <field name="recurring_total"/>
+                            <field name="mrr_amount"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Recurring Lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Generated Invoices">
+                            <field name="invoice_ids" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Rental Orders -->
+    <record id="view_custom_rental_order_list" model="ir.ui.view">
+        <field name="name">custom.rental.order.list</field>
+        <field name="model">custom.rental.order</field>
+        <field name="arch" type="xml">
+            <list string="Rental Orders">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="pickup_date"/>
+                <field name="return_due_date"/>
+                <field name="security_deposit"/>
+                <field name="total_payable"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_rental_order_form" model="ir.ui.view">
+        <field name="name">custom.rental.order.form</field>
+        <field name="model">custom.rental.order</field>
+        <field name="arch" type="xml">
+            <form string="Rental Booking">
+                <header>
+                    <button name="action_reserve" string="Reserve" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_pickup" string="Mark Picked Up" type="object" class="oe_highlight" invisible="state != 'reserved'"/>
+                    <button name="action_return" string="Mark Returned" type="object" class="oe_highlight" invisible="state != 'picked_up'"/>
+                    <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="pickup_date"/>
+                            <field name="return_due_date"/>
+                            <field name="actual_return_date"/>
+                        </group>
+                        <group>
+                            <field name="security_deposit"/>
+                            <field name="late_fee_per_day"/>
+                            <field name="late_fee_total"/>
+                            <field name="total_payable"/>
+                            <field name="invoice_id" invisible="not invoice_id"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="rental_price"/>
+                            <field name="subtotal"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Marketing Automation & Social -->
+    <record id="view_custom_marketing_campaign_list" model="ir.ui.view">
+        <field name="name">custom.marketing.campaign.list</field>
+        <field name="model">custom.marketing.campaign</field>
+        <field name="arch" type="xml">
+            <list string="Marketing Automation Campaigns">
+                <field name="name"/>
+                <field name="model_name"/>
+                <field name="trace_count"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_marketing_campaign_form" model="ir.ui.view">
+        <field name="name">custom.marketing.campaign.form</field>
+        <field name="model">custom.marketing.campaign</field>
+        <field name="arch" type="xml">
+            <form string="Marketing Automation Campaign">
+                <header>
+                    <button name="action_start" string="Start Campaign" type="object" class="oe_highlight" invisible="state == 'running'"/>
+                    <button name="action_run_now" string="Execute Now" type="object" class="btn-secondary" invisible="state != 'running'"/>
+                    <button name="action_stop" string="Stop" type="object" invisible="state != 'running'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="model_name"/>
+                        <field name="domain_filter"/>
+                        <field name="trace_count"/>
+                    </group>
+                    <field name="step_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="action_type"/>
+                            <field name="mail_template_id"/>
+                            <field name="activity_summary"/>
+                            <field name="partner_tag_id"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_social_post_list" model="ir.ui.view">
+        <field name="name">custom.social.post.list</field>
+        <field name="model">custom.social.post</field>
+        <field name="arch" type="xml">
+            <list string="Social Post Calendar">
+                <field name="name"/>
+                <field name="brand"/>
+                <field name="channel"/>
+                <field name="scheduled_date"/>
+                <field name="utm_campaign"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_social_post_form" model="ir.ui.view">
+        <field name="name">custom.social.post.form</field>
+        <field name="model">custom.social.post</field>
+        <field name="arch" type="xml">
+            <form string="Social Media Post">
+                <header>
+                    <button name="action_schedule" string="Schedule" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_mark_posted" string="Mark Published" type="object" class="btn-secondary" invisible="state == 'posted'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="brand"/>
+                            <field name="channel"/>
+                        </group>
+                        <group>
+                            <field name="scheduled_date"/>
+                            <field name="target_url" widget="url"/>
+                            <field name="utm_campaign"/>
+                        </group>
+                    </group>
+                    <field name="message_body" placeholder="Write Instagram Reel caption, hashtags, or WhatsApp broadcast copy..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Field Service & Shift Planning -->
+    <record id="view_custom_field_service_task_list" model="ir.ui.view">
+        <field name="name">custom.field.service.task.list</field>
+        <field name="model">custom.field.service.task</field>
+        <field name="arch" type="xml">
+            <list string="Field Service Tasks">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="service_type"/>
+                <field name="partner_id"/>
+                <field name="technician_id"/>
+                <field name="planned_date"/>
+                <field name="stage" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_field_service_task_form" model="ir.ui.view">
+        <field name="name">custom.field.service.task.form</field>
+        <field name="model">custom.field.service.task</field>
+        <field name="arch" type="xml">
+            <form string="Field Service Task">
+                <header>
+                    <button name="action_start" string="Start Visit" type="object" class="oe_highlight" invisible="stage != 'new'"/>
+                    <button name="action_done" string="Mark Completed" type="object" class="oe_highlight" invisible="stage != 'in_progress'"/>
+                    <field name="stage" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="o_form_label"><field name="name"/></span>
+                        <h1><field name="title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="service_type"/>
+                            <field name="partner_id"/>
+                            <field name="technician_id"/>
+                        </group>
+                        <group>
+                            <field name="planned_date"/>
+                            <field name="sale_order_id"/>
+                            <field name="customer_signed_by"/>
+                        </group>
+                    </group>
+                    <field name="worksheet_notes" placeholder="Custom garment measurements, store POS fix log, or gadget service notes..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_planning_shift_list" model="ir.ui.view">
+        <field name="name">custom.planning.shift.list</field>
+        <field name="model">custom.planning.shift</field>
+        <field name="arch" type="xml">
+            <list string="Shift Roster" editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="location_label"/>
+                <field name="role_name"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="allocated_hours"/>
+                <field name="state" widget="badge"/>
+                <button name="action_publish" string="Publish" type="object" class="btn-link" invisible="state == 'published'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_custom_sign_template" model="ir.actions.act_window">
+        <field name="name">e-Sign Templates</field>
+        <field name="res_model">custom.sign.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_sign_request" model="ir.actions.act_window">
+        <field name="name">e-Signature Requests</field>
+        <field name="res_model">custom.sign.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_subscription_plan" model="ir.actions.act_window">
+        <field name="name">Subscription Plans</field>
+        <field name="res_model">custom.subscription.plan</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_custom_subscription" model="ir.actions.act_window">
+        <field name="name">Subscriptions</field>
+        <field name="res_model">custom.subscription</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_rental_order" model="ir.actions.act_window">
+        <field name="name">Rental Bookings</field>
+        <field name="res_model">custom.rental.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_marketing_campaign" model="ir.actions.act_window">
+        <field name="name">Marketing Automation</field>
+        <field name="res_model">custom.marketing.campaign</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_social_post" model="ir.actions.act_window">
+        <field name="name">Social Planner</field>
+        <field name="res_model">custom.social.post</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_field_service_task" model="ir.actions.act_window">
+        <field name="name">Field Service</field>
+        <field name="res_model">custom.field.service.task</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_planning_shift" model="ir.actions.act_window">
+        <field name="name">Shift &amp; Roster Planning</field>
+        <field name="res_model">custom.planning.shift</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>
+

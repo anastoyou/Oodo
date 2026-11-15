@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_shopfloor_workorder_user,custom.shopfloor.workorder.user,custom.shopfloor.workorder,base.group_user,crud,
+access_custom_timesheet_entry_user,custom.timesheet.entry.user,custom.timesheet.entry,base.group_user,crud,
+access_custom_spreadsheet_sheet_user,custom.spreadsheet.sheet.user,custom.spreadsheet.sheet,base.group_user,crud,
+access_custom_spreadsheet_cell_user,custom.spreadsheet.cell.user,custom.spreadsheet.cell,base.group_user,crud,
+access_custom_studio_app_wizard_user,custom.studio.app.wizard.user,custom.studio.app.wizard,base.group_user,crud,
+

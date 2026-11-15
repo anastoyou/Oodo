@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_whatsapp_config_user,custom.whatsapp.config.user,custom.whatsapp.config,base.group_user,crud,
+access_custom_whatsapp_template_user,custom.whatsapp.template.user,custom.whatsapp.template,base.group_user,crud,
+access_custom_whatsapp_message_user,custom.whatsapp.message.user,custom.whatsapp.message,base.group_user,crud,
+access_custom_voip_call_user,custom.voip.call.user,custom.voip.call,base.group_user,crud,
+access_custom_frontdesk_visitor_user,custom.frontdesk.visitor.user,custom.frontdesk.visitor,base.group_user,crud,
+

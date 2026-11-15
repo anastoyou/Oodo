@@ -821,21 +821,22 @@ Navigate to: **Website → Configuration → Settings**:
 | `hr_recruitment` (part-time / WFH hiring) | Community | | ✅ | ✅ | ✅ | ✅ |
 | `loyalty`, `website_sale_loyalty` | Community | | ✅ | ✅ | ✅ | ✅ |
 | `stock_landed_costs` | Community | | ✅ | ✅ | ✅ | ✅ |
-| `stock_barcodes` | OCA | | ✅ | ✅ | ✅ | ✅ |
+| `stock_barcodes` / Barcode Console | `custom_enterprise` (built) / OCA | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `rma` | OCA | | ✅ | ✅ | ✅ | ✅ |
-| `account_financial_report` | OCA | | ✅ | ✅ | ✅ | ✅ |
-| `account_reconcile_oca` | OCA | | ✅ | ✅ | ✅ | ✅ |
+| `account_financial_report` / Enterprise Finance+ (Assets, Deferred, Budgets, Bank Import) | `custom_enterprise` (built) / OCA | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `account_reconcile_oca` / Auto-Reconcile Rules | `custom_enterprise` (built) / OCA | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Courier + marketplace connectors | Third-party | | ✅ | ✅ | ✅ | ✅ |
 | `mrp` + `mrp_subcontracting` | Community | | | ✅ | ✅ | ✅ |
 | `point_of_sale` | Community | | | ✅ | ✅ | ✅ |
-| `hr`, `hr_attendance`, `hr_holidays`, `hr_expense` | Community | | | ✅ | ✅ | ✅ |
-| `mis_builder` | OCA | | | ✅ | ✅ | ✅ |
-| `quality_control_oca` | OCA | | | ✅ | ✅ | ✅ |
-| `stock_picking_batch` | Community | | | | ✅ | ✅ |
+| `hr`, `hr_attendance`, `hr_holidays`, `hr_expense` | Community (`hr` installed) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `mis_builder` / Executive KPIs & Studio-Lite | `custom_enterprise` (built) / OCA | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Quality Control & PLM Tech Packs / ECOs | `custom_enterprise` (built) / OCA | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `stock_picking_batch` | Community (core `stock`) | | | | ✅ | ✅ |
 | `purchase_requisition` | Community | | | | ✅ | ✅ |
-| `helpdesk_mgmt` | OCA | | | | ✅ | ✅ |
-| `account_budget_oca` | OCA | | | | ✅ | ✅ |
-| `payroll` | OCA | | | | ✅ | ✅ |
+| Helpdesk SLA, Teams, Canned & CSAT | `custom_erp` + `custom_enterprise` (built) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `account_budget_oca` / Live Budgets | `custom_enterprise` (built) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Payroll & Appraisals (`custom.hr.payslip`, `custom.hr.appraisal`) | `custom_enterprise` (built) / OCA `payroll` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Approvals, DMS, e-Sign, Subscriptions, Rentals, Marketing Automation, Social, Field Service & Shift Planning | `custom_enterprise` (built) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Multi-company | Community | | | | (franchise) | ✅ |
 | Multi-website | Community | | | | | ✅ |
 | `repair` + Serial numbers | Community | | | | | ✅ |

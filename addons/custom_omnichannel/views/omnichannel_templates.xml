@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- e-Signature Portal: Add HTML5 Canvas Freehand Signature Pad + Signed PDF Download -->
+    <template id="portal_sign_page_canvas" inherit_id="custom_enterprise.portal_sign_page" name="Online Document e-Signature Canvas">
+        <xpath expr="//div[hasclass('alert-success')]" position="after">
+            <div t-if="sign_request.state == 'signed'" class="mb-3">
+                <a t-attf-href="/my/sign/#{signer.access_token}/pdf" class="btn btn-outline-success">
+                    Download Stamped Signed PDF
+                </a>
+            </div>
+        </xpath>
+
+        <xpath expr="//form/button[@type='submit']" position="before">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Draw Freehand Signature (Optional)</label>
+                <div class="border rounded bg-light p-2">
+                    <canvas id="signPadCanvas" width="520" height="140" style="width:100%; max-width:520px; height:140px; background:#fff; border:1px dashed #ced4da; touch-action:none; cursor:crosshair;"/>
+                    <div class="mt-2">
+                        <button type="button" id="clearSignPad" class="btn btn-sm btn-outline-secondary">Clear Pad</button>
+                    </div>
+                </div>
+                <input type="hidden" name="signature_data" id="signatureDataInput"/>
+            </div>
+            <script>
+                (function () {
+                    const canvas = document.getElementById('signPadCanvas');
+                    const input = document.getElementById('signatureDataInput');
+                    const clearBtn = document.getElementById('clearSignPad');
+                    if (!canvas || !input) return;
+                    const ctx = canvas.getContext('2d');
+                    ctx.lineWidth = 2.2;
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#111827';
+                    let drawing = false;
+                    const pos = (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const pt = e.touches ? e.touches[0] : e;
+                        return {
+                            x: (pt.clientX - rect.left) * (canvas.width / rect.width),
+                            y: (pt.clientY - rect.top) * (canvas.height / rect.height)
+                        };
+                    };
+                    const start = (e) => { drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+                    const move = (e) => { if (!drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); input.value = canvas.toDataURL('image/png'); };
+                    const stop = () => { if (drawing) { drawing = false; input.value = canvas.toDataURL('image/png'); } };
+                    canvas.addEventListener('mousedown', start);
+                    canvas.addEventListener('mousemove', move);
+                    window.addEventListener('mouseup', stop);
+                    canvas.addEventListener('touchstart', start, {passive: false});
+                    canvas.addEventListener('touchmove', move, {passive: false});
+                    canvas.addEventListener('touchend', stop);
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', () => {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            input.value = '';
+                        });
+                    }
+                })();
+            </script>
+        </xpath>
+    </template>
+
+    <!-- /shop Product Page: Subscription Plan Info & Online Rental Booking Card -->
+    <template id="product_page_omnichannel" inherit_id="website_sale.product" name="Omnichannel Subscription and Rental Product Options">
+        <xpath expr="//div[@id='o_wsale_product_cta_section']" position="after">
+            <div t-if="product.x_is_subscription" class="alert alert-info small mb-3">
+                <strong>Recurring Subscription:</strong>
+                Billed automatically per <span t-esc="product.x_subscription_plan_id.name or 'Subscription Plan'"/> after order confirmation.
+            </div>
+
+            <div t-if="product.x_is_rental" class="border rounded p-3 mb-3 bg-light">
+                <h6 class="fw-bold mb-2">Reserve for Occasion / Event Rental</h6>
+                <p class="small text-muted mb-2">
+                    Default term: <t t-esc="product.x_rental_default_days or 3"/> days
+                    <t t-if="product.x_rental_deposit"> · Refundable Deposit: ₹<t t-esc="int(product.x_rental_deposit)"/></t>
+                </p>
+                <form action="/shop/rental/book" method="post" class="row g-2">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="product_id" t-att-value="product.product_variant_id.id"/>
+                    <div class="col-md-5">
+                        <label class="form-label small mb-1">Pickup Date &amp; Time</label>
+                        <input type="datetime-local" name="pickup_date" class="form-control form-control-sm" required="required"/>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small mb-1">Return Date &amp; Time</label>
+                        <input type="datetime-local" name="return_date" class="form-control form-control-sm" required="required"/>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">Book Rental</button>
+                    </div>
+                </form>
+            </div>
+        </xpath>
+    </template>
+</odoo>
+

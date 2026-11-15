@@ -124,6 +124,36 @@
                         </div>
                     </div>
 
+                    <div t-if="'rating_score' in ticket._fields and ticket.stage in ('resolved', 'closed')" class="card border shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="mb-2">Rate Your Support Experience</h5>
+                            <div t-if="ticket.rating_score" class="alert alert-info mb-0 small">
+                                Thank you! You rated this ticket <strong><t t-out="ticket.rating_score"/> / 5</strong>.
+                                <div t-if="ticket.rating_comment" class="mt-1" t-out="ticket.rating_comment"/>
+                            </div>
+                            <form t-else="" t-attf-action="/my/tickets/#{ticket.id}/rate" method="post" class="row g-2 align-items-end">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold">Rating</label>
+                                    <select name="rating_score" class="form-select form-select-sm">
+                                        <option value="5">5 - Excellent</option>
+                                        <option value="4">4 - Great</option>
+                                        <option value="3">3 - Good</option>
+                                        <option value="2">2 - Fair</option>
+                                        <option value="1">1 - Poor</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Feedback (Optional)</label>
+                                    <input type="text" name="rating_comment" class="form-control form-control-sm" placeholder="Tell us how we helped..."/>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-sm btn-dark w-100">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     <div id="ticket_communication" class="p-3 p-lg-4 rounded-3 border bg-white">
                         <h4 class="pb-1">Messages &amp; Updates</h4>
                         <t t-call="portal.message_thread" hide_header="True"/>

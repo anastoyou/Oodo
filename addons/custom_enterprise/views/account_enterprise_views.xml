@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fixed Asset Category -->
+    <record id="view_custom_asset_category_list" model="ir.ui.view">
+        <field name="name">custom.asset.category.list</field>
+        <field name="model">custom.asset.category</field>
+        <field name="arch" type="xml">
+            <list string="Asset Categories">
+                <field name="name"/>
+                <field name="method"/>
+                <field name="useful_life_months"/>
+                <field name="journal_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_asset_category_form" model="ir.ui.view">
+        <field name="name">custom.asset.category.form</field>
+        <field name="model">custom.asset.category</field>
+        <field name="arch" type="xml">
+            <form string="Asset Category">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="method"/>
+                            <field name="useful_life_months"/>
+                            <field name="degressive_rate" invisible="method != 'degressive'"/>
+                        </group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="asset_account_id"/>
+                            <field name="depreciation_account_id"/>
+                            <field name="expense_account_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Fixed Assets -->
+    <record id="view_custom_asset_list" model="ir.ui.view">
+        <field name="name">custom.asset.list</field>
+        <field name="model">custom.asset</field>
+        <field name="arch" type="xml">
+            <list string="Fixed Assets">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="acquisition_date"/>
+                <field name="original_value"/>
+                <field name="depreciated_value"/>
+                <field name="book_value"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'running'" decoration-muted="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_asset_form" model="ir.ui.view">
+        <field name="name">custom.asset.form</field>
+        <field name="model">custom.asset</field>
+        <field name="arch" type="xml">
+            <form string="Fixed Asset">
+                <header>
+                    <button name="action_compute_depreciation" string="Compute Schedule" type="object" class="btn-secondary"/>
+                    <button name="action_validate" string="Confirm &amp; Run" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_close" string="Close / Dispose" type="object" invisible="state != 'running'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,running,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="o_form_label"><field name="code"/></span>
+                        <h1><field name="name" placeholder="e.g. Industrial Sewing Machine / MacBook Pro"/></h1>
+                    </div>
+                    <group>
+                        <group string="Asset Details">
+                            <field name="category_id"/>
+                            <field name="acquisition_date"/>
+                            <field name="first_depreciation_date"/>
+                            <field name="original_value"/>
+                            <field name="salvage_value"/>
+                            <field name="depreciated_value"/>
+                            <field name="book_value"/>
+                        </group>
+                        <group string="Depreciation &amp; Accounts">
+                            <field name="method"/>
+                            <field name="useful_life_months"/>
+                            <field name="degressive_rate" invisible="method != 'degressive'"/>
+                            <field name="journal_id"/>
+                            <field name="expense_account_id"/>
+                            <field name="depreciation_account_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Depreciation Schedule">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence"/>
+                                    <field name="depreciation_date"/>
+                                    <field name="amount"/>
+                                    <field name="move_id"/>
+                                    <field name="move_state" widget="badge"/>
+                                    <button name="action_post_entry" string="Post Entry" type="object" class="btn-link" invisible="move_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Deferred Schedules -->
+    <record id="view_custom_deferred_schedule_list" model="ir.ui.view">
+        <field name="name">custom.deferred.schedule.list</field>
+        <field name="model">custom.deferred.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Deferred &amp; Prepaid Schedules">
+                <field name="name"/>
+                <field name="schedule_type"/>
+                <field name="partner_id"/>
+                <field name="start_date"/>
+                <field name="periods"/>
+                <field name="total_amount"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_deferred_schedule_form" model="ir.ui.view">
+        <field name="name">custom.deferred.schedule.form</field>
+        <field name="model">custom.deferred.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Deferred / Prepaid Schedule">
+                <header>
+                    <button name="action_generate_lines" string="Generate Schedule" type="object" class="oe_highlight"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="schedule_type"/>
+                            <field name="partner_id"/>
+                            <field name="start_date"/>
+                            <field name="periods"/>
+                            <field name="total_amount"/>
+                        </group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="deferred_account_id"/>
+                            <field name="recognition_account_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Recognition Lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="recognition_date"/>
+                                    <field name="amount"/>
+                                    <field name="move_id"/>
+                                    <button name="action_post_entry" string="Post Entry" type="object" class="btn-link" invisible="move_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Budgets -->
+    <record id="view_custom_account_budget_list" model="ir.ui.view">
+        <field name="name">custom.account.budget.list</field>
+        <field name="model">custom.account.budget</field>
+        <field name="arch" type="xml">
+            <list string="Budgets">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="total_planned"/>
+                <field name="total_practical"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_account_budget_form" model="ir.ui.view">
+        <field name="name">custom.account.budget.form</field>
+        <field name="model">custom.account.budget</field>
+        <field name="arch" type="xml">
+            <form string="Budget">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_done" string="Close" type="object" invisible="state != 'confirmed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="total_planned"/>
+                            <field name="total_practical"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Budget Lines (Live Actuals)">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="account_id"/>
+                                    <field name="analytic_account_id"/>
+                                    <field name="planned_amount"/>
+                                    <field name="practical_amount"/>
+                                    <field name="variance"/>
+                                    <field name="achievement_pct" string="Usage %"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Bank Reconcile Rules & Import Wizard -->
+    <record id="view_custom_bank_reconcile_rule_list" model="ir.ui.view">
+        <field name="name">custom.bank.reconcile.rule.list</field>
+        <field name="model">custom.bank.reconcile.rule</field>
+        <field name="arch" type="xml">
+            <list string="Bank Auto-Reconcile Rules" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="match_pattern"/>
+                <field name="transaction_sign"/>
+                <field name="partner_id"/>
+                <field name="account_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_bank_import_wizard_form" model="ir.ui.view">
+        <field name="name">custom.bank.import.wizard.form</field>
+        <field name="model">custom.bank.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Bank / UPI / Razorpay Statement">
+                <group>
+                    <field name="journal_id"/>
+                    <field name="apply_rules"/>
+                    <field name="csv_file" filename="csv_filename"/>
+                    <field name="csv_filename" invisible="1"/>
+                    <field name="csv_text" placeholder="2026-11-15,RAZORPAY SETTLEMENT,45200.00,RZP-001"/>
+                </group>
+                <footer>
+                    <button name="action_import_and_match" string="Import &amp; Auto-Match" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_custom_asset_category" model="ir.actions.act_window">
+        <field name="name">Asset Categories</field>
+        <field name="res_model">custom.asset.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_asset" model="ir.actions.act_window">
+        <field name="name">Fixed Assets</field>
+        <field name="res_model">custom.asset</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_deferred_schedule" model="ir.actions.act_window">
+        <field name="name">Deferred &amp; Prepaid Schedules</field>
+        <field name="res_model">custom.deferred.schedule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_account_budget" model="ir.actions.act_window">
+        <field name="name">Budgets &amp; Variance</field>
+        <field name="res_model">custom.account.budget</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_bank_reconcile_rule" model="ir.actions.act_window">
+        <field name="name">Bank Reconciliation Rules</field>
+        <field name="res_model">custom.bank.reconcile.rule</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_custom_bank_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Bank / UPI CSV</field>
+        <field name="res_model">custom.bank.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Dynamic Financial Statements (P&L / Balance Sheet) -->
+    <record id="view_custom_financial_statement_wizard_form" model="ir.ui.view">
+        <field name="name">custom.financial.statement.wizard.form</field>
+        <field name="model">custom.financial.statement.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Dynamic Financial Statements">
+                <group>
+                    <group>
+                        <field name="report_type"/>
+                        <field name="date_from" invisible="report_type != 'pnl'"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="net_result"/>
+                    </group>
+                </group>
+                <field name="line_ids" readonly="1">
+                    <list>
+                        <field name="account_id"/>
+                        <field name="account_type"/>
+                        <field name="balance" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_compute_statement" string="Compute Statement" type="object" class="oe_highlight"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_financial_statement_wizard" model="ir.actions.act_window">
+        <field name="name">P&amp;L &amp; Balance Sheet</field>
+        <field name="res_model">custom.financial.statement.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+

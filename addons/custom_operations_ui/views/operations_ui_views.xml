@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shop Floor Work Orders -->
+    <record id="view_custom_shopfloor_workorder_list" model="ir.ui.view">
+        <field name="name">custom.shopfloor.workorder.list</field>
+        <field name="model">custom.shopfloor.workorder</field>
+        <field name="arch" type="xml">
+            <list decoration-info="stage == 'in_progress'" decoration-success="stage == 'done'">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="workcenter"/>
+                <field name="operator_id"/>
+                <field name="quantity"/>
+                <field name="duration_minutes"/>
+                <field name="priority"/>
+                <field name="stage" widget="badge"/>
+                <button name="action_start_timer" string="Start" type="object" invisible="stage in ('in_progress', 'done')"/>
+                <button name="action_pause_timer" string="Pause" type="object" invisible="stage != 'in_progress'"/>
+                <button name="action_complete" string="Done" type="object" invisible="stage == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_shopfloor_workorder_kanban" model="ir.ui.view">
+        <field name="name">custom.shopfloor.workorder.kanban</field>
+        <field name="model">custom.shopfloor.workorder</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="workcenter"/>
+                <field name="operator_id"/>
+                <field name="duration_minutes"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="fw-bold"><field name="name"/> - <field name="title"/></div>
+                        <div class="text-muted small"><field name="workcenter"/> · <field name="operator_id"/></div>
+                        <div class="small mt-1">Elapsed: <field name="duration_minutes"/> mins</div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_custom_shopfloor_workorder_form" model="ir.ui.view">
+        <field name="name">custom.shopfloor.workorder.form</field>
+        <field name="model">custom.shopfloor.workorder</field>
+        <field name="arch" type="xml">
+            <form string="Shop Floor Work Order">
+                <header>
+                    <button name="action_start_timer" string="Start Work" type="object" class="btn-primary" invisible="stage in ('in_progress', 'done')"/>
+                    <button name="action_pause_timer" string="Pause" type="object" invisible="stage != 'in_progress'"/>
+                    <button name="action_complete" string="Mark Done" type="object" class="btn-success" invisible="stage == 'done'"/>
+                    <field name="stage" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="o_form_label"><field name="name"/></span>
+                        <h1><field name="title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workcenter"/>
+                            <field name="operator_id"/>
+                            <field name="priority"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="sale_order_id"/>
+                            <field name="quantity"/>
+                            <field name="duration_minutes"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="instructions"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_shopfloor_workorder" model="ir.actions.act_window">
+        <field name="name">Shop Floor Work Orders</field>
+        <field name="res_model">custom.shopfloor.workorder</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <record id="action_open_shopfloor_kiosk_url" model="ir.actions.act_url">
+        <field name="name">Open Shop Floor Kiosk (/shopfloor)</field>
+        <field name="url">/shopfloor</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_open_barcode_pwa_url" model="ir.actions.act_url">
+        <field name="name">Launch Camera Barcode Scanner (/barcode)</field>
+        <field name="url">/barcode</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Employee Timesheets & Timer -->
+    <record id="view_custom_timesheet_entry_list" model="ir.ui.view">
+        <field name="name">custom.timesheet.entry.list</field>
+        <field name="model">custom.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="employee_id"/>
+                <field name="name"/>
+                <field name="hours_spent" sum="Total Hours"/>
+                <field name="is_running"/>
+                <field name="state" widget="badge"/>
+                <button name="action_start_timer" string="Start Timer" type="object" invisible="is_running or state != 'draft'"/>
+                <button name="action_stop_timer" string="Stop Timer" type="object" invisible="not is_running"/>
+                <button name="action_approve" string="Approve" type="object" invisible="state == 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_timesheet_entry_form" model="ir.ui.view">
+        <field name="name">custom.timesheet.entry.form</field>
+        <field name="model">custom.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <form string="Timesheet Entry">
+                <header>
+                    <button name="action_start_timer" string="Start Timer" type="object" class="btn-primary" invisible="is_running or state != 'draft'"/>
+                    <button name="action_stop_timer" string="Stop Timer" type="object" class="btn-warning" invisible="not is_running"/>
+                    <button name="action_submit" string="Submit" type="object" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state == 'approved'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="employee_id"/>
+                        </group>
+                        <group>
+                            <field name="hours_spent"/>
+                            <field name="is_running"/>
+                            <field name="timer_start"/>
+                            <field name="sale_order_id"/>
+                            <field name="field_task_id"/>
+                            <field name="workorder_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_timesheet_entry" model="ir.actions.act_window">
+        <field name="name">Timesheets &amp; Timers</field>
+        <field name="res_model">custom.timesheet.entry</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Calendar Views for Existing Planning & Rentals -->
+    <record id="view_custom_planning_shift_calendar" model="ir.ui.view">
+        <field name="name">custom.planning.shift.calendar</field>
+        <field name="model">custom.planning.shift</field>
+        <field name="arch" type="xml">
+            <calendar string="Shift Roster Timeline" date_start="start_datetime" date_stop="end_datetime" color="employee_id" mode="week">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="location_label"/>
+                <field name="role_name"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_custom_planning_shift_form_ui" model="ir.ui.view">
+        <field name="name">custom.planning.shift.form.ui</field>
+        <field name="model">custom.planning.shift</field>
+        <field name="arch" type="xml">
+            <form string="Shift Schedule">
+                <header>
+                    <button name="action_publish" string="Publish Shift" type="object" class="btn-primary" invisible="state == 'published'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="employee_id"/>
+                        <field name="location_label"/>
+                        <field name="role_name"/>
+                        <field name="start_datetime"/>
+                        <field name="end_datetime"/>
+                        <field name="allocated_hours"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="custom_enterprise.action_custom_planning_shift" model="ir.actions.act_window">
+        <field name="view_mode">calendar,list,form</field>
+    </record>
+
+    <record id="view_custom_rental_order_calendar" model="ir.ui.view">
+        <field name="name">custom.rental.order.calendar</field>
+        <field name="model">custom.rental.order</field>
+        <field name="arch" type="xml">
+            <calendar string="Rental Bookings Calendar" date_start="pickup_date" date_stop="return_due_date" color="state" mode="month">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="total_payable"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="custom_enterprise.action_custom_rental_order" model="ir.actions.act_window">
+        <field name="view_mode">calendar,list,form</field>
+    </record>
+
+    <!-- Live Formula Spreadsheets -->
+    <record id="view_custom_spreadsheet_sheet_list" model="ir.ui.view">
+        <field name="name">custom.spreadsheet.sheet.list</field>
+        <field name="model">custom.spreadsheet.sheet</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="last_recalculated_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_spreadsheet_sheet_form" model="ir.ui.view">
+        <field name="name">custom.spreadsheet.sheet.form</field>
+        <field name="model">custom.spreadsheet.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Live BI &amp; Financial Spreadsheet">
+                <header>
+                    <button name="action_recalculate" string="Recalculate All Formulas" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="last_recalculated_at"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Live Grid Preview">
+                            <field name="html_preview" readonly="1"/>
+                        </page>
+                        <page string="Cell Formulas &amp; Inputs">
+                            <field name="cell_ids">
+                                <list editable="bottom">
+                                    <field name="cell_ref"/>
+                                    <field name="raw_input"/>
+                                    <field name="computed_value"/>
+                                    <field name="display_value"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_spreadsheet_sheet" model="ir.actions.act_window">
+        <field name="name">Live Formula Spreadsheets</field>
+        <field name="res_model">custom.spreadsheet.sheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Studio-Lite Custom App / Model Wizard -->
+    <record id="view_custom_studio_app_wizard_form" model="ir.ui.view">
+        <field name="name">custom.studio.app.wizard.form</field>
+        <field name="model">custom.studio.app.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Studio-Lite Custom App &amp; Model Creator">
+                <sheet>
+                    <group>
+                        <field name="app_title" placeholder="e.g. Tailoring Fabric Lots"/>
+                        <field name="model_technical_name" placeholder="x_custom_fabric_lot"/>
+                        <field name="parent_menu_id"/>
+                        <field name="include_status_field"/>
+                        <field name="include_notes_field"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_create_custom_app" string="Create Model, Views &amp; Menu" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_studio_app_wizard" model="ir.actions.act_window">
+        <field name="name">Create Custom App / Model (Studio-Lite)</field>
+        <field name="res_model">custom.studio.app.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_sign_page" name="Online Document e-Signature">
+        <t t-call="website.layout">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0" t-esc="sign_request.subject"/>
+                                <span class="badge bg-info" t-esc="sign_request.name"/>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4" t-if="sign_request.agreement_body">
+                                    <t t-out="sign_request.agreement_body"/>
+                                </div>
+                                <div t-if="signer.state == 'signed'" class="alert alert-success">
+                                    <strong>Signed!</strong> Signed by <span t-esc="signer.signed_name"/> on <span t-esc="signer.signed_on"/>.
+                                </div>
+                                <form t-if="signer.state != 'signed'" t-attf-action="/my/sign/#{signer.access_token}/submit" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Type Full Legal Name to Electronically Sign (<t t-esc="signer.role"/>)</label>
+                                        <input type="text" name="signed_name" class="form-control" required="required" t-att-value="signer.partner_id.name"/>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Adopt &amp; Sign Agreement</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_appointments_page" name="Book Store / Tailoring Appointment">
+        <t t-call="website.layout">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <h2 class="mb-3">Book a Styling, Store, or Custom Tailoring Appointment</h2>
+                        <div t-if="booked" class="alert alert-success">
+                            Your appointment request has been booked! Our team will confirm your slot shortly.
+                        </div>
+                        <form action="/appointments/book" method="post" class="card p-4 shadow-sm">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Appointment Type</label>
+                                <select name="appointment_type_id" class="form-select" required="required">
+                                    <t t-foreach="appointment_types" t-as="atype">
+                                        <option t-att-value="atype.id">
+                                            <t t-esc="atype.name"/> (<t t-esc="atype.duration_minutes"/> mins - <t t-esc="atype.location"/>)
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Your Name</label>
+                                    <input type="text" name="customer_name" class="form-control" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Phone / WhatsApp</label>
+                                    <input type="text" name="customer_phone" class="form-control" required="required"/>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <input type="email" name="customer_email" class="form-control"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Preferred Date &amp; Time</label>
+                                    <input type="datetime-local" name="start_datetime" class="form-control" required="required"/>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Notes / Measurements</label>
+                                <textarea name="notes" rows="3" class="form-control" placeholder="Share garment style, occasion date, or preferred branch..."/>
+                            </div>
+                            <button type="submit" class="btn btn-dark">Confirm Booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
+

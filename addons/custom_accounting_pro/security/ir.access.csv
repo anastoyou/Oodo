@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_bank_reconcile_wizard_user,custom.bank.reconcile.wizard.user,custom.bank.reconcile.wizard,base.group_user,crud,
+access_custom_bank_reconcile_line_user,custom.bank.reconcile.line.user,custom.bank.reconcile.line,base.group_user,crud,
+access_custom_bill_ocr_wizard_user,custom.bill.ocr.wizard.user,custom.bill.ocr.wizard,base.group_user,crud,
+access_custom_consolidation_wizard_user,custom.consolidation.wizard.user,custom.consolidation.wizard,base.group_user,crud,
+access_custom_consolidation_line_user,custom.consolidation.line.user,custom.consolidation.line,base.group_user,crud,
+access_custom_tax_lock_wizard_user,custom.tax.lock.wizard.user,custom.tax.lock.wizard,base.group_user,crud,
+access_custom_equity_holder_user,custom.equity.holder.user,custom.equity.holder,base.group_user,crud,
+access_custom_equity_grant_user,custom.equity.grant.user,custom.equity.grant,base.group_user,crud,
+

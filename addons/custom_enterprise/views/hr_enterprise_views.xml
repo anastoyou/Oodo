@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_salary_structure_list" model="ir.ui.view">
+        <field name="name">custom.salary.structure.list</field>
+        <field name="model">custom.salary.structure</field>
+        <field name="arch" type="xml">
+            <list string="Salary Structures">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_salary_structure_form" model="ir.ui.view">
+        <field name="name">custom.salary.structure.form</field>
+        <field name="model">custom.salary.structure</field>
+        <field name="arch" type="xml">
+            <form string="Salary Structure">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                    </group>
+                    <field name="rule_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="rule_type"/>
+                            <field name="compute_mode"/>
+                            <field name="percentage"/>
+                            <field name="fixed_amount"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_hr_payslip_list" model="ir.ui.view">
+        <field name="name">custom.hr.payslip.list</field>
+        <field name="model">custom.hr.payslip</field>
+        <field name="arch" type="xml">
+            <list string="Employee Payslips">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="total_earnings"/>
+                <field name="total_deductions"/>
+                <field name="net_wage"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'verify'" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_hr_payslip_form" model="ir.ui.view">
+        <field name="name">custom.hr.payslip.form</field>
+        <field name="model">custom.hr.payslip</field>
+        <field name="arch" type="xml">
+            <form string="Employee Payslip">
+                <header>
+                    <button name="action_compute_sheet" string="Compute Sheet" type="object" class="btn-secondary" invisible="state in ('done', 'cancel')"/>
+                    <button name="action_confirm_and_post" string="Confirm &amp; Post Salary JE" type="object" class="oe_highlight" invisible="state in ('done', 'cancel')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,verify,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="structure_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="working_days"/>
+                            <field name="lop_days"/>
+                        </group>
+                        <group>
+                            <field name="monthly_gross"/>
+                            <field name="total_earnings"/>
+                            <field name="total_deductions"/>
+                            <field name="net_wage"/>
+                            <field name="journal_id"/>
+                            <field name="expense_account_id"/>
+                            <field name="payable_account_id"/>
+                            <field name="move_id" invisible="not move_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Salary Computation">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="rule_type"/>
+                                    <field name="amount"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_hr_appraisal_list" model="ir.ui.view">
+        <field name="name">custom.hr.appraisal.list</field>
+        <field name="model">custom.hr.appraisal</field>
+        <field name="arch" type="xml">
+            <list string="Employee Appraisals">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="manager_id"/>
+                <field name="review_date"/>
+                <field name="overall_rating"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_hr_appraisal_form" model="ir.ui.view">
+        <field name="name">custom.hr.appraisal.form</field>
+        <field name="model">custom.hr.appraisal</field>
+        <field name="arch" type="xml">
+            <form string="Employee Appraisal">
+                <header>
+                    <button name="action_start_review" string="Start Review" type="object" class="btn-secondary" invisible="state != 'new'"/>
+                    <button name="action_complete" string="Complete Appraisal" type="object" class="oe_highlight" invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="employee_id"/>
+                            <field name="manager_id"/>
+                        </group>
+                        <group>
+                            <field name="review_date"/>
+                            <field name="next_review_date"/>
+                            <field name="overall_rating"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="KPI Goals">
+                            <field name="goal_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="target_metric"/>
+                                    <field name="progress_pct"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Reviews">
+                            <group>
+                                <field name="self_assessment"/>
+                                <field name="manager_feedback"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_salary_structure" model="ir.actions.act_window">
+        <field name="name">Salary Structures</field>
+        <field name="res_model">custom.salary.structure</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_hr_payslip" model="ir.actions.act_window">
+        <field name="name">Payslips</field>
+        <field name="res_model">custom.hr.payslip</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_custom_hr_appraisal" model="ir.actions.act_window">
+        <field name="name">Appraisals</field>
+        <field name="res_model">custom.hr.appraisal</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Employee Referrals -->
+    <record id="view_custom_hr_referral_list" model="ir.ui.view">
+        <field name="name">custom.hr.referral.list</field>
+        <field name="model">custom.hr.referral</field>
+        <field name="arch" type="xml">
+            <list string="Employee Referrals">
+                <field name="name"/>
+                <field name="referrer_id"/>
+                <field name="job_role"/>
+                <field name="candidate_phone"/>
+                <field name="bonus_amount"/>
+                <field name="stage" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_hr_referral_form" model="ir.ui.view">
+        <field name="name">custom.hr.referral.form</field>
+        <field name="model">custom.hr.referral</field>
+        <field name="arch" type="xml">
+            <form string="Employee Referral">
+                <header>
+                    <button name="action_mark_interview" string="Interview" type="object" class="btn-secondary" invisible="stage != 'referred'"/>
+                    <button name="action_mark_hired" string="Mark Hired" type="object" class="oe_highlight" invisible="stage != 'interview'"/>
+                    <button name="action_mark_paid" string="Mark Bonus Paid" type="object" class="oe_highlight" invisible="stage != 'hired'"/>
+                    <field name="stage" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="referrer_id"/>
+                            <field name="job_role"/>
+                        </group>
+                        <group>
+                            <field name="candidate_phone"/>
+                            <field name="candidate_email"/>
+                            <field name="bonus_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_hr_referral" model="ir.actions.act_window">
+        <field name="name">Employee Referrals</field>
+        <field name="res_model">custom.hr.referral</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+

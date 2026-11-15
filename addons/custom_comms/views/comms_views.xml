@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- WhatsApp Configuration -->
+    <record id="view_custom_whatsapp_config_list" model="ir.ui.view">
+        <field name="name">custom.whatsapp.config.list</field>
+        <field name="model">custom.whatsapp.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="phone_number_id"/>
+                <field name="sandbox_mode"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_whatsapp_config_form" model="ir.ui.view">
+        <field name="name">custom.whatsapp.config.form</field>
+        <field name="model">custom.whatsapp.config</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Cloud API Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sandbox_mode"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="phone_number_id"/>
+                            <field name="business_account_id"/>
+                            <field name="access_token" password="True"/>
+                            <field name="verify_token"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_whatsapp_config" model="ir.actions.act_window">
+        <field name="name">WhatsApp Configuration</field>
+        <field name="res_model">custom.whatsapp.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- WhatsApp Templates -->
+    <record id="view_custom_whatsapp_template_list" model="ir.ui.view">
+        <field name="name">custom.whatsapp.template.list</field>
+        <field name="model">custom.whatsapp.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="template_code"/>
+                <field name="category"/>
+                <field name="language_code"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_whatsapp_template_form" model="ir.ui.view">
+        <field name="name">custom.whatsapp.template.form</field>
+        <field name="model">custom.whatsapp.template</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Template">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="template_code"/>
+                        <field name="category"/>
+                        <field name="language_code"/>
+                    </group>
+                    <group>
+                        <field name="body_preview"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_whatsapp_template" model="ir.actions.act_window">
+        <field name="name">WhatsApp Templates</field>
+        <field name="res_model">custom.whatsapp.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- WhatsApp Messages -->
+    <record id="view_custom_whatsapp_message_list" model="ir.ui.view">
+        <field name="name">custom.whatsapp.message.list</field>
+        <field name="model">custom.whatsapp.message</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state in ('sent', 'received')" decoration-danger="state == 'failed'">
+                <field name="name"/>
+                <field name="direction"/>
+                <field name="partner_id"/>
+                <field name="mobile_number"/>
+                <field name="sale_order_id"/>
+                <field name="state" widget="badge"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_whatsapp_message_form" model="ir.ui.view">
+        <field name="name">custom.whatsapp.message.form</field>
+        <field name="model">custom.whatsapp.message</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Message">
+                <header>
+                    <button name="action_send_whatsapp" string="Send WhatsApp" type="object" class="btn-primary" invisible="state != 'draft' or direction != 'outbound'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="direction"/>
+                            <field name="partner_id"/>
+                            <field name="mobile_number"/>
+                            <field name="template_id"/>
+                        </group>
+                        <group>
+                            <field name="sale_order_id"/>
+                            <field name="ticket_id"/>
+                            <field name="external_message_id"/>
+                            <field name="error_message" invisible="not error_message"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="body"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_whatsapp_message" model="ir.actions.act_window">
+        <field name="name">WhatsApp Messages</field>
+        <field name="res_model">custom.whatsapp.message</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- VoIP Call Log -->
+    <record id="view_custom_voip_call_list" model="ir.ui.view">
+        <field name="name">custom.voip.call.list</field>
+        <field name="model">custom.voip.call</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="call_datetime"/>
+                <field name="name"/>
+                <field name="direction"/>
+                <field name="partner_id"/>
+                <field name="phone_number"/>
+                <field name="disposition" widget="badge"/>
+                <field name="duration_seconds"/>
+                <field name="sale_order_id"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_voip_call_form" model="ir.ui.view">
+        <field name="name">custom.voip.call.form</field>
+        <field name="model">custom.voip.call</field>
+        <field name="arch" type="xml">
+            <form string="VoIP Call Log">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="direction"/>
+                            <field name="partner_id"/>
+                            <field name="phone_number"/>
+                            <field name="disposition"/>
+                        </group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="call_datetime"/>
+                            <field name="duration_seconds"/>
+                            <field name="sale_order_id"/>
+                            <field name="crm_lead_id"/>
+                            <field name="recording_url" widget="url"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_voip_call" model="ir.actions.act_window">
+        <field name="name">VoIP Call Logs</field>
+        <field name="res_model">custom.voip.call</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Frontdesk Visitors -->
+    <record id="view_custom_frontdesk_visitor_list" model="ir.ui.view">
+        <field name="name">custom.frontdesk.visitor.list</field>
+        <field name="model">custom.frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'checked_in'">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="company_name"/>
+                <field name="purpose"/>
+                <field name="host_employee_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="state" widget="badge"/>
+                <button name="action_check_out" string="Check Out" type="object" invisible="state == 'checked_out'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_frontdesk_visitor_form" model="ir.ui.view">
+        <field name="name">custom.frontdesk.visitor.form</field>
+        <field name="model">custom.frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <form string="Frontdesk Visitor">
+                <header>
+                    <button name="action_check_out" string="Check Out" type="object" class="btn-primary" invisible="state == 'checked_out'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="phone"/>
+                            <field name="company_name"/>
+                            <field name="purpose"/>
+                        </group>
+                        <group>
+                            <field name="host_employee_id"/>
+                            <field name="check_in"/>
+                            <field name="check_out"/>
+                            <field name="notes"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_frontdesk_visitor" model="ir.actions.act_window">
+        <field name="name">Frontdesk Visitors</field>
+        <field name="res_model">custom.frontdesk.visitor</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_open_frontdesk_kiosk_url" model="ir.actions.act_url">
+        <field name="name">Open Frontdesk Kiosk (/frontdesk)</field>
+        <field name="url">/frontdesk</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Inherit Sale Order form to add WhatsApp & VoIP quick actions -->
+    <record id="view_order_form_custom_comms" model="ir.ui.view">
+        <field name="name">sale.order.form.custom.comms</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_whatsapp_composer" string="WhatsApp" type="object" class="btn-secondary"/>
+                <button name="action_log_voip_call" string="Log Call" type="object" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Accounting+ Submenus -->
+    <menuitem id="menu_custom_accounting_enterprise" name="Enterprise Finance" parent="account.menu_finance" sequence="25"/>
+    <menuitem id="menu_custom_financial_statements" name="P&amp;L &amp; Balance Sheet" parent="menu_custom_accounting_enterprise" action="action_custom_financial_statement_wizard" sequence="5"/>
+    <menuitem id="menu_custom_asset" name="Fixed Assets" parent="menu_custom_accounting_enterprise" action="action_custom_asset" sequence="10"/>
+    <menuitem id="menu_custom_asset_category" name="Asset Categories" parent="menu_custom_accounting_enterprise" action="action_custom_asset_category" sequence="15"/>
+    <menuitem id="menu_custom_deferred_schedule" name="Deferred &amp; Prepaid Schedules" parent="menu_custom_accounting_enterprise" action="action_custom_deferred_schedule" sequence="20"/>
+    <menuitem id="menu_custom_account_budget" name="Budgets &amp; Variance" parent="menu_custom_accounting_enterprise" action="action_custom_account_budget" sequence="30"/>
+    <menuitem id="menu_custom_bank_import" name="Import Bank / UPI CSV" parent="menu_custom_accounting_enterprise" action="action_custom_bank_import_wizard" sequence="40"/>
+    <menuitem id="menu_custom_bank_reconcile_rule" name="Auto-Reconcile Rules" parent="menu_custom_accounting_enterprise" action="action_custom_bank_reconcile_rule" sequence="45"/>
+
+    <!-- Helpdesk+ Submenus -->
+    <menuitem id="menu_custom_helpdesk_config" name="SLA &amp; Teams" parent="custom_erp.menu_custom_helpdesk_root" sequence="80"/>
+    <menuitem id="menu_custom_support_team" name="Support Teams" parent="menu_custom_helpdesk_config" action="action_custom_support_team" sequence="10"/>
+    <menuitem id="menu_custom_support_sla" name="SLA Policies" parent="menu_custom_helpdesk_config" action="action_custom_support_sla" sequence="20"/>
+    <menuitem id="menu_custom_support_canned" name="Canned Responses" parent="menu_custom_helpdesk_config" action="action_custom_support_canned" sequence="30"/>
+
+    <!-- HR Payroll, Appraisals & Referrals under Employees -->
+    <menuitem id="menu_custom_hr_payroll" name="Payroll &amp; Appraisals" parent="hr.menu_hr_root" sequence="40"/>
+    <menuitem id="menu_custom_hr_payslip" name="Employee Payslips" parent="menu_custom_hr_payroll" action="action_custom_hr_payslip" sequence="10"/>
+    <menuitem id="menu_custom_salary_structure" name="Salary Structures" parent="menu_custom_hr_payroll" action="action_custom_salary_structure" sequence="20"/>
+    <menuitem id="menu_custom_hr_appraisal" name="Appraisals" parent="menu_custom_hr_payroll" action="action_custom_hr_appraisal" sequence="30"/>
+    <menuitem id="menu_custom_hr_referral" name="Employee Referrals" parent="menu_custom_hr_payroll" action="action_custom_hr_referral" sequence="40"/>
+
+    <!-- Inventory Barcode, QC, PLM & MPS -->
+    <menuitem id="menu_custom_inventory_enterprise" name="Barcode, QC, PLM &amp; MPS" parent="stock.menu_stock_root" sequence="25"/>
+    <menuitem id="menu_custom_barcode_session" name="Barcode Scan Console" parent="menu_custom_inventory_enterprise" action="action_custom_barcode_session" sequence="10"/>
+    <menuitem id="menu_custom_quality_check" name="Quality Checks" parent="menu_custom_inventory_enterprise" action="action_custom_quality_check" sequence="20"/>
+    <menuitem id="menu_custom_quality_point" name="Quality Control Points" parent="menu_custom_inventory_enterprise" action="action_custom_quality_point" sequence="25"/>
+    <menuitem id="menu_custom_plm_techpack" name="PLM Tech Packs" parent="menu_custom_inventory_enterprise" action="action_custom_plm_techpack" sequence="30"/>
+    <menuitem id="menu_custom_plm_eco" name="PLM ECO Revisions" parent="menu_custom_inventory_enterprise" action="action_custom_plm_eco" sequence="35"/>
+    <menuitem id="menu_custom_mrp_mps" name="MPS Demand Replenishment" parent="menu_custom_inventory_enterprise" action="action_custom_mrp_mps" sequence="40"/>
+
+    <!-- Standalone Enterprise Suite Apps -->
+    <menuitem id="menu_custom_approvals_root" name="Approvals" sequence="58" groups="base.group_user"/>
+    <menuitem id="menu_custom_approval_requests" name="Approval Requests" parent="menu_custom_approvals_root" action="action_custom_approval_request" sequence="10"/>
+    <menuitem id="menu_custom_approval_categories" name="Approval Types" parent="menu_custom_approvals_root" action="action_custom_approval_category" sequence="20"/>
+
+    <menuitem id="menu_custom_documents_root" name="Documents" sequence="59" groups="base.group_user"/>
+    <menuitem id="menu_custom_documents_all" name="All Documents" parent="menu_custom_documents_root" action="action_custom_document" sequence="10"/>
+    <menuitem id="menu_custom_document_folders" name="Folders" parent="menu_custom_documents_root" action="action_custom_document_folder" sequence="20"/>
+
+    <menuitem id="menu_custom_enterprise_ops_root" name="Enterprise Suite" sequence="62" groups="base.group_user"/>
+    <menuitem id="menu_custom_kpi_snapshot" name="Executive KPIs" parent="menu_custom_enterprise_ops_root" action="action_custom_kpi_snapshot" sequence="5"/>
+    <menuitem id="menu_custom_sign_request" name="e-Signatures" parent="menu_custom_enterprise_ops_root" action="action_custom_sign_request" sequence="10"/>
+    <menuitem id="menu_custom_sign_template" name="e-Sign Templates" parent="menu_custom_enterprise_ops_root" action="action_custom_sign_template" sequence="12"/>
+    <menuitem id="menu_custom_subscription" name="Subscriptions" parent="menu_custom_enterprise_ops_root" action="action_custom_subscription" sequence="20"/>
+    <menuitem id="menu_custom_subscription_plan" name="Subscription Plans" parent="menu_custom_enterprise_ops_root" action="action_custom_subscription_plan" sequence="22"/>
+    <menuitem id="menu_custom_rental_order" name="Rental Bookings" parent="menu_custom_enterprise_ops_root" action="action_custom_rental_order" sequence="30"/>
+    <menuitem id="menu_custom_marketing_campaign" name="Marketing Automation" parent="menu_custom_enterprise_ops_root" action="action_custom_marketing_campaign" sequence="40"/>
+    <menuitem id="menu_custom_social_post" name="Social Planner" parent="menu_custom_enterprise_ops_root" action="action_custom_social_post" sequence="45"/>
+    <menuitem id="menu_custom_field_service" name="Field Service" parent="menu_custom_enterprise_ops_root" action="action_custom_field_service_task" sequence="50"/>
+    <menuitem id="menu_custom_planning_shift" name="Shift &amp; Roster Planning" parent="menu_custom_enterprise_ops_root" action="action_custom_planning_shift" sequence="60"/>
+    <menuitem id="menu_custom_appointment_booking" name="Appointments" parent="menu_custom_enterprise_ops_root" action="action_custom_appointment_booking" sequence="70"/>
+    <menuitem id="menu_custom_appointment_type" name="Appointment Types" parent="menu_custom_enterprise_ops_root" action="action_custom_appointment_type" sequence="72"/>
+    <menuitem id="menu_custom_knowledge_article" name="Knowledge Base (SOPs)" parent="menu_custom_enterprise_ops_root" action="action_custom_knowledge_article" sequence="80"/>
+    <menuitem id="menu_custom_studio_field" name="Studio-Lite Field Builder" parent="menu_custom_enterprise_ops_root" action="action_custom_studio_field_wizard" sequence="90" groups="base.group_system"/>
+</odoo>
+

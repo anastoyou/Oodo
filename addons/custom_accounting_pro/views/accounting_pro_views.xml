@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Interactive Bank Reconciliation -->
+    <record id="view_custom_bank_reconcile_wizard_form" model="ir.ui.view">
+        <field name="name">custom.bank.reconcile.wizard.form</field>
+        <field name="model">custom.bank.reconcile.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Interactive Bank Reconciliation">
+                <group>
+                    <field name="journal_id"/>
+                    <button name="action_reload_lines" string="Filter / Reload Unreconciled" type="object" class="btn-secondary"/>
+                </group>
+                <field name="line_ids">
+                    <list editable="bottom">
+                        <field name="date"/>
+                        <field name="payment_ref"/>
+                        <field name="partner_id"/>
+                        <field name="amount"/>
+                        <field name="suggested_move_id"/>
+                        <field name="counterpart_account_id"/>
+                        <field name="is_reconciled"/>
+                        <button name="action_reconcile_line" string="Reconcile" type="object" class="btn-primary" invisible="is_reconciled"/>
+                    </list>
+                </field>
+                <footer>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vendor Bill PDF & Text OCR -->
+    <record id="view_custom_bill_ocr_wizard_form" model="ir.ui.view">
+        <field name="name">custom.bill.ocr.wizard.form</field>
+        <field name="model">custom.bill.ocr.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Bill OCR Extractor">
+                <group>
+                    <group string="Upload PDF or Paste Text">
+                        <field name="pdf_file" filename="pdf_filename"/>
+                        <field name="pdf_filename" invisible="1"/>
+                        <field name="expense_account_id"/>
+                        <field name="raw_text" placeholder="Or paste vendor invoice text here..."/>
+                    </group>
+                    <group string="Extracted GST Invoice Fields">
+                        <field name="detected_gstin"/>
+                        <field name="partner_id"/>
+                        <field name="invoice_number"/>
+                        <field name="invoice_date"/>
+                        <field name="detected_amount"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_extract_fields" string="Extract Fields" type="object" class="btn-secondary"/>
+                    <button name="action_create_vendor_bill" string="Create Draft Vendor Bill" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Auto-Asset Category column on Vendor Bill lines -->
+    <record id="view_move_form_asset_pro" model="ir.ui.view">
+        <field name="name">account.move.form.asset.pro</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']//list//field[@name='price_subtotal']" position="before">
+                <field name="x_asset_category_id" optional="hide"/>
+                <field name="x_generated_asset_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Consolidation & Cash Flow -->
+    <record id="view_custom_consolidation_wizard_form" model="ir.ui.view">
+        <field name="name">custom.consolidation.wizard.form</field>
+        <field name="model">custom.consolidation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Multi-Company Consolidation &amp; Cash Flow">
+                <group>
+                    <group>
+                        <field name="report_mode"/>
+                        <field name="company_ids" widget="many2many_tags"/>
+                        <field name="exclude_intercompany_partner_ids" widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="total_amount"/>
+                    </group>
+                </group>
+                <field name="line_ids" readonly="1">
+                    <list>
+                        <field name="account_code"/>
+                        <field name="account_name"/>
+                        <field name="account_type"/>
+                        <field name="balance" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_compute" string="Compute Report" type="object" class="oe_highlight"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tax Period Lock -->
+    <record id="view_custom_tax_lock_wizard_form" model="ir.ui.view">
+        <field name="name">custom.tax.lock.wizard.form</field>
+        <field name="model">custom.tax.lock.wizard</field>
+        <field name="arch" type="xml">
+            <form string="GST Tax &amp; Period Lock Dates">
+                <group>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="tax_lock_date"/>
+                    <field name="fiscalyear_lock_date"/>
+                    <field name="sale_lock_date"/>
+                    <field name="purchase_lock_date"/>
+                </group>
+                <footer>
+                    <button name="action_apply_locks" string="Save Lock Dates" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Equity Cap Table -->
+    <record id="view_custom_equity_holder_list" model="ir.ui.view">
+        <field name="name">custom.equity.holder.list</field>
+        <field name="model">custom.equity.holder</field>
+        <field name="arch" type="xml">
+            <list string="Equity Cap Table">
+                <field name="name"/>
+                <field name="share_class"/>
+                <field name="total_shares" sum="Total Shares"/>
+                <field name="ownership_pct"/>
+                <field name="total_capital" sum="Total Capital"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_equity_holder_form" model="ir.ui.view">
+        <field name="name">custom.equity.holder.form</field>
+        <field name="model">custom.equity.holder</field>
+        <field name="arch" type="xml">
+            <form string="Shareholder / Partner Equity">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="share_class"/>
+                        </group>
+                        <group>
+                            <field name="total_shares"/>
+                            <field name="ownership_pct"/>
+                            <field name="total_capital"/>
+                        </group>
+                    </group>
+                    <field name="grant_ids">
+                        <list editable="bottom">
+                            <field name="certificate_no"/>
+                            <field name="allotment_date"/>
+                            <field name="shares_count"/>
+                            <field name="face_value"/>
+                            <field name="paid_amount"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_custom_bank_reconcile_wizard" model="ir.actions.act_window">
+        <field name="name">Interactive Bank Reconciliation</field>
+        <field name="res_model">custom.bank.reconcile.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="action_custom_bill_ocr_wizard" model="ir.actions.act_window">
+        <field name="name">Bill PDF OCR Extractor</field>
+        <field name="res_model">custom.bill.ocr.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="action_custom_consolidation_wizard" model="ir.actions.act_window">
+        <field name="name">Consolidation &amp; Cash Flow</field>
+        <field name="res_model">custom.consolidation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="action_custom_tax_lock_wizard" model="ir.actions.act_window">
+        <field name="name">Tax &amp; Period Lock Dates</field>
+        <field name="res_model">custom.tax.lock.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="action_custom_equity_holder" model="ir.actions.act_window">
+        <field name="name">Equity Cap Table</field>
+        <field name="res_model">custom.equity.holder</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+

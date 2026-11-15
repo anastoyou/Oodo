@@ -43,7 +43,7 @@ Your Chart of Accounts already includes **`Capital Account`** (`equity`) and **`
 
 Your Chart of Accounts already includes **`Salary Expense`** (`expense`) and **`Salary Exp Payable`** (`liability_current`).
 
-* **Do you need Payroll in Phase 1–2?** **No.** Odoo's `hr_payroll` is Enterprise-only, and full payroll is planned for **Phase 3–4+** using **OCA `payroll`** once you have 10–15+ salaried staff ([`SCALING_ROADMAP.md`](./SCALING_ROADMAP.md)).
+* **Do you need Payroll in Phase 1–2?** **No.** Odoo's `hr_payroll` is Enterprise-only, so full staff payroll is built as a custom module in **`addons/custom_enterprise/`** (`custom.hr.payslip`, `custom.salary.structure` with `IN_STD` Indian rules, PDF Payslip report, and Accounting Journal Entry posting) for when you add salaried staff, alongside optional **OCA `payroll`** in Phase 3–4+ ([`SCALING_ROADMAP.md`](./SCALING_ROADMAP.md)).
 * **Monthly workflow for 2 partners & early helpers:**
   1. Confirm with your CA whether partner payouts should hit `Salary Expense` (Pvt Ltd director salary / LLP remuneration) or a `Partner Drawings` equity account (Partnership / Proprietorship).
   2. Post a monthly **Journal Entry** (or **Vendor Bill**):

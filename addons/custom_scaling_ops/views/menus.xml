@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_custom_scaling_ops_root" name="Scaling Ops (P2-P5)" sequence="44"/>
+
+    <menuitem id="menu_scaling_returns_logistics" name="Returns &amp; Courier" parent="menu_custom_scaling_ops_root" sequence="10"/>
+    <menuitem id="menu_custom_rma_requests" name="Returns &amp; Size Exchanges (RMA)" parent="menu_scaling_returns_logistics" action="action_custom_rma_request" sequence="10"/>
+    <menuitem id="menu_custom_courier_configs" name="Courier Aggregators" parent="menu_scaling_returns_logistics" action="action_custom_courier_config" sequence="20"/>
+    <menuitem id="menu_custom_courier_pincodes" name="COD Pincode Rules" parent="menu_scaling_returns_logistics" action="action_custom_courier_pincode_rule" sequence="30"/>
+
+    <menuitem id="menu_scaling_marketplaces_section" name="Marketplaces &amp; P5 Scale" parent="menu_custom_scaling_ops_root" sequence="20"/>
+    <menuitem id="menu_custom_marketplace_channels" name="Marketplace Feed Export" parent="menu_scaling_marketplaces_section" action="action_custom_marketplace_channel" sequence="10"/>
+    <menuitem id="menu_custom_marketplace_import" name="Import Marketplace Orders CSV" parent="menu_scaling_marketplaces_section" action="action_custom_marketplace_import_wizard" sequence="20"/>
+    <menuitem id="menu_custom_warranty_claims" name="Gadget Warranty Claims" parent="menu_scaling_marketplaces_section" action="action_custom_warranty_claim" sequence="30"/>
+    <menuitem id="menu_custom_intercompany_rules" name="Franchise Inter-Company Rules" parent="menu_scaling_marketplaces_section" action="action_custom_intercompany_rule" sequence="40"/>
+</odoo>
+
