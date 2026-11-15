@@ -12,7 +12,6 @@ import socket
 import subprocess
 import sys
 import tempfile
-import time
 import zipfile
 from contextlib import suppress
 from pathlib import Path
@@ -23,7 +22,6 @@ from psycopg2 import sql
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
-CONTAINER_NAME = "odoo-db"
 
 
 def load_env(root: Path = ROOT) -> dict[str, str]:
@@ -31,8 +29,8 @@ def load_env(root: Path = ROOT) -> dict[str, str]:
     cfg = {
         "DB_HOST": "localhost",
         "DB_PORT": "5432",
-        "DB_USER": "odoo",
-        "DB_PASSWORD": "odoo",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "postgres",
         "ADMIN_PASSWORD": "masteradmin",
         "ODOO_PORT": "8069",
         "ODOO_BRANCH": "20.0",
@@ -64,8 +62,8 @@ def is_port_open(host: str, port: int) -> bool:
         return sock.connect_ex((target, port)) == 0
 
 
-def ensure_postgres(root: Path, cfg: dict[str, str]) -> None:
-    """Ensure PostgreSQL is listening, starting the Docker db service when local."""
+def ensure_postgres(_root: Path, cfg: dict[str, str]) -> None:
+    """Verify PostgreSQL is already reachable on DB_HOST:DB_PORT without managing Docker."""
     host = cfg["DB_HOST"]
     port = int(cfg["DB_PORT"])
     print("=" * 56)
@@ -74,20 +72,10 @@ def ensure_postgres(root: Path, cfg: dict[str, str]) -> None:
     if is_port_open(host, port):
         return
 
-    if host.lower() not in LOCAL_HOSTS:
-        raise RuntimeError(f"Remote PostgreSQL at {host}:{port} is not reachable.")
-
-    print(f"PostgreSQL is not listening yet. Starting Docker PostgreSQL ({CONTAINER_NAME})...")
-    if subprocess.run(["docker", "info"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0:
-        raise RuntimeError("Docker Desktop is NOT running! Start Docker Desktop first.")
-
-    subprocess.run(["docker", "compose", "up", "-d", "db"], cwd=root, check=True)
-    print(f"Waiting for PostgreSQL on {host}:{port}...")
-    for _ in range(30):
-        if is_port_open(host, port):
-            return
-        time.sleep(0.5)
-    raise RuntimeError(f"PostgreSQL did not become ready on {host}:{port} in time.")
+    raise RuntimeError(
+        f"PostgreSQL is not reachable at {host}:{port}. "
+        "Start your PostgreSQL server / Docker container manually first (e.g. `docker compose up -d`)."
+    )
 
 
 def connect_pg(cfg: dict[str, str], dbname: str):
@@ -267,9 +255,75 @@ def build_manifest(root: Path, cfg: dict[str, str], db_name: str) -> dict[str, o
     }
 
 
+def _resolve_pg_container(cfg: dict[str, str]) -> str | None:
+    """Return a running local Docker container publishing DB_PORT, if any."""
+    if cfg["DB_HOST"].lower() not in LOCAL_HOSTS or not shutil.which("docker"):
+        return None
+    explicit = cfg.get("DB_CONTAINER", "").strip()
+    candidates = [explicit] if explicit else []
+    res = subprocess.run(
+        ["docker", "ps", "--filter", f"publish={cfg['DB_PORT']}", "--format", "{{.Names}}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if res.returncode == 0:
+        candidates.extend(line.strip() for line in res.stdout.splitlines() if line.strip())
+    candidates.extend(["shared-postgres", "postgres", "odoo-db"])
+
+    seen: set[str] = set()
+    for name in candidates:
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        chk = subprocess.run(
+            ["docker", "ps", "--filter", f"name=^/{name}$", "--format", "{{.Names}}"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if chk.returncode == 0 and name in chk.stdout.splitlines():
+            return name
+    return None
+
+
+def _docker_target_host(host: str) -> str:
+    return "host.docker.internal" if host.lower() in LOCAL_HOSTS else host
+
+
 def _dump_sql_via_pg(cfg: dict[str, str], db_name: str, out_sql: Path) -> None:
+    container = _resolve_pg_container(cfg)
+    if container:
+        container_sql = "/tmp/odoo_save.sql"
+        try:
+            subprocess.run(
+                [
+                    "docker",
+                    "exec",
+                    "-e",
+                    f"PGPASSWORD={cfg['DB_PASSWORD']}",
+                    container,
+                    "pg_dump",
+                    "-U",
+                    cfg["DB_USER"],
+                    "--no-owner",
+                    "-f",
+                    container_sql,
+                    db_name,
+                ],
+                check=True,
+            )
+            subprocess.run(["docker", "cp", f"{container}:{container_sql}", str(out_sql)], check=True)
+        finally:
+            subprocess.run(
+                ["docker", "exec", container, "rm", "-f", container_sql],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        return
+
     pg_dump_bin = shutil.which("pg_dump")
-    if pg_dump_bin and cfg["DB_HOST"].lower() not in LOCAL_HOSTS:
+    if pg_dump_bin:
         env = {**os.environ, "PGPASSWORD": cfg["DB_PASSWORD"]}
         subprocess.run(
             [
@@ -290,37 +344,70 @@ def _dump_sql_via_pg(cfg: dict[str, str], db_name: str, out_sql: Path) -> None:
         )
         return
 
-    container_sql = "/tmp/odoo_save.sql"
-    try:
+    docker_bin = shutil.which("docker")
+    if not docker_bin:
+        raise RuntimeError("Neither pg_dump nor Docker was found to dump the PostgreSQL database.")
+    with out_sql.open("wb") as fh:
         subprocess.run(
             [
-                "docker",
-                "exec",
+                docker_bin,
+                "run",
+                "--rm",
                 "-e",
                 f"PGPASSWORD={cfg['DB_PASSWORD']}",
-                CONTAINER_NAME,
+                "postgres:16-alpine",
                 "pg_dump",
+                "-h",
+                _docker_target_host(cfg["DB_HOST"]),
+                "-p",
+                cfg["DB_PORT"],
                 "-U",
                 cfg["DB_USER"],
                 "--no-owner",
-                "-f",
-                container_sql,
                 db_name,
             ],
+            stdout=fh,
             check=True,
-        )
-        subprocess.run(["docker", "cp", f"{CONTAINER_NAME}:{container_sql}", str(out_sql)], check=True)
-    finally:
-        subprocess.run(
-            ["docker", "exec", CONTAINER_NAME, "rm", "-f", container_sql],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
         )
 
 
 def _restore_sql_via_pg(cfg: dict[str, str], target_db: str, dump_sql: Path) -> None:
+    container = _resolve_pg_container(cfg)
+    if container:
+        container_sql = "/tmp/odoo_load.sql"
+        try:
+            subprocess.run(["docker", "cp", str(dump_sql), f"{container}:{container_sql}"], check=True)
+            subprocess.run(
+                [
+                    "docker",
+                    "exec",
+                    "-e",
+                    f"PGPASSWORD={cfg['DB_PASSWORD']}",
+                    container,
+                    "psql",
+                    "-v",
+                    "ON_ERROR_STOP=1",
+                    "-U",
+                    cfg["DB_USER"],
+                    "-d",
+                    target_db,
+                    "-q",
+                    "-f",
+                    container_sql,
+                ],
+                stdout=subprocess.DEVNULL,
+                check=True,
+            )
+        finally:
+            subprocess.run(
+                ["docker", "exec", container, "rm", "-f", container_sql],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        return
+
     psql_bin = shutil.which("psql")
-    if psql_bin and cfg["DB_HOST"].lower() not in LOCAL_HOSTS:
+    if psql_bin:
         env = {**os.environ, "PGPASSWORD": cfg["DB_PASSWORD"]}
         subprocess.run(
             [
@@ -345,17 +432,24 @@ def _restore_sql_via_pg(cfg: dict[str, str], target_db: str, dump_sql: Path) -> 
         )
         return
 
-    container_sql = "/tmp/odoo_load.sql"
-    try:
-        subprocess.run(["docker", "cp", str(dump_sql), f"{CONTAINER_NAME}:{container_sql}"], check=True)
+    docker_bin = shutil.which("docker")
+    if not docker_bin:
+        raise RuntimeError("Neither psql nor Docker was found to restore the PostgreSQL database.")
+    with dump_sql.open("rb") as fh:
         subprocess.run(
             [
-                "docker",
-                "exec",
+                docker_bin,
+                "run",
+                "--rm",
+                "-i",
                 "-e",
                 f"PGPASSWORD={cfg['DB_PASSWORD']}",
-                CONTAINER_NAME,
+                "postgres:16-alpine",
                 "psql",
+                "-h",
+                _docker_target_host(cfg["DB_HOST"]),
+                "-p",
+                cfg["DB_PORT"],
                 "-v",
                 "ON_ERROR_STOP=1",
                 "-U",
@@ -363,62 +457,11 @@ def _restore_sql_via_pg(cfg: dict[str, str], target_db: str, dump_sql: Path) -> 
                 "-d",
                 target_db,
                 "-q",
-                "-f",
-                container_sql,
             ],
+            stdin=fh,
             stdout=subprocess.DEVNULL,
             check=True,
         )
-    finally:
-        subprocess.run(
-            ["docker", "exec", CONTAINER_NAME, "rm", "-f", container_sql],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-
-def cmd_start(args: argparse.Namespace) -> int:
-    """Start PostgreSQL (if local) and launch Odoo using runtime config built from .env."""
-    cfg = load_env(ROOT)
-    odoo_bin = ROOT / "odoo" / "odoo-bin"
-    if not odoo_bin.is_file():
-        raise RuntimeError(f"Odoo source not found at {odoo_bin}")
-
-    ensure_postgres(ROOT, cfg)
-    extra = list(args.extra)
-    if extra and extra[0] == "--":
-        extra = extra[1:]
-
-    has_custom_conf = any(a in ("-c", "--config") or a.startswith("--config=") for a in extra)
-    cmd = [sys.executable, str(odoo_bin)]
-    if not has_custom_conf:
-        runtime_conf = write_runtime_conf(ROOT, cfg, prod=True if getattr(args, "prod", False) else None)
-        cmd.extend(["-c", str(runtime_conf)])
-    cmd.extend(extra)
-
-    print()
-    print("=" * 56)
-    print(f"Starting Odoo {cfg.get('ODOO_BRANCH', '20.0')} directly from {ROOT / 'odoo'}")
-    print(f"DB: {cfg['DB_USER']}@{cfg['DB_HOST']}:{cfg['DB_PORT']} | URL: http://localhost:{cfg['ODOO_PORT']}")
-    print("Press Ctrl+C to stop Odoo")
-    print("=" * 56)
-    print()
-
-    try:
-        return subprocess.run(cmd, cwd=ROOT).returncode
-    except KeyboardInterrupt:
-        return 0
-
-
-def cmd_stop(_args: argparse.Namespace) -> int:
-    """Stop local Odoo server and pause Docker PostgreSQL."""
-    cfg = load_env(ROOT)
-    stop_local_odoo()
-    if cfg["DB_HOST"].lower() in LOCAL_HOSTS:
-        print(f"Stopping PostgreSQL container ({CONTAINER_NAME})...")
-        subprocess.run(["docker", "compose", "stop", "db"], cwd=ROOT, check=False)
-    print("Odoo ERP stopped.")
-    return 0
 
 
 def _save_backup_archive(root: Path, cfg: dict[str, str], db_name: str, out_zip: Path) -> bool:
@@ -651,47 +694,14 @@ def cmd_load(args: argparse.Namespace) -> int:
             fs_msg = "SQL only (no filestore in backup)"
 
         print(f'[SUCCESS] Restored "{backup_file.name}" into "{target_db}" ({fs_msg}).')
-        print("Run start.bat to launch Odoo.")
+        print("You can now start Odoo manually (e.g. .venv\\Scripts\\python.exe odoo\\odoo-bin -c odoo.conf).")
         print("=" * 56)
-    return 0
-
-
-def cmd_reset(args: argparse.Namespace) -> int:
-    """Wipe PostgreSQL Docker volume and local Odoo runtime data."""
-    cfg = load_env(ROOT)
-    if cfg["DB_HOST"].lower() not in LOCAL_HOSTS:
-        raise RuntimeError(f"Refusing to reset remote DB host {cfg['DB_HOST']}.")
-
-    if not args.yes:
-        print("=" * 56)
-        print("WARNING: This will completely erase all databases and filestore data!")
-        print("=" * 56)
-        if input("Are you sure you want to completely clear the database? (Y/N): ").strip().lower() != "y":
-            print("Operation cancelled.")
-            return 0
-
-    stop_local_odoo()
-    print("Stopping PostgreSQL container and removing database volumes...")
-    subprocess.run(["docker", "compose", "down", "-v"], cwd=ROOT, check=True)
-
-    for folder in (ROOT / "data" / "filestore", ROOT / "data" / "sessions"):
-        shutil.rmtree(folder, ignore_errors=True)
-    (ROOT / "data" / "odoo.runtime.conf").unlink(missing_ok=True)
-
-    print("Starting fresh PostgreSQL container...")
-    subprocess.run(["docker", "compose", "up", "-d", "db"], cwd=ROOT, check=True)
-    print("\nDatabase has been completely cleared! Run start.bat to open Odoo.")
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Odoo project controller (.env single source of truth)")
+    parser = argparse.ArgumentParser(description="Odoo backup, restore, and upgrade controller (.env single source of truth)")
     sub = parser.add_subparsers(dest="command", required=True)
-
-    p_start = sub.add_parser("start", help="Start Odoo using .env DB config")
-    p_start.add_argument("--prod", action="store_true", help="Apply production runtime conf overrides")
-    p_start.add_argument("extra", nargs=argparse.REMAINDER, help="Arguments passed through to odoo-bin")
-    p_start.set_defaults(func=cmd_start, pause=False)
 
     p_upgrade = sub.add_parser("upgrade", help="Back up DB, pull odoo/, and upgrade addons/ modules")
     p_upgrade.add_argument("-d", "--database", help="Target database name (defaults to ODOO_DB)")
@@ -700,10 +710,6 @@ def build_parser() -> argparse.ArgumentParser:
     p_upgrade.add_argument("--skip-pull", action="store_true", help="Skip git pull inside odoo/")
     p_upgrade.add_argument("--prod", action="store_true", help="Use production runtime conf")
     p_upgrade.set_defaults(func=cmd_upgrade, pause=False)
-
-    p_stop = sub.add_parser("stop", help="Stop local Odoo and PostgreSQL container")
-    p_stop.add_argument("-y", "--yes", action="store_true", help="Do not pause on exit")
-    p_stop.set_defaults(func=cmd_stop)
 
     p_save = sub.add_parser("save", help="Save database + filestore backup zip")
     p_save.add_argument("database", nargs="?", help="Database name to back up")
@@ -716,10 +722,6 @@ def build_parser() -> argparse.ArgumentParser:
     p_load.add_argument("-y", "--yes", "-f", "--force", action="store_true", help="Overwrite without prompting")
     p_load.set_defaults(func=cmd_load)
 
-    p_reset = sub.add_parser("reset", help="Reset local PostgreSQL volume and filestore")
-    p_reset.add_argument("-y", "--yes", action="store_true", help="Skip confirmation prompt")
-    p_reset.set_defaults(func=cmd_reset)
-
     return parser
 
 
@@ -728,7 +730,7 @@ def main() -> int:
     should_pause = False
     if args.command == "save":
         should_pause = args.database is None
-    elif args.command in ("load", "stop", "reset"):
+    elif args.command == "load":
         should_pause = not args.yes
 
     try:

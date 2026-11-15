@@ -1,17 +1,41 @@
+# Standalone shared PostgreSQL 16 server for any project on this device.
+# Start manually: docker compose up -d
+# - Local / host apps: localhost:${POSTGRES_PORT:-5432}
+# - Other Docker Compose projects: join external network `shared-db-network`
+#   and connect to host `shared-postgres` (or `postgres` / `shared-db`) on port 5432.
+name: shared-postgres
+
 services:
-  db:
+  postgres:
     image: postgres:16-alpine
-    container_name: odoo-db
+    container_name: shared-postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=${DB_USER:-odoo}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-odoo}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
+      - shared-postgres-data:/var/lib/postgresql/data/pgdata
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      shared-db-network:
+        aliases:
+          - shared-postgres
+          - postgres
+          - shared-db
 
 volumes:
-  odoo-db-data:
+  shared-postgres-data:
+    name: shared-postgres-data
+
+networks:
+  shared-db-network:
+    name: shared-db-network
+    driver: bridge

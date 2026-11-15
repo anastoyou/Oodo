@@ -36,11 +36,10 @@ This project keeps upstream Odoo source completely separate from your business c
 
 ## 3. Daily Project Commands (Windows Dev)
 
-| Script | Action |
+| Script / Command | Action |
 | :--- | :--- |
-| `.\start.bat` | Starts local PostgreSQL (if needed) and launches Odoo using `.env` + `odoo.conf` |
-| `.\start.bat --prod` | Preview production runtime configuration locally |
-| `.\stop.bat` | Stops local `odoo-bin` and pauses the Docker PostgreSQL container |
+| `docker compose up -d` | Manually starts the standalone shared PostgreSQL container (`shared-postgres`) |
+| `.\.venv\Scripts\python.exe odoo\odoo-bin -c odoo.conf` | Manually launches Odoo directly against PostgreSQL using `odoo.conf` |
 | `.\upgrade.bat` | Takes backup, pulls clean `odoo/`, upgrades installed custom addons (`-u`) |
 | `.\upgrade.bat --skip-pull` | Skips `git pull` in `odoo/` and upgrades installed `addons/` modules |
 | `.\upgrade.bat --skip-pull --install --modules <name>` | Installs a newly added module from `addons/` (`-i`) |
