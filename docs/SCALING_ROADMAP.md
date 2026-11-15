@@ -353,7 +353,7 @@ In Phase 1, you sell apparel online without investing capital in warehouse renta
    ```
 4. Access the Odoo interface:
    - **URL:** [http://localhost:8069](http://localhost:8069)
-   - **Database Master Password:** `masteradmin` (configured in `.env`)
+   - **Database Master Password:** `zoeeadmin` (configured in `.env`)
 
 ### 5.4 Database & Indian GST Configuration
 When creating your initial database at `http://localhost:8069`:

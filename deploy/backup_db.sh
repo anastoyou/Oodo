@@ -5,7 +5,7 @@ set -euo pipefail
 APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${APP_ROOT}/.env"
 
-DB_NAME="${1:-${ODOO_DB:-localhost}}"
+DB_NAME="${1:-${ODOO_DB:-zoeemasterdb}}"
 STAMP="$(date +%Y%m%d_%H%M%S)"
 BACKUP_DIR="${APP_ROOT}/backups"
 STAGE_DIR="$(mktemp -d "${BACKUP_DIR}/.tmp_prod_${STAMP}_XXXXXX")"

@@ -45,4 +45,5 @@ This project keeps upstream Odoo source completely separate from your business c
 | `.\upgrade.bat --skip-pull --install --modules <name>` | Installs a newly added module from `addons/` (`-i`) |
 | `.\save_db.bat` | Saves SQL + `manifest.json` + `filestore` into `backups/*.zip` |
 | `.\load_db.bat` | Restores a `.zip` / `.sql` backup into PostgreSQL + `data/filestore/` |
+| `.\remove_db.bat` | Drops a single selected database and removes its `data/filestore/<db>` folder without affecting other DBs |
 

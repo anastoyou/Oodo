@@ -29,12 +29,12 @@ def load_env(root: Path = ROOT) -> dict[str, str]:
     cfg = {
         "DB_HOST": "localhost",
         "DB_PORT": "5432",
-        "DB_USER": "postgres",
-        "DB_PASSWORD": "postgres",
-        "ADMIN_PASSWORD": "masteradmin",
+        "DB_USER": "odoo",
+        "DB_PASSWORD": "odoo",
+        "ADMIN_PASSWORD": "zoeeadmin",
         "ODOO_PORT": "8069",
         "ODOO_BRANCH": "20.0",
-        "ODOO_DB": "localhost",
+        "ODOO_DB": "zoeemasterdb",
     }
     env_file = root / ".env"
     if not env_file.is_file():
@@ -89,6 +89,52 @@ def connect_pg(cfg: dict[str, str], dbname: str):
     )
 
 
+def _ensure_db_role(cfg: dict[str, str]) -> None:
+    """Create DB_USER via PostgreSQL superuser if missing on a fresh shared PostgreSQL server."""
+    try:
+        with connect_pg(cfg, "postgres"):
+            return
+    except psycopg2.OperationalError as exc:
+        if "does not exist" not in str(exc) and "password authentication failed" not in str(exc):
+            raise
+
+    admin_user = cfg.get("POSTGRES_USER") or "postgres"
+    admin_passwords = [p for p in (
+        cfg.get("POSTGRES_PASSWORD"), cfg.get("DB_PASSWORD"), "postgres") if p]
+    admin_conn = None
+    for pwd in admin_passwords:
+        try:
+            admin_conn = psycopg2.connect(
+                host=cfg["DB_HOST"],
+                port=int(cfg["DB_PORT"]),
+                user=admin_user,
+                password=pwd,
+                dbname="postgres",
+            )
+            break
+        except psycopg2.OperationalError:
+            continue
+
+    if admin_conn is None:
+        return
+
+    try:
+        admin_conn.autocommit = True
+        with admin_conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s",
+                        (cfg["DB_USER"],))
+            if cur.fetchone() is None:
+                print(f'Creating PostgreSQL role "{cfg["DB_USER"]}"...')
+                cur.execute(
+                    sql.SQL("CREATE ROLE {} WITH SUPERUSER CREATEDB LOGIN PASSWORD %s").format(
+                        sql.Identifier(cfg["DB_USER"])
+                    ),
+                    (cfg["DB_PASSWORD"],),
+                )
+    finally:
+        admin_conn.close()
+
+
 def list_user_databases(cfg: dict[str, str]) -> list[str]:
     """Return sorted non-template, non-system databases."""
     with connect_pg(cfg, "postgres") as conn:
@@ -104,7 +150,8 @@ def db_exists(cfg: dict[str, str], db_name: str) -> bool:
     """Return True if db_name exists in PostgreSQL."""
     with connect_pg(cfg, "postgres") as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (db_name,))
+            cur.execute(
+                "SELECT 1 FROM pg_database WHERE datname = %s", (db_name,))
             return cur.fetchone() is not None
 
 
@@ -186,7 +233,8 @@ def write_runtime_conf(root: Path, cfg: dict[str, str], prod: bool | None = None
     if "options" not in parser:
         parser["options"] = {}
 
-    is_prod = prod if prod is not None else cfg.get("ODOO_ENV", "").lower() == "production"
+    is_prod = prod if prod is not None else cfg.get(
+        "ODOO_ENV", "").lower() == "production"
     opts = parser["options"]
     opts["admin_passwd"] = cfg["ADMIN_PASSWORD"]
     opts["db_host"] = cfg["DB_HOST"]
@@ -238,9 +286,11 @@ def build_manifest(root: Path, cfg: dict[str, str], db_name: str) -> dict[str, o
         pg_version = "%d.%d" % divmod(conn.server_version // 100, 100)
         modules: dict[str, str] = {}
         with conn.cursor() as cur:
-            cur.execute("SELECT to_regclass('public.ir_module_module') IS NOT NULL")
+            cur.execute(
+                "SELECT to_regclass('public.ir_module_module') IS NOT NULL")
             if cur.fetchone()[0]:
-                cur.execute("SELECT name, latest_version FROM ir_module_module WHERE state = 'installed'")
+                cur.execute(
+                    "SELECT name, latest_version FROM ir_module_module WHERE state = 'installed'")
                 modules = dict(cur.fetchall())
 
     rel = read_odoo_release(root)
@@ -262,13 +312,15 @@ def _resolve_pg_container(cfg: dict[str, str]) -> str | None:
     explicit = cfg.get("DB_CONTAINER", "").strip()
     candidates = [explicit] if explicit else []
     res = subprocess.run(
-        ["docker", "ps", "--filter", f"publish={cfg['DB_PORT']}", "--format", "{{.Names}}"],
+        ["docker", "ps", "--filter",
+            f"publish={cfg['DB_PORT']}", "--format", "{{.Names}}"],
         capture_output=True,
         text=True,
         check=False,
     )
     if res.returncode == 0:
-        candidates.extend(line.strip() for line in res.stdout.splitlines() if line.strip())
+        candidates.extend(line.strip()
+                          for line in res.stdout.splitlines() if line.strip())
     candidates.extend(["shared-postgres", "postgres", "odoo-db"])
 
     seen: set[str] = set()
@@ -277,7 +329,8 @@ def _resolve_pg_container(cfg: dict[str, str]) -> str | None:
             continue
         seen.add(name)
         chk = subprocess.run(
-            ["docker", "ps", "--filter", f"name=^/{name}$", "--format", "{{.Names}}"],
+            ["docker", "ps", "--filter",
+                f"name=^/{name}$", "--format", "{{.Names}}"],
             capture_output=True,
             text=True,
             check=False,
@@ -313,7 +366,8 @@ def _dump_sql_via_pg(cfg: dict[str, str], db_name: str, out_sql: Path) -> None:
                 ],
                 check=True,
             )
-            subprocess.run(["docker", "cp", f"{container}:{container_sql}", str(out_sql)], check=True)
+            subprocess.run(
+                ["docker", "cp", f"{container}:{container_sql}", str(out_sql)], check=True)
         finally:
             subprocess.run(
                 ["docker", "exec", container, "rm", "-f", container_sql],
@@ -346,7 +400,8 @@ def _dump_sql_via_pg(cfg: dict[str, str], db_name: str, out_sql: Path) -> None:
 
     docker_bin = shutil.which("docker")
     if not docker_bin:
-        raise RuntimeError("Neither pg_dump nor Docker was found to dump the PostgreSQL database.")
+        raise RuntimeError(
+            "Neither pg_dump nor Docker was found to dump the PostgreSQL database.")
     with out_sql.open("wb") as fh:
         subprocess.run(
             [
@@ -376,7 +431,8 @@ def _restore_sql_via_pg(cfg: dict[str, str], target_db: str, dump_sql: Path) -> 
     if container:
         container_sql = "/tmp/odoo_load.sql"
         try:
-            subprocess.run(["docker", "cp", str(dump_sql), f"{container}:{container_sql}"], check=True)
+            subprocess.run(["docker", "cp", str(dump_sql),
+                           f"{container}:{container_sql}"], check=True)
             subprocess.run(
                 [
                     "docker",
@@ -434,7 +490,8 @@ def _restore_sql_via_pg(cfg: dict[str, str], target_db: str, dump_sql: Path) -> 
 
     docker_bin = shutil.which("docker")
     if not docker_bin:
-        raise RuntimeError("Neither psql nor Docker was found to restore the PostgreSQL database.")
+        raise RuntimeError(
+            "Neither psql nor Docker was found to restore the PostgreSQL database.")
     with dump_sql.open("rb") as fh:
         subprocess.run(
             [
@@ -486,7 +543,8 @@ def _save_backup_archive(root: Path, cfg: dict[str, str], db_name: str, out_zip:
                 if has_filestore:
                     for file_path in sorted((stage / "filestore").rglob("*")):
                         if file_path.is_file():
-                            zf.write(file_path, file_path.relative_to(stage).as_posix())
+                            zf.write(file_path, file_path.relative_to(
+                                stage).as_posix())
             os.replace(part_zip, out_zip)
         except Exception:
             part_zip.unlink(missing_ok=True)
@@ -494,33 +552,109 @@ def _save_backup_archive(root: Path, cfg: dict[str, str], db_name: str, out_zip:
     return has_filestore
 
 
-def cmd_save(args: argparse.Namespace) -> int:
-    """Dump an Odoo database and its filestore to backups/<db>_<timestamp>.zip."""
-    cfg = load_env(ROOT)
-    ensure_postgres(ROOT, cfg)
+def _select_existing_db(cfg: dict[str, str], action_label: str, explicit_db: str | None) -> str:
+    """Resolve an existing user database from CLI arg or interactive prompt."""
     avail = list_user_databases(cfg)
     if not avail:
         raise RuntimeError("No user databases found in PostgreSQL.")
 
     default_db = cfg["ODOO_DB"] if cfg["ODOO_DB"] in avail else avail[0]
-    if args.database:
-        db_name = args.database
+    if explicit_db:
+        db_name = explicit_db
     else:
         print(f"Available databases: {', '.join(avail)}")
-        entered = input(f"Database name to save [{default_db}]: ").strip()
+        entered = input(
+            f"Database name to {action_label} [{default_db}]: ").strip()
         db_name = entered or default_db
 
     if db_name not in avail:
-        raise RuntimeError(f'Database "{db_name}" does not exist. Available: {", ".join(avail)}')
+        raise RuntimeError(
+            f'Database "{db_name}" does not exist. Available: {", ".join(avail)}')
+    return db_name
+
+
+def _drop_database(cfg: dict[str, str], db_name: str) -> None:
+    """Terminate active connections and drop db_name."""
+    conn = connect_pg(cfg, "postgres")
+    try:
+        conn.autocommit = True
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                "WHERE datname = %s AND pid <> pg_backend_pid()",
+                (db_name,),
+            )
+            cur.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(
+                sql.Identifier(db_name)))
+    finally:
+        conn.close()
+
+
+def cmd_save(args: argparse.Namespace) -> int:
+    """Dump an Odoo database and its filestore to backups/<db>_<timestamp>.zip."""
+    cfg = load_env(ROOT)
+    ensure_postgres(ROOT, cfg)
+    db_name = _select_existing_db(cfg, "save", args.database)
 
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     backups_dir = ROOT / "backups"
-    out_zip = Path(args.output).resolve() if args.output else backups_dir / f"{db_name}_{stamp}.zip"
+    out_zip = Path(args.output).resolve(
+    ) if args.output else backups_dir / f"{db_name}_{stamp}.zip"
 
     print(f'\nSaving database "{db_name}" (SQL + manifest + filestore)...')
     has_filestore = _save_backup_archive(ROOT, cfg, db_name, out_zip)
     size_mb = out_zip.stat().st_size / (1024 * 1024)
-    print(f"[SUCCESS] Saved backup: {out_zip} ({size_mb:.2f} MB, filestore={'yes' if has_filestore else 'none'})")
+    print(
+        f"[SUCCESS] Saved backup: {out_zip} ({size_mb:.2f} MB, filestore={'yes' if has_filestore else 'none'})")
+    return 0
+
+
+def cmd_remove(args: argparse.Namespace) -> int:
+    """Drop a single Odoo database and delete its local filestore without affecting other DBs."""
+    cfg = load_env(ROOT)
+    ensure_postgres(ROOT, cfg)
+
+    avail = list_user_databases(cfg)
+    filestore_root = ROOT / "data" / "filestore"
+    if args.database:
+        db_name = args.database
+    else:
+        if not avail:
+            raise RuntimeError("No user databases found in PostgreSQL.")
+        db_name = _select_existing_db(cfg, "remove", None)
+
+    if db_name in ("postgres", "template0", "template1"):
+        raise RuntimeError(
+            f'Refusing to remove PostgreSQL system database "{db_name}".')
+
+    filestore_dst = filestore_root / db_name
+    has_db = db_name in avail
+    has_fs = filestore_dst.is_dir()
+    if not has_db and not has_fs:
+        raise RuntimeError(
+            f'Database "{db_name}" does not exist. Available: {", ".join(avail) or "(none)"}')
+
+    if not args.yes:
+        print()
+        print("=" * 56)
+        print(f'WARNING: This will permanently DELETE database "{db_name}"')
+        if has_fs:
+            print(f'         and its filestore ({filestore_dst})!')
+        print("         Other databases in PostgreSQL will NOT be affected.")
+        print("=" * 56)
+        if input(f'Are you sure you want to remove "{db_name}"? (Y/N): ').strip().lower() != "y":
+            print("Operation cancelled.")
+            return 0
+
+    stop_local_odoo()
+    if has_db:
+        print(f'Dropping PostgreSQL database "{db_name}"...')
+        _drop_database(cfg, db_name)
+    if has_fs:
+        print(f'Removing filestore "{filestore_dst}"...')
+        shutil.rmtree(filestore_dst)
+
+    print(f'[SUCCESS] Removed "{db_name}".')
     return 0
 
 
@@ -540,15 +674,20 @@ def cmd_upgrade(args: argparse.Namespace) -> int:
             check=True,
         )
         if dirty.stdout.strip():
-            raise RuntimeError(f"Upstream {odoo_dir} has uncommitted local edits; aborting pull to keep core clean.")
-        print(f"Pulling latest upstream Odoo ({cfg.get('ODOO_BRANCH', '20.0')}) in {odoo_dir}...")
-        subprocess.run(["git", "-C", str(odoo_dir), "pull", "--ff-only"], check=True)
+            raise RuntimeError(
+                f"Upstream {odoo_dir} has uncommitted local edits; aborting pull to keep core clean.")
+        print(
+            f"Pulling latest upstream Odoo ({cfg.get('ODOO_BRANCH', '20.0')}) in {odoo_dir}...")
+        subprocess.run(["git", "-C", str(odoo_dir),
+                       "pull", "--ff-only"], check=True)
 
     ensure_postgres(ROOT, cfg)
     avail = list_user_databases(cfg)
-    db_name = args.database or (cfg["ODOO_DB"] if cfg["ODOO_DB"] in avail else (avail[0] if avail else ""))
+    db_name = args.database or (
+        cfg["ODOO_DB"] if cfg["ODOO_DB"] in avail else (avail[0] if avail else ""))
     if not db_name or db_name not in avail:
-        raise RuntimeError(f'Target database "{db_name}" not found. Available: {", ".join(avail)}')
+        raise RuntimeError(
+            f'Target database "{db_name}" not found. Available: {", ".join(avail)}')
 
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     pre_zip = ROOT / "backups" / f"{db_name}_pre_upgrade_{stamp}.zip"
@@ -562,7 +701,8 @@ def cmd_upgrade(args: argparse.Namespace) -> int:
         if not args.install:
             with connect_pg(cfg, db_name) as conn:
                 with conn.cursor() as cur:
-                    cur.execute("SELECT name FROM ir_module_module WHERE state = 'installed'")
+                    cur.execute(
+                        "SELECT name FROM ir_module_module WHERE state = 'installed'")
                     installed = {row[0] for row in cur.fetchall()}
             installed_custom = [m for m in custom_mods if m in installed]
             if installed_custom:
@@ -571,23 +711,27 @@ def cmd_upgrade(args: argparse.Namespace) -> int:
         raise RuntimeError("No custom modules found in addons/.")
 
     stop_local_odoo()
-    runtime_conf = write_runtime_conf(ROOT, cfg, prod=True if args.prod else None)
+    runtime_conf = write_runtime_conf(
+        ROOT, cfg, prod=True if args.prod else None)
     flag = "-i" if args.install else "-u"
     mod_arg = ",".join(custom_mods)
     print(f'Running Odoo {flag} {mod_arg} on database "{db_name}"...')
     rc = subprocess.run(
-        [sys.executable, str(odoo_bin), "-c", str(runtime_conf), "-d", db_name, flag, mod_arg, "--stop-after-init", "--no-http"],
+        [sys.executable, str(odoo_bin), "-c", str(runtime_conf), "-d",
+         db_name, flag, mod_arg, "--stop-after-init", "--no-http"],
         cwd=ROOT,
     ).returncode
     if rc == 0:
-        print(f'\n[SUCCESS] Upgraded {", ".join(custom_mods)} on "{db_name}". Pre-upgrade backup: {pre_zip}')
+        print(
+            f'\n[SUCCESS] Upgraded {", ".join(custom_mods)} on "{db_name}". Pre-upgrade backup: {pre_zip}')
     return rc
 
 
 def _pick_backup_interactive(backups_dir: Path) -> Path:
     backups = (
         sorted(
-            (p for p in backups_dir.iterdir() if p.is_file() and p.suffix.lower() in (".zip", ".sql")),
+            (p for p in backups_dir.iterdir() if p.is_file()
+             and p.suffix.lower() in (".zip", ".sql")),
             key=lambda p: p.stat().st_mtime,
             reverse=True,
         )
@@ -600,7 +744,8 @@ def _pick_backup_interactive(backups_dir: Path) -> Path:
     else:
         for idx, path in enumerate(backups, start=1):
             size_mb = path.stat().st_size / (1024 * 1024)
-            mtime = datetime.datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+            mtime = datetime.datetime.fromtimestamp(
+                path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
             print(f"  [{idx}] {path.name}  ({size_mb:.2f} MB, {mtime})")
 
     prompt = "Enter backup number [1] or file path: " if backups else "Enter path to .zip or .sql backup file: "
@@ -615,13 +760,15 @@ def _pick_backup_interactive(backups_dir: Path) -> Path:
 def _extract_backup(backup_file: Path, stage: Path, default_db: str) -> str:
     if zipfile.is_zipfile(backup_file):
         with zipfile.ZipFile(backup_file, "r") as zf:
-            members = [m for m in zf.namelist() if m in ("dump.sql", "manifest.json") or m.startswith("filestore/")]
+            members = [m for m in zf.namelist() if m in (
+                "dump.sql", "manifest.json") or m.startswith("filestore/")]
             zf.extractall(stage, members)
     else:
         shutil.copy2(backup_file, stage / "dump.sql")
 
     if not (stage / "dump.sql").is_file():
-        raise RuntimeError(f'Backup "{backup_file}" does not contain dump.sql.')
+        raise RuntimeError(
+            f'Backup "{backup_file}" does not contain dump.sql.')
 
     manifest_file = stage / "manifest.json"
     if manifest_file.is_file():
@@ -633,10 +780,12 @@ def cmd_load(args: argparse.Namespace) -> int:
     """Restore an Odoo backup (.zip or .sql) and its filestore."""
     cfg = load_env(ROOT)
     ensure_postgres(ROOT, cfg)
+    _ensure_db_role(cfg)
 
     backups_dir = ROOT / "backups"
     backups_dir.mkdir(parents=True, exist_ok=True)
-    backup_file = Path(args.backup_file).resolve() if args.backup_file else _pick_backup_interactive(backups_dir)
+    backup_file = Path(args.backup_file).resolve(
+    ) if args.backup_file else _pick_backup_interactive(backups_dir)
     if not backup_file.is_file():
         raise RuntimeError(f'Backup file not found: "{backup_file}"')
 
@@ -649,11 +798,13 @@ def cmd_load(args: argparse.Namespace) -> int:
         elif args.yes:
             target_db = suggested_db
         else:
-            entered = input(f"Target database name to restore into [{suggested_db}]: ").strip()
+            entered = input(
+                f"Target database name to restore into [{suggested_db}]: ").strip()
             target_db = entered or suggested_db
 
         if db_exists(cfg, target_db) and not args.yes:
-            print(f'\nWARNING: Database "{target_db}" and its filestore already exist and will be REPLACED!')
+            print(
+                f'\nWARNING: Database "{target_db}" and its filestore already exist and will be REPLACED!')
             if input(f'Continue and overwrite "{target_db}"? (Y/N): ').strip().lower() != "y":
                 print("Operation cancelled.")
                 return 0
@@ -662,16 +813,11 @@ def cmd_load(args: argparse.Namespace) -> int:
         print("=" * 56)
         stop_local_odoo()
         print(f'Recreating PostgreSQL database "{target_db}"...')
+        _drop_database(cfg, target_db)
         conn = connect_pg(cfg, "postgres")
         try:
             conn.autocommit = True
             with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
-                    "WHERE datname = %s AND pid <> pg_backend_pid()",
-                    (target_db,),
-                )
-                cur.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(target_db)))
                 cur.execute(
                     sql.SQL("CREATE DATABASE {} ENCODING 'unicode' LC_COLLATE 'C' TEMPLATE template0").format(
                         sql.Identifier(target_db)
@@ -693,34 +839,54 @@ def cmd_load(args: argparse.Namespace) -> int:
         else:
             fs_msg = "SQL only (no filestore in backup)"
 
-        print(f'[SUCCESS] Restored "{backup_file.name}" into "{target_db}" ({fs_msg}).')
+        print(
+            f'[SUCCESS] Restored "{backup_file.name}" into "{target_db}" ({fs_msg}).')
         print("You can now start Odoo manually (e.g. .venv\\Scripts\\python.exe odoo\\odoo-bin -c odoo.conf).")
         print("=" * 56)
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Odoo backup, restore, and upgrade controller (.env single source of truth)")
+    parser = argparse.ArgumentParser(
+        description="Odoo backup, restore, and upgrade controller (.env single source of truth)")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_upgrade = sub.add_parser("upgrade", help="Back up DB, pull odoo/, and upgrade addons/ modules")
-    p_upgrade.add_argument("-d", "--database", help="Target database name (defaults to ODOO_DB)")
-    p_upgrade.add_argument("-m", "--modules", help="Comma-separated modules (defaults to all addons/ modules)")
-    p_upgrade.add_argument("-i", "--install", action="store_true", help="Install (-i) instead of upgrade (-u)")
-    p_upgrade.add_argument("--skip-pull", action="store_true", help="Skip git pull inside odoo/")
-    p_upgrade.add_argument("--prod", action="store_true", help="Use production runtime conf")
+    p_upgrade = sub.add_parser(
+        "upgrade", help="Back up DB, pull odoo/, and upgrade addons/ modules")
+    p_upgrade.add_argument(
+        "-d", "--database", help="Target database name (defaults to ODOO_DB)")
+    p_upgrade.add_argument(
+        "-m", "--modules", help="Comma-separated modules (defaults to all addons/ modules)")
+    p_upgrade.add_argument("-i", "--install", action="store_true",
+                           help="Install (-i) instead of upgrade (-u)")
+    p_upgrade.add_argument("--skip-pull", action="store_true",
+                           help="Skip git pull inside odoo/")
+    p_upgrade.add_argument("--prod", action="store_true",
+                           help="Use production runtime conf")
     p_upgrade.set_defaults(func=cmd_upgrade, pause=False)
 
-    p_save = sub.add_parser("save", help="Save database + filestore backup zip")
+    p_save = sub.add_parser(
+        "save", help="Save database + filestore backup zip")
     p_save.add_argument("database", nargs="?", help="Database name to back up")
-    p_save.add_argument("output", nargs="?", help="Output .zip path (optional)")
+    p_save.add_argument("output", nargs="?",
+                        help="Output .zip path (optional)")
     p_save.set_defaults(func=cmd_save)
 
     p_load = sub.add_parser("load", help="Restore database + filestore backup")
-    p_load.add_argument("backup_file", nargs="?", help="Path to .zip or .sql backup")
+    p_load.add_argument("backup_file", nargs="?",
+                        help="Path to .zip or .sql backup")
     p_load.add_argument("database", nargs="?", help="Target database name")
-    p_load.add_argument("-y", "--yes", "-f", "--force", action="store_true", help="Overwrite without prompting")
+    p_load.add_argument("-y", "--yes", "-f", "--force",
+                        action="store_true", help="Overwrite without prompting")
     p_load.set_defaults(func=cmd_load)
+
+    p_remove = sub.add_parser(
+        "remove", help="Drop a single database and delete its local filestore")
+    p_remove.add_argument("database", nargs="?",
+                          help="Database name to remove")
+    p_remove.add_argument("-y", "--yes", "-f", "--force",
+                          action="store_true", help="Remove without prompting")
+    p_remove.set_defaults(func=cmd_remove)
 
     return parser
 
@@ -730,7 +896,7 @@ def main() -> int:
     should_pause = False
     if args.command == "save":
         should_pause = args.database is None
-    elif args.command == "load":
+    elif args.command in ("load", "remove"):
         should_pause = not args.yes
 
     try:
@@ -745,4 +911,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

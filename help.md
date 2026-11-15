@@ -29,3 +29,17 @@
 | **Customer Signup** | http://localhost:8069/web/signup | https://dollar-observations-silicon-leeds.trycloudflare.com/web/signup |
 | **Odoo Admin Backend (ERP / Builder)** | http://localhost:8069/odoo | https://dollar-observations-silicon-leeds.trycloudflare.com/odoo |
 
+
+
+
+
+
+
+
+
+
+
+.\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\odoo.conf
+
+
+

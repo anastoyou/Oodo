@@ -5,7 +5,7 @@ set -euo pipefail
 APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${APP_ROOT}/.env"
 
-DB_NAME="${1:-${ODOO_DB:-localhost}}"
+DB_NAME="${1:-${ODOO_DB:-zoeemasterdb}}"
 MODULES="${2:-custom_erp,custom_store}"
 
 if [ -n "$(git -C "${APP_ROOT}/odoo" status --porcelain)" ]; then
