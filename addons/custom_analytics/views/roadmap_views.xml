@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_roadmap_snapshot_form" model="ir.ui.view">
+        <field name="name">custom.roadmap.snapshot.form</field>
+        <field name="model">custom.roadmap.snapshot</field>
+        <field name="arch" type="xml">
+            <form string="Scaling Roadmap Phase Tracker">
+                <header>
+                    <button name="action_evaluate_now" string="Re-Evaluate Progress Now" type="object" class="btn-primary"/>
+                    <button name="action_promote_next_phase"
+                            string="Promote to Next Phase"
+                            type="object"
+                            class="btn-success"
+                            invisible="not ready_for_next_phase or current_phase == '5'"/>
+                    <field name="current_phase" widget="statusbar" statusbar_visible="1,2,3,4,5"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-success" role="alert" invisible="alert_level != 'ready'">
+                        <strong>PHASE GATE CLEARED:</strong>
+                        <field name="alert_banner" nolabel="1" readonly="1"/>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="alert_level != 'warning'">
+                        <strong>APPROACHING NEXT PHASE:</strong>
+                        <field name="alert_banner" nolabel="1" readonly="1"/>
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="alert_level != 'tracking'">
+                        <strong>ROADMAP PROGRESS:</strong>
+                        <field name="alert_banner" nolabel="1" readonly="1"/>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Gate Progress">
+                            <field name="evaluated_date"/>
+                            <field name="current_phase"/>
+                            <field name="next_phase_label"/>
+                            <field name="gate_progress_pct" widget="progressbar"/>
+                            <field name="ready_for_next_phase"/>
+                            <field name="consecutive_months_cleared"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Trailing 3-Month &amp; Core Metrics">
+                            <field name="net_revenue_30d"/>
+                            <field name="net_revenue_m2"/>
+                            <field name="net_revenue_m3"/>
+                            <field name="margin_pct"/>
+                            <field name="cash_reserve"/>
+                            <field name="total_customers"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Health Signals">
+                            <field name="repeat_customer_pct"/>
+                            <field name="rto_rate_pct"/>
+                            <field name="top_sku_share_pct"/>
+                            <field name="inventory_value"/>
+                            <field name="inventory_turns"/>
+                            <field name="active_warehouses"/>
+                            <field name="active_websites"/>
+                            <field name="distinct_cities"/>
+                        </group>
+                        <group string="Next Phase &amp; New Website (Unit) Readiness">
+                            <field name="next_phase_unlocks" readonly="1"/>
+                            <field name="ready_for_new_website"/>
+                            <field name="website_unit_advice" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Next Phase Gate Checklist">
+                            <field name="criteria_line_ids" readonly="1">
+                                <list decoration-success="is_met" decoration-muted="not is_met">
+                                    <field name="criteria_type"/>
+                                    <field name="name"/>
+                                    <field name="target_display"/>
+                                    <field name="actual_display"/>
+                                    <field name="progress_pct" widget="progressbar"/>
+                                    <field name="is_met"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_custom_roadmap_snapshot_list" model="ir.ui.view">
+        <field name="name">custom.roadmap.snapshot.list</field>
+        <field name="model">custom.roadmap.snapshot</field>
+        <field name="arch" type="xml">
+            <list string="Scaling Roadmap History">
+                <field name="evaluated_date"/>
+                <field name="name"/>
+                <field name="current_phase"/>
+                <field name="gate_progress_pct" widget="progressbar"/>
+                <field name="consecutive_months_cleared"/>
+                <field name="net_revenue_30d"/>
+                <field name="cash_reserve"/>
+                <field name="ready_for_next_phase"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_roadmap_snapshot_graph" model="ir.ui.view">
+        <field name="name">custom.roadmap.snapshot.graph</field>
+        <field name="model">custom.roadmap.snapshot</field>
+        <field name="arch" type="xml">
+            <graph string="Roadmap Readiness Over Time" type="line">
+                <field name="evaluated_date" interval="day"/>
+                <field name="gate_progress_pct" type="measure"/>
+                <field name="net_revenue_30d" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_custom_roadmap_tracker" model="ir.actions.act_window">
+        <field name="name">Scaling Phase Tracker (1→5)</field>
+        <field name="res_model">custom.roadmap.snapshot</field>
+        <field name="view_mode">list,form,graph</field>
+    </record>
+
+    <record id="action_open_roadmap_web" model="ir.actions.act_url">
+        <field name="name">Open Visual Roadmap (/analytics/roadmap)</field>
+        <field name="url">/analytics/roadmap</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+

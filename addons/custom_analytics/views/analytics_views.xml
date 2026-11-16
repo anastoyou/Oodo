@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Live Analytics Board Form View -->
+    <record id="view_custom_analytics_board_form" model="ir.ui.view">
+        <field name="name">custom.analytics.board.form</field>
+        <field name="model">custom.analytics.board</field>
+        <field name="arch" type="xml">
+            <form string="Executive &amp; Cross-ERP Analytics">
+                <header>
+                    <button name="action_refresh" string="Apply Filters &amp; Refresh" type="object" class="btn-primary"/>
+                    <button name="action_preset_7d" string="Last 7 Days" type="object" class="btn-secondary"/>
+                    <button name="action_preset_30d" string="Last 30 Days" type="object" class="btn-secondary"/>
+                    <button name="action_preset_90d" string="Last 90 Days" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Cross-ERP Business Analytics Console</h1>
+                    </div>
+                    <group string="Interactive Filters (Customer, Channel, Payment, Period &amp; Module)">
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="active_module"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" placeholder="All Customers..."/>
+                            <field name="sales_channel" placeholder="All Channels..."/>
+                            <field name="payment_mode" placeholder="Prepaid &amp; COD..."/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Sales, Margin &amp; Period Comparison">
+                            <field name="total_sales"/>
+                            <field name="prev_total_sales"/>
+                            <field name="sales_growth_pct"/>
+                            <field name="total_margin"/>
+                            <field name="margin_growth_pct"/>
+                            <field name="margin_pct"/>
+                            <field name="order_count"/>
+                            <field name="orders_growth_pct"/>
+                            <field name="prepaid_order_count"/>
+                            <field name="cod_order_count"/>
+                            <field name="rto_order_count"/>
+                            <field name="rto_rate_pct"/>
+                        </group>
+                        <group string="Purchase &amp; Inventory Comparison">
+                            <field name="purchase_spend"/>
+                            <field name="prev_purchase_spend"/>
+                            <field name="purchase_growth_pct"/>
+                            <field name="purchase_count"/>
+                            <field name="inventory_value"/>
+                            <field name="low_stock_count"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Finance &amp; CRM Pipeline">
+                            <field name="invoiced_revenue"/>
+                            <field name="vendor_bills_total"/>
+                            <field name="customer_receivable"/>
+                            <field name="vendor_payable"/>
+                            <field name="crm_pipeline_value"/>
+                            <field name="crm_open_count"/>
+                        </group>
+                        <group string="Subscriptions, HR &amp; Support">
+                            <field name="active_mrr"/>
+                            <field name="active_rental_total"/>
+                            <field name="payroll_total"/>
+                            <field name="timesheet_hours"/>
+                            <field name="open_rma_count"/>
+                            <field name="open_ticket_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sales Channels">
+                            <field name="channel_line_ids" readonly="1">
+                                <list>
+                                    <field name="channel_name"/>
+                                    <field name="order_count" sum="Orders"/>
+                                    <field name="revenue" sum="Revenue"/>
+                                    <field name="share_pct"/>
+                                    <field name="cod_count" sum="COD"/>
+                                    <field name="rto_count" sum="RTO"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Top Customers">
+                            <field name="customer_line_ids" readonly="1">
+                                <list>
+                                    <field name="partner_id"/>
+                                    <field name="order_count" sum="Orders"/>
+                                    <field name="revenue" sum="Revenue"/>
+                                    <field name="share_pct"/>
+                                    <field name="cod_count" sum="COD"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Top Selling Products">
+                            <field name="product_line_ids" readonly="1">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="units_sold" sum="Units"/>
+                                    <field name="revenue" sum="Revenue"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Top Vendors">
+                            <field name="vendor_line_ids" readonly="1">
+                                <list>
+                                    <field name="partner_id"/>
+                                    <field name="po_count" sum="POs"/>
+                                    <field name="total_spend" sum="Spend"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Inventory &amp; Low Stock">
+                            <field name="stock_line_ids" readonly="1">
+                                <list decoration-danger="is_low_stock">
+                                    <field name="product_id"/>
+                                    <field name="qty_on_hand" sum="On Hand"/>
+                                    <field name="qty_reserved" sum="Reserved"/>
+                                    <field name="qty_available" sum="Available"/>
+                                    <field name="stock_value" sum="Value"/>
+                                    <field name="is_low_stock"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Daily Trend vs Prev. Period">
+                            <field name="trend_line_ids" readonly="1">
+                                <list>
+                                    <field name="period_date"/>
+                                    <field name="order_count" sum="Orders"/>
+                                    <field name="sales_amount" sum="Sales"/>
+                                    <field name="prev_sales_amount" sum="Prev. Sales"/>
+                                    <field name="purchase_amount" sum="Purchases"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_analytics_board" model="ir.actions.act_window">
+        <field name="name">Live Analytics Console</field>
+        <field name="res_model">custom.analytics.board</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <record id="action_open_analytics_web" model="ir.actions.act_url">
+        <field name="name">Open Visual Analytics (/analytics)</field>
+        <field name="url">/analytics</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- 1. Sales Channel, COD & RTO Pivot + Graph -->
+    <record id="view_sale_order_analytics_graph" model="ir.ui.view">
+        <field name="name">sale.order.analytics.graph</field>
+        <field name="model">sale.order</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Sales by Channel &amp; Payment Mode" type="bar" sample="1">
+                <field name="x_sales_channel"/>
+                <field name="x_payment_mode"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_sale_order_analytics_pivot" model="ir.ui.view">
+        <field name="name">sale.order.analytics.pivot</field>
+        <field name="model">sale.order</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Channel, COD &amp; RTO Pivot Analysis" sample="1">
+                <field name="x_sales_channel" type="row"/>
+                <field name="x_payment_mode" type="col"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_sale_order_analytics_search" model="ir.ui.view">
+        <field name="name">sale.order.analytics.search</field>
+        <field name="model">sale.order</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <search string="Filter Sales Analytics">
+                <field name="partner_id" string="Customer"/>
+                <field name="x_sales_channel" string="Channel"/>
+                <field name="x_payment_mode" string="Payment Mode"/>
+                <field name="name" string="Order #"/>
+                <filter string="Prepaid" name="filter_prepaid" domain="[('x_payment_mode', '=', 'prepaid')]"/>
+                <filter string="COD Only" name="filter_cod" domain="[('x_payment_mode', '=', 'cod')]"/>
+                <filter string="RTO Flagged" name="filter_rto" domain="[('x_is_rto', '=', True)]"/>
+                <separator/>
+                <filter string="Order Date" name="filter_date" date="date_order"/>
+                <group>
+                    <filter string="Customer" name="grp_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Sales Channel" name="grp_channel" context="{'group_by': 'x_sales_channel'}"/>
+                    <filter string="Payment Mode" name="grp_payment" context="{'group_by': 'x_payment_mode'}"/>
+                    <filter string="Order Month" name="grp_month" context="{'group_by': 'date_order:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_analytics_sales_channels" model="ir.actions.act_window">
+        <field name="name">Channel, COD &amp; RTO Analytics</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('state', '=', 'sale')]</field>
+        <field name="search_view_id" ref="view_sale_order_analytics_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_sale_order_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_sale_order_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 2. Top Selling Products (sale.order.line) -->
+    <record id="view_sale_order_line_analytics_graph" model="ir.ui.view">
+        <field name="name">sale.order.line.analytics.graph</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Top Products by Revenue" type="bar" sample="1">
+                <field name="product_id"/>
+                <field name="price_subtotal" type="measure"/>
+                <field name="product_uom_qty" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_sale_order_line_analytics_pivot" model="ir.ui.view">
+        <field name="name">sale.order.line.analytics.pivot</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Product Sales Volume &amp; Revenue" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="price_subtotal" type="measure"/>
+                <field name="product_uom_qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_top_products" model="ir.actions.act_window">
+        <field name="name">Top Selling Products</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('state', '=', 'sale'), ('product_id', '!=', False)]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_sale_order_line_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_sale_order_line_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 3. Purchase & Vendor Spend Analytics -->
+    <record id="view_purchase_order_analytics_graph" model="ir.ui.view">
+        <field name="name">purchase.order.analytics.graph</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Vendor Purchase Spend" type="bar" sample="1">
+                <field name="partner_id"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_analytics_pivot" model="ir.ui.view">
+        <field name="name">purchase.order.analytics.pivot</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Purchase Order &amp; Vendor Pivot" sample="1">
+                <field name="partner_id" type="row"/>
+                <field name="date_order" interval="month" type="col"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_purchase_vendors" model="ir.actions.act_window">
+        <field name="name">Vendor Spend Analytics</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('state', 'in', ('purchase', 'done'))]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_purchase_order_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_purchase_order_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 4. Purchased Products Breakdown (purchase.order.line) -->
+    <record id="view_purchase_order_line_analytics_graph" model="ir.ui.view">
+        <field name="name">purchase.order.line.analytics.graph</field>
+        <field name="model">purchase.order.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Purchased Products Spend" type="bar" sample="1">
+                <field name="product_id"/>
+                <field name="price_subtotal" type="measure"/>
+                <field name="product_qty" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_purchase_order_line_analytics_pivot" model="ir.ui.view">
+        <field name="name">purchase.order.line.analytics.pivot</field>
+        <field name="model">purchase.order.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Purchased Products x Vendor Pivot" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="partner_id" type="col"/>
+                <field name="price_subtotal" type="measure"/>
+                <field name="product_qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_purchase_products" model="ir.actions.act_window">
+        <field name="name">Purchased Products Breakdown</field>
+        <field name="res_model">purchase.order.line</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('order_id.state', 'in', ('purchase', 'done')), ('product_id', '!=', False)]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_purchase_order_line_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_purchase_order_line_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 5. Warehouse Stock & Location Analytics (stock.quant) -->
+    <record id="view_stock_quant_analytics_graph" model="ir.ui.view">
+        <field name="name">stock.quant.analytics.graph</field>
+        <field name="model">stock.quant</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Warehouse Stock On Hand vs Reserved" type="bar" sample="1">
+                <field name="product_id"/>
+                <field name="quantity" type="measure"/>
+                <field name="reserved_quantity" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_stock_quant_analytics_pivot" model="ir.ui.view">
+        <field name="name">stock.quant.analytics.pivot</field>
+        <field name="model">stock.quant</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Warehouse Location Stock Pivot" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="location_id" type="col"/>
+                <field name="quantity" type="measure"/>
+                <field name="reserved_quantity" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_stock_quants" model="ir.actions.act_window">
+        <field name="name">Warehouse Stock Quantities</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('location_id.usage', '=', 'internal')]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_stock_quant_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_stock_quant_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 6. Logistics, Packing & Courier AWB Analytics (stock.picking) -->
+    <record id="view_stock_picking_analytics_graph" model="ir.ui.view">
+        <field name="name">stock.picking.analytics.graph</field>
+        <field name="model">stock.picking</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Transfers by Operation &amp; Courier Status" type="bar" sample="1">
+                <field name="picking_type_id"/>
+                <field name="x_courier_status"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_stock_picking_analytics_pivot" model="ir.ui.view">
+        <field name="name">stock.picking.analytics.pivot</field>
+        <field name="model">stock.picking</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Dispatch Packing &amp; Courier Pivot" sample="1">
+                <field name="x_packing_status" type="row"/>
+                <field name="x_courier_status" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_logistics" model="ir.actions.act_window">
+        <field name="name">Logistics &amp; Courier AWB Analytics</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_stock_picking_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_stock_picking_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 7. Quality Control Analytics -->
+    <record id="view_custom_quality_check_graph" model="ir.ui.view">
+        <field name="name">custom.quality.check.graph</field>
+        <field name="model">custom.quality.check</field>
+        <field name="arch" type="xml">
+            <graph string="Quality Checks by State &amp; Type" type="pie">
+                <field name="quality_state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_quality_check_pivot" model="ir.ui.view">
+        <field name="name">custom.quality.check.pivot</field>
+        <field name="model">custom.quality.check</field>
+        <field name="arch" type="xml">
+            <pivot string="Quality Inspection Matrix">
+                <field name="check_type" type="row"/>
+                <field name="quality_state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_quality" model="ir.actions.act_window">
+        <field name="name">Quality Control Pass/Fail Analytics</field>
+        <field name="res_model">custom.quality.check</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- 8. CRM Pipeline & Channel Analytics -->
+    <record id="view_crm_lead_analytics_graph" model="ir.ui.view">
+        <field name="name">crm.lead.analytics.graph</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="CRM Pipeline Revenue by Stage &amp; Channel" type="bar" sample="1">
+                <field name="stage_id"/>
+                <field name="x_inquiry_channel"/>
+                <field name="expected_revenue" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_crm_lead_analytics_pivot" model="ir.ui.view">
+        <field name="name">crm.lead.analytics.pivot</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="CRM Inquiry Channel x Stage Pivot" sample="1">
+                <field name="x_inquiry_channel" type="row"/>
+                <field name="stage_id" type="col"/>
+                <field name="expected_revenue" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_crm" model="ir.actions.act_window">
+        <field name="name">CRM Pipeline &amp; Channel Analytics</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_crm_lead_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_crm_lead_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 9. Invoices & Vendor Bills Finance Analytics -->
+    <record id="view_account_move_analytics_graph" model="ir.ui.view">
+        <field name="name">account.move.analytics.graph</field>
+        <field name="model">account.move</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <graph string="Monthly Customer Invoices vs Vendor Bills" type="bar" sample="1">
+                <field name="invoice_date" interval="month"/>
+                <field name="move_type"/>
+                <field name="amount_total" type="measure"/>
+                <field name="amount_residual" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_account_move_analytics_pivot" model="ir.ui.view">
+        <field name="name">account.move.analytics.pivot</field>
+        <field name="model">account.move</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <pivot string="Invoiced Revenue, Vendor Bills &amp; Balances" sample="1">
+                <field name="move_type" type="row"/>
+                <field name="invoice_date" interval="month" type="col"/>
+                <field name="amount_total" type="measure"/>
+                <field name="amount_residual" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_invoices_bills" model="ir.actions.act_window">
+        <field name="name">Invoices, Bills &amp; Receivables Trend</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="domain">[('state', '=', 'posted'), ('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'graph', 'view_id': ref('view_account_move_analytics_graph')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'pivot', 'view_id': ref('view_account_move_analytics_pivot')})]"/>
+    </record>
+
+    <!-- 10. Subscriptions & Rentals Analytics -->
+    <record id="view_custom_subscription_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.subscription.analytics.graph</field>
+        <field name="model">custom.subscription</field>
+        <field name="arch" type="xml">
+            <graph string="Subscription MRR by Plan &amp; State" type="bar">
+                <field name="plan_id"/>
+                <field name="state"/>
+                <field name="mrr_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_subscription_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.subscription.analytics.pivot</field>
+        <field name="model">custom.subscription</field>
+        <field name="arch" type="xml">
+            <pivot string="Subscription MRR Matrix">
+                <field name="plan_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="mrr_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_subscriptions" model="ir.actions.act_window">
+        <field name="name">Subscription MRR Analytics</field>
+        <field name="res_model">custom.subscription</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <record id="view_custom_rental_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.rental.analytics.graph</field>
+        <field name="model">custom.rental.order</field>
+        <field name="arch" type="xml">
+            <graph string="Rental Revenue by State" type="bar">
+                <field name="state"/>
+                <field name="total_payable" type="measure"/>
+                <field name="late_fee_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_rental_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.rental.analytics.pivot</field>
+        <field name="model">custom.rental.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Rental Orders &amp; Late Fees">
+                <field name="state" type="row"/>
+                <field name="pickup_date" interval="month" type="col"/>
+                <field name="total_payable" type="measure"/>
+                <field name="late_fee_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_rentals" model="ir.actions.act_window">
+        <field name="name">Rental Revenue Analytics</field>
+        <field name="res_model">custom.rental.order</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- 11. Shop Floor, Timesheets & Payroll Analytics -->
+    <record id="view_custom_shopfloor_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.shopfloor.workorder.analytics.graph</field>
+        <field name="model">custom.shopfloor.workorder</field>
+        <field name="arch" type="xml">
+            <graph string="Shop Floor Output &amp; Duration by Workcenter" type="bar">
+                <field name="workcenter"/>
+                <field name="stage"/>
+                <field name="duration_minutes" type="measure"/>
+                <field name="quantity" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_shopfloor_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.shopfloor.workorder.analytics.pivot</field>
+        <field name="model">custom.shopfloor.workorder</field>
+        <field name="arch" type="xml">
+            <pivot string="Workcenter x Stage Matrix">
+                <field name="workcenter" type="row"/>
+                <field name="stage" type="col"/>
+                <field name="duration_minutes" type="measure"/>
+                <field name="quantity" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_shopfloor" model="ir.actions.act_window">
+        <field name="name">Shop Floor Workcenter Analytics</field>
+        <field name="res_model">custom.shopfloor.workorder</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <record id="view_custom_timesheet_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.timesheet.entry.analytics.graph</field>
+        <field name="model">custom.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <graph string="Employee Timesheet Hours" type="bar">
+                <field name="employee_id"/>
+                <field name="hours_spent" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_timesheet_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.timesheet.entry.analytics.pivot</field>
+        <field name="model">custom.timesheet.entry</field>
+        <field name="arch" type="xml">
+            <pivot string="Employee Timesheets x Month">
+                <field name="employee_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="hours_spent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_timesheets" model="ir.actions.act_window">
+        <field name="name">Employee Timesheet Analytics</field>
+        <field name="res_model">custom.timesheet.entry</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <record id="view_custom_payslip_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.hr.payslip.analytics.graph</field>
+        <field name="model">custom.hr.payslip</field>
+        <field name="arch" type="xml">
+            <graph string="Payroll Cost by Employee" type="bar">
+                <field name="employee_id"/>
+                <field name="net_wage" type="measure"/>
+                <field name="total_deductions" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_payslip_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.hr.payslip.analytics.pivot</field>
+        <field name="model">custom.hr.payslip</field>
+        <field name="arch" type="xml">
+            <pivot string="Payroll Spend x Month">
+                <field name="employee_id" type="row"/>
+                <field name="date_from" interval="month" type="col"/>
+                <field name="net_wage" type="measure"/>
+                <field name="total_earnings" type="measure"/>
+                <field name="total_deductions" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_payroll" model="ir.actions.act_window">
+        <field name="name">HR Payroll Cost Analytics</field>
+        <field name="res_model">custom.hr.payslip</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- 12. Upgrade Executive KPI Snapshots with Graph & Pivot -->
+    <record id="view_custom_kpi_snapshot_graph" model="ir.ui.view">
+        <field name="name">custom.kpi.snapshot.graph</field>
+        <field name="model">custom.kpi.snapshot</field>
+        <field name="arch" type="xml">
+            <graph string="Executive KPI Trends" type="line">
+                <field name="snapshot_date" interval="day"/>
+                <field name="sales_30d" type="measure"/>
+                <field name="gross_margin_30d" type="measure"/>
+                <field name="monthly_mrr" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_kpi_snapshot_pivot" model="ir.ui.view">
+        <field name="name">custom.kpi.snapshot.pivot</field>
+        <field name="model">custom.kpi.snapshot</field>
+        <field name="arch" type="xml">
+            <pivot string="Executive KPI Matrix">
+                <field name="snapshot_date" interval="month" type="row"/>
+                <field name="sales_30d" type="measure"/>
+                <field name="gross_margin_30d" type="measure"/>
+                <field name="rto_rate_pct" type="measure"/>
+                <field name="monthly_mrr" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="custom_enterprise.action_custom_kpi_snapshot" model="ir.actions.act_window">
+        <field name="view_mode">graph,pivot,list,form</field>
+    </record>
+
+    <!-- 13. Helpdesk Support Ticket Analytics -->
+    <record id="view_custom_support_ticket_graph" model="ir.ui.view">
+        <field name="name">custom.support.ticket.graph</field>
+        <field name="model">custom.support.ticket</field>
+        <field name="arch" type="xml">
+            <graph string="Support Tickets by Issue Type &amp; Stage" type="bar">
+                <field name="category"/>
+                <field name="stage"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_support_ticket_pivot" model="ir.ui.view">
+        <field name="name">custom.support.ticket.pivot</field>
+        <field name="model">custom.support.ticket</field>
+        <field name="arch" type="xml">
+            <pivot string="Support SLA &amp; Category Analytics">
+                <field name="category" type="row"/>
+                <field name="stage" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_support" model="ir.actions.act_window">
+        <field name="name">Support &amp; Size-Exchange Analytics</field>
+        <field name="res_model">custom.support.ticket</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- 14. RMA Return & Warranty Analytics -->
+    <record id="view_custom_rma_request_graph" model="ir.ui.view">
+        <field name="name">custom.rma.request.graph</field>
+        <field name="model">custom.rma.request</field>
+        <field name="arch" type="xml">
+            <graph string="Returns &amp; Exchanges by Reason" type="pie">
+                <field name="reason"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_rma_request_pivot" model="ir.ui.view">
+        <field name="name">custom.rma.request.pivot</field>
+        <field name="model">custom.rma.request</field>
+        <field name="arch" type="xml">
+            <pivot string="RMA Return &amp; Exchange Pivot">
+                <field name="request_type" type="row"/>
+                <field name="reason" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_rma" model="ir.actions.act_window">
+        <field name="name">RMA Return &amp; Exchange Analytics</field>
+        <field name="res_model">custom.rma.request</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <record id="view_custom_warranty_analytics_graph" model="ir.ui.view">
+        <field name="name">custom.warranty.claim.analytics.graph</field>
+        <field name="model">custom.warranty.claim</field>
+        <field name="arch" type="xml">
+            <graph string="Warranty Claims by Type &amp; Status" type="bar">
+                <field name="claim_type"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_custom_warranty_analytics_pivot" model="ir.ui.view">
+        <field name="name">custom.warranty.claim.analytics.pivot</field>
+        <field name="model">custom.warranty.claim</field>
+        <field name="arch" type="xml">
+            <pivot string="Warranty Claims x Product">
+                <field name="product_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_analytics_warranty" model="ir.actions.act_window">
+        <field name="name">Warranty Claims Analytics</field>
+        <field name="res_model">custom.warranty.claim</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+</odoo>

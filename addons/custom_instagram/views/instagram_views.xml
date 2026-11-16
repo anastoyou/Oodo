@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Unit Instagram Business Account (Credentials, Token Lifecycle, Webhooks & Automation) -->
+    <record id="view_custom_instagram_account_list" model="ir.ui.view">
+        <field name="name">custom.instagram.account.list</field>
+        <field name="model">custom.instagram.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="website_id"/>
+                <field name="ig_username"/>
+                <field name="connection_state" widget="badge"
+                       decoration-success="connection_state == 'connected'"
+                       decoration-warning="connection_state == 'expiring_soon'"
+                       decoration-danger="connection_state == 'error'"/>
+                <field name="days_until_expiry"/>
+                <field name="auto_sync_new_products"/>
+                <field name="product_sync_count"/>
+                <field name="sandbox_mode"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_instagram_account_form" model="ir.ui.view">
+        <field name="name">custom.instagram.account.form</field>
+        <field name="model">custom.instagram.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_oauth_login" string="Connect with Instagram Login" type="object" class="oe_highlight"/>
+                    <button name="action_test_connection" string="Verify / Fetch IG Profile" type="object" class="btn-secondary"/>
+                    <button name="action_refresh_access_token" string="Refresh 60-Day Token" type="object" class="btn-secondary"/>
+                    <button name="action_subscribe_webhooks" string="Subscribe Webhooks" type="object" class="btn-secondary"/>
+                    <button name="action_sync_all_unit_products" string="Sync All Unit Products" type="object" class="btn-secondary"/>
+                    <button name="action_simulate_test_webhook" string="Simulate Comment-to-DM Test" type="object" class="btn-secondary"/>
+                    <field name="connection_state" widget="statusbar" statusbar_visible="disconnected,expiring_soon,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_product_syncs" icon="fa-shopping-bag">
+                            <field string="Synced Products" name="product_sync_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_rules" icon="fa-bolt">
+                            <field string="DM Rules" name="rule_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_messages" icon="fa-paper-plane">
+                            <field string="DM &amp; Comments" name="message_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_webhook_logs" icon="fa-exchange">
+                            <field string="Webhook Logs" name="webhook_log_count" widget="statinfo"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Unit 1 - Ethnic Apparel IG"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Business Unit Binding">
+                            <field name="website_id"/>
+                            <field name="company_id"/>
+                            <field name="active"/>
+                            <field name="sandbox_mode"/>
+                        </group>
+                        <group string="Connected Instagram Business Profile">
+                            <field name="ig_username" placeholder="@brand_handle"/>
+                            <field name="ig_user_id"/>
+                            <field name="account_type"/>
+                            <field name="token_type"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-danger" role="alert" invisible="not last_error">
+                        <strong>API Error: </strong>
+                        <field name="last_error" readonly="1" nolabel="1"/>
+                    </div>
+
+                    <notebook>
+                        <page string="Credentials &amp; Instagram Login Token" name="credentials">
+                            <group>
+                                <group string="Meta Instagram Login App Credentials">
+                                    <field name="app_id" placeholder="Meta App ID / Instagram App ID"/>
+                                    <field name="app_secret" password="True"/>
+                                    <field name="api_version"/>
+                                    <field name="oauth_scopes"/>
+                                    <field name="redirect_uri" widget="CopyClipboardChar"/>
+                                </group>
+                                <group string="Latest Token Lifecycle (Auto-Refreshed Daily)">
+                                    <field name="access_token" password="True"/>
+                                    <field name="token_obtained_at"/>
+                                    <field name="token_expires_at"/>
+                                    <field name="last_refreshed_at"/>
+                                    <field name="days_until_expiry"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Webhook Configuration" name="webhooks">
+                            <group>
+                                <group string="Meta Webhook Endpoint">
+                                    <field name="public_base_url" placeholder="https://localapi.locanydm.online"/>
+                                    <field name="webhook_url" widget="CopyClipboardChar"/>
+                                    <field name="webhook_verify_token" widget="CopyClipboardChar"/>
+                                    <field name="verify_signature"/>
+                                    <field name="webhook_subscribed_at"/>
+                                </group>
+                                <group string="Subscribed Webhook Fields">
+                                    <field name="subscribe_messages"/>
+                                    <field name="subscribe_comments"/>
+                                    <field name="subscribe_postbacks"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Product Sync &amp; DM Automation" name="automation">
+                            <group>
+                                <group string="New Product Auto-Sync">
+                                    <field name="auto_sync_new_products"/>
+                                    <field name="sync_shared_products"/>
+                                    <field name="sync_service_products"/>
+                                    <field name="auto_publish_to_feed"/>
+                                </group>
+                                <group string="Meesho-Style Direct Link DM Behavior">
+                                    <field name="use_cart_instant_checkout"/>
+                                    <field name="auto_create_crm_lead"/>
+                                    <field name="default_utm_campaign"/>
+                                    <field name="fallback_dm_text"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- 2. Unit Product to Instagram Syncs -->
+    <record id="view_custom_instagram_product_sync_list" model="ir.ui.view">
+        <field name="name">custom.instagram.product.sync.list</field>
+        <field name="model">custom.instagram.product.sync</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="website_id"/>
+                <field name="account_id"/>
+                <field name="product_tmpl_id"/>
+                <field name="list_price"/>
+                <field name="keyword_code"/>
+                <field name="sync_state" widget="badge"
+                       decoration-success="sync_state in ('ready', 'published')"
+                       decoration-warning="sync_state == 'pending'"
+                       decoration-danger="sync_state == 'error'"/>
+                <field name="dm_sent_count"/>
+                <field name="dm_click_count"/>
+                <field name="tracked_dm_url" widget="CopyClipboardChar"/>
+                <button name="action_sync_now" string="Sync" type="object" class="btn-secondary btn-sm"/>
+                <button name="action_open_send_dm_wizard" string="Send DM Link" type="object" class="btn-primary btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_instagram_product_sync_form" model="ir.ui.view">
+        <field name="name">custom.instagram.product.sync.form</field>
+        <field name="model">custom.instagram.product.sync</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync_now" string="Sync / Publish to Instagram" type="object" class="oe_highlight"/>
+                    <button name="action_open_send_dm_wizard" string="Send Direct Link DM Now" type="object" class="btn-primary"/>
+                    <field name="sync_state" widget="statusbar" statusbar_visible="pending,ready,published,error"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Unit &amp; Product">
+                            <field name="account_id"/>
+                            <field name="website_id"/>
+                            <field name="product_tmpl_id"/>
+                            <field name="list_price"/>
+                            <field name="keyword_code"/>
+                        </group>
+                        <group string="Direct Checkout Links &amp; IG Media">
+                            <field name="tracked_dm_url" widget="CopyClipboardChar"/>
+                            <field name="direct_shop_url" widget="CopyClipboardChar"/>
+                            <field name="public_image_url"/>
+                            <field name="ig_media_id"/>
+                            <field name="last_synced_at"/>
+                        </group>
+                    </group>
+                    <group string="Tracking Performance">
+                        <field name="dm_sent_count"/>
+                        <field name="dm_click_count"/>
+                    </group>
+                    <group string="Instagram Caption / Comment CTA">
+                        <field name="caption" nolabel="1"/>
+                    </group>
+                    <group string="Sync Notes / Errors" invisible="not last_error">
+                        <field name="last_error" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Comment-to-DM & Keyword Rules -->
+    <record id="view_custom_instagram_rule_list" model="ir.ui.view">
+        <field name="name">custom.instagram.rule.list</field>
+        <field name="model">custom.instagram.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="website_id"/>
+                <field name="account_id"/>
+                <field name="trigger_on"/>
+                <field name="keywords"/>
+                <field name="product_sync_id"/>
+                <field name="use_generic_card"/>
+                <field name="trigger_count"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_instagram_rule_form" model="ir.ui.view">
+        <field name="name">custom.instagram.rule.form</field>
+        <field name="model">custom.instagram.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Trigger Configuration">
+                            <field name="name"/>
+                            <field name="account_id"/>
+                            <field name="website_id"/>
+                            <field name="trigger_on"/>
+                            <field name="keywords"/>
+                            <field name="match_mode"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Direct Product Link Response">
+                            <field name="product_sync_id"/>
+                            <field name="use_generic_card"/>
+                            <field name="auto_create_lead"/>
+                            <field name="trigger_count"/>
+                        </group>
+                    </group>
+                    <group string="DM Auto-Reply Message Template">
+                        <field name="reply_template" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 4. Instagram DM & Comment Inbox -->
+    <record id="view_custom_instagram_message_list" model="ir.ui.view">
+        <field name="name">custom.instagram.message.list</field>
+        <field name="model">custom.instagram.message</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="website_id"/>
+                <field name="direction"/>
+                <field name="channel_event"/>
+                <field name="sender_username"/>
+                <field name="sender_ig_id"/>
+                <field name="product_sync_id"/>
+                <field name="body"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'sent'"
+                       decoration-info="state == 'received'"
+                       decoration-danger="state == 'failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_instagram_message_form" model="ir.ui.view">
+        <field name="name">custom.instagram.message.form</field>
+        <field name="model">custom.instagram.message</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_send_dm" string="Send Direct Link DM" type="object" class="oe_highlight"
+                            invisible="direction == 'inbound' or state == 'sent'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,received,failed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Conversation">
+                            <field name="name"/>
+                            <field name="account_id"/>
+                            <field name="website_id"/>
+                            <field name="direction"/>
+                            <field name="channel_event"/>
+                            <field name="sender_username"/>
+                            <field name="sender_ig_id"/>
+                            <field name="comment_id"/>
+                        </group>
+                        <group string="Direct Product Link &amp; CRM">
+                            <field name="product_sync_id"/>
+                            <field name="direct_link_url" widget="CopyClipboardChar"/>
+                            <field name="use_generic_card"/>
+                            <field name="partner_id"/>
+                            <field name="lead_id"/>
+                            <field name="rule_id"/>
+                            <field name="external_message_id"/>
+                        </group>
+                    </group>
+                    <group string="Message Body">
+                        <field name="body" nolabel="1"/>
+                    </group>
+                    <group string="API Error" invisible="not error_message">
+                        <field name="error_message" nolabel="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- 5. Webhook Event Logs -->
+    <record id="view_custom_instagram_webhook_log_list" model="ir.ui.view">
+        <field name="name">custom.instagram.webhook.log.list</field>
+        <field name="model">custom.instagram.webhook.log</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="received_at"/>
+                <field name="website_id"/>
+                <field name="account_id"/>
+                <field name="event_type"/>
+                <field name="sender_username"/>
+                <field name="incoming_text"/>
+                <field name="signature_valid"/>
+                <field name="is_simulated"/>
+                <field name="process_status" widget="badge"
+                       decoration-success="process_status == 'processed'"
+                       decoration-warning="process_status == 'ignored'"
+                       decoration-danger="process_status == 'error'"/>
+                <field name="result_summary"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_instagram_webhook_log_form" model="ir.ui.view">
+        <field name="name">custom.instagram.webhook.log.form</field>
+        <field name="model">custom.instagram.webhook.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_reprocess" string="Replay Webhook Event" type="object" class="oe_highlight"/>
+                    <field name="process_status" widget="statusbar" statusbar_visible="received,processed,ignored,error"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="received_at"/>
+                            <field name="account_id"/>
+                            <field name="website_id"/>
+                            <field name="event_type"/>
+                            <field name="signature_valid"/>
+                            <field name="is_simulated"/>
+                        </group>
+                        <group>
+                            <field name="sender_ig_id"/>
+                            <field name="sender_username"/>
+                            <field name="comment_id"/>
+                            <field name="incoming_text"/>
+                            <field name="inbound_message_id"/>
+                            <field name="reply_message_id"/>
+                        </group>
+                    </group>
+                    <group string="Processing Summary">
+                        <field name="result_summary" nolabel="1"/>
+                    </group>
+                    <group string="Raw Webhook JSON">
+                        <field name="raw_payload" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 6. Send Direct Product Link DM Wizard -->
+    <record id="view_custom_instagram_send_link_wizard_form" model="ir.ui.view">
+        <field name="name">custom.instagram.send.link.wizard.form</field>
+        <field name="model">custom.instagram.send.link.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="account_id"/>
+                    <field name="product_sync_id"/>
+                    <field name="direct_link_preview" widget="CopyClipboardChar"/>
+                    <field name="recipient_ig_id"/>
+                    <field name="recipient_username"/>
+                    <field name="comment_id"/>
+                    <field name="use_generic_card"/>
+                </group>
+                <group string="DM Text">
+                    <field name="message_text" nolabel="1"/>
+                </group>
+                <footer>
+                    <button name="action_send_now" string="Send Direct Product Link DM" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- 7. Product Template Form Extension (Auto-Sync & Smart Button per Product) -->
+    <record id="product_template_form_instagram_sync" model="ir.ui.view">
+        <field name="name">product.template.form.custom.instagram</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_ig_syncs" icon="fa-instagram">
+                    <field string="IG Syncs" name="x_ig_sync_count" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Instagram DM Sync" name="instagram_dm_sync">
+                    <group>
+                        <group string="Per-Unit Instagram Sync">
+                            <field name="x_ig_auto_sync"/>
+                            <field name="x_ig_dm_keyword" placeholder="e.g. KURTI101 (defaults to SKU or BUY&lt;ID&gt;)"/>
+                        </group>
+                        <group>
+                            <button name="action_sync_to_instagram" string="Sync to Unit Instagram Now" type="object" class="btn-primary"/>
+                            <button name="action_open_send_ig_dm" string="Send Direct Link to DM" type="object" class="btn-secondary"/>
+                        </group>
+                    </group>
+                    <field name="x_ig_sync_ids" readonly="1">
+                        <list>
+                            <field name="website_id"/>
+                            <field name="account_id"/>
+                            <field name="keyword_code"/>
+                            <field name="sync_state"/>
+                            <field name="tracked_dm_url"/>
+                            <field name="dm_sent_count"/>
+                            <field name="dm_click_count"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- 8. Actions & Application Menus -->
+    <record id="action_custom_instagram_account" model="ir.actions.act_window">
+        <field name="name">Unit Instagram Accounts &amp; Credentials</field>
+        <field name="res_model">custom.instagram.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_instagram_product_sync" model="ir.actions.act_window">
+        <field name="name">Unit Product Syncs &amp; Direct Links</field>
+        <field name="res_model">custom.instagram.product.sync</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_instagram_rule" model="ir.actions.act_window">
+        <field name="name">Comment-to-DM &amp; Keyword Rules</field>
+        <field name="res_model">custom.instagram.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_instagram_message" model="ir.actions.act_window">
+        <field name="name">Instagram DM &amp; Comment Inbox</field>
+        <field name="res_model">custom.instagram.message</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_instagram_webhook_log" model="ir.actions.act_window">
+        <field name="name">Webhook Event Logs</field>
+        <field name="res_model">custom.instagram.webhook.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_instagram_send_link_wizard" model="ir.actions.act_window">
+        <field name="name">Send Direct Product Link DM</field>
+        <field name="res_model">custom.instagram.send.link.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_custom_instagram_root" name="Instagram DM" sequence="39"/>
+
+    <menuitem id="menu_custom_instagram_inbox" name="DM &amp; Comment Inbox" parent="menu_custom_instagram_root" sequence="10"/>
+    <menuitem id="menu_custom_instagram_messages" name="Messages &amp; Private Replies" parent="menu_custom_instagram_inbox" action="action_custom_instagram_message" sequence="10"/>
+    <menuitem id="menu_custom_instagram_send_wizard" name="Send Direct Link DM" parent="menu_custom_instagram_inbox" action="action_custom_instagram_send_link_wizard" sequence="20"/>
+
+    <menuitem id="menu_custom_instagram_catalog" name="Product Sync &amp; Links" parent="menu_custom_instagram_root" sequence="20"/>
+    <menuitem id="menu_custom_instagram_product_syncs" name="Unit Product Syncs" parent="menu_custom_instagram_catalog" action="action_custom_instagram_product_sync" sequence="10"/>
+    <menuitem id="menu_custom_instagram_rules" name="Comment-to-DM Rules" parent="menu_custom_instagram_catalog" action="action_custom_instagram_rule" sequence="20"/>
+
+    <menuitem id="menu_custom_instagram_settings" name="Units, Credentials &amp; Webhooks" parent="menu_custom_instagram_root" sequence="30"/>
+    <menuitem id="menu_custom_instagram_accounts" name="Unit Accounts &amp; Tokens" parent="menu_custom_instagram_settings" action="action_custom_instagram_account" sequence="10"/>
+    <menuitem id="menu_custom_instagram_webhooks" name="Webhook Event Logs" parent="menu_custom_instagram_settings" action="action_custom_instagram_webhook_log" sequence="20"/>
+</odoo>

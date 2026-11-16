@@ -18,20 +18,20 @@
                                 <div class="card-body d-flex flex-column justify-content-between">
                                     <div>
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-dark" t-esc="wo.name"/>
+                                            <span class="badge bg-dark" t-out="wo.name"/>
                                             <span t-if="wo.stage == 'in_progress'" class="badge bg-primary">In Progress</span>
                                             <span t-elif="wo.stage == 'paused'" class="badge bg-warning text-dark">Paused</span>
                                             <span t-else="" class="badge bg-secondary">Ready</span>
                                         </div>
-                                        <h5 class="card-title mb-1" t-esc="wo.title"/>
+                                        <h5 class="card-title mb-1" t-out="wo.title"/>
                                         <div class="small text-muted mb-2">
-                                            Workcenter: <strong t-esc="wo.workcenter"/> · Qty: <t t-esc="wo.quantity"/>
+                                            Workcenter: <strong t-out="wo.workcenter"/> · Qty: <t t-out="wo.quantity"/>
                                         </div>
                                         <div class="small mb-2" t-if="wo.instructions">
-                                            <t t-esc="wo.instructions"/>
+                                            <t t-out="wo.instructions"/>
                                         </div>
                                         <div class="small text-muted mb-3">
-                                            Logged: <strong><t t-esc="round(wo.duration_minutes, 1)"/> mins</strong>
+                                            Logged: <strong><t t-out="round(wo.duration_minutes, 1)"/> mins</strong>
                                         </div>
                                     </div>
                                     <form action="/shopfloor/action" method="post" class="d-flex gap-2">

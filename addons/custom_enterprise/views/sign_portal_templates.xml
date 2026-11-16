@@ -7,20 +7,20 @@
                     <div class="col-lg-8">
                         <div class="card shadow-sm">
                             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                <h4 class="mb-0" t-esc="sign_request.subject"/>
-                                <span class="badge bg-info" t-esc="sign_request.name"/>
+                                <h4 class="mb-0" t-out="sign_request.subject"/>
+                                <span class="badge bg-info" t-out="sign_request.name"/>
                             </div>
                             <div class="card-body">
                                 <div class="mb-4" t-if="sign_request.agreement_body">
                                     <t t-out="sign_request.agreement_body"/>
                                 </div>
                                 <div t-if="signer.state == 'signed'" class="alert alert-success">
-                                    <strong>Signed!</strong> Signed by <span t-esc="signer.signed_name"/> on <span t-esc="signer.signed_on"/>.
+                                    <strong>Signed!</strong> Signed by <span t-out="signer.signed_name"/> on <span t-out="signer.signed_on"/>.
                                 </div>
                                 <form t-if="signer.state != 'signed'" t-attf-action="/my/sign/#{signer.access_token}/submit" method="post">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Type Full Legal Name to Electronically Sign (<t t-esc="signer.role"/>)</label>
+                                        <label class="form-label fw-bold">Type Full Legal Name to Electronically Sign (<t t-out="signer.role"/>)</label>
                                         <input type="text" name="signed_name" class="form-control" required="required" t-att-value="signer.partner_id.name"/>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Adopt &amp; Sign Agreement</button>
@@ -49,7 +49,7 @@
                                 <select name="appointment_type_id" class="form-select" required="required">
                                     <t t-foreach="appointment_types" t-as="atype">
                                         <option t-att-value="atype.id">
-                                            <t t-esc="atype.name"/> (<t t-esc="atype.duration_minutes"/> mins - <t t-esc="atype.location"/>)
+                                            <t t-out="atype.name"/> (<t t-out="atype.duration_minutes"/> mins - <t t-out="atype.location"/>)
                                         </option>
                                     </t>
                                 </select>

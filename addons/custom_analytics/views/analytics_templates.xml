@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="analytics_dashboard_page" name="Executive Analytics Web Dashboard">
+        <t t-call="website.layout">
+            <div class="container py-4">
+                <t t-set="curr" t-value="board.currency_id.symbol or '₹'"/>
+                <t t-set="mod" t-value="active_module or 'all'"/>
+
+                <!-- Top Header -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <div>
+                        <h1 class="h3 mb-1">Business &amp; Operations Analytics Studio</h1>
+                        <p class="text-muted small mb-0">
+                            Period: <strong><t t-out="board.date_from"/></strong> to <strong><t t-out="board.date_to"/></strong>
+                            <t t-if="board.partner_id"> · Customer: <span class="badge bg-info text-dark" t-out="board.partner_id.display_name"/></t>
+                            <t t-if="selected_channel"> · Channel: <span class="badge bg-secondary" t-out="selected_channel"/></t>
+                            <t t-if="selected_payment"> · Payment: <span class="badge bg-warning text-dark" t-out="selected_payment"/></t>
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/analytics?days=7" t-attf-class="btn btn-sm {{'btn-dark' if days == 7 else 'btn-outline-dark'}}">7D</a>
+                        <a href="/analytics?days=30" t-attf-class="btn btn-sm {{'btn-dark' if days == 30 else 'btn-outline-dark'}}">30D</a>
+                        <a href="/analytics?days=90" t-attf-class="btn btn-sm {{'btn-dark' if days == 90 else 'btn-outline-dark'}}">90D</a>
+                        <a href="/analytics/roadmap" class="btn btn-outline-primary btn-sm">Phase 1→5 Roadmap</a>
+                        <a href="/odoo" class="btn btn-primary btn-sm">Odoo Backend</a>
+                    </div>
+                </div>
+
+                <!-- Scaling Phase Readiness Alert Banner -->
+                <t t-if="roadmap">
+                    <div t-attf-class="alert {{'alert-success' if roadmap.alert_level == 'ready' else ('alert-warning' if roadmap.alert_level == 'warning' else 'alert-info')}} d-flex flex-wrap justify-content-between align-items-center py-2 px-3 mb-3 gap-2">
+                        <div class="small">
+                            <strong>Phase <t t-out="roadmap.current_phase"/> Progress (<t t-out="roadmap.gate_progress_pct"/>%):</strong>
+                            <span t-out="roadmap.alert_banner"/>
+                        </div>
+                        <a href="/analytics/roadmap" class="btn btn-sm btn-dark">View Phase Gate Details →</a>
+                    </div>
+                </t>
+
+                <!-- Module Switcher Tabs -->
+                <ul class="nav nav-pills mb-3 gap-1">
+                    <li class="nav-item">
+                        <a t-attf-href="/analytics?module=all&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;partner_id={{selected_partner_id or ''}}&amp;channel={{selected_channel}}&amp;payment_mode={{selected_payment}}"
+                           t-attf-class="nav-link py-1 px-3 {{'active' if mod == 'all' else 'bg-light text-dark'}}">All Modules (360°)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a t-attf-href="/analytics?module=sales_crm&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;partner_id={{selected_partner_id or ''}}&amp;channel={{selected_channel}}&amp;payment_mode={{selected_payment}}"
+                           t-attf-class="nav-link py-1 px-3 {{'active' if mod == 'sales_crm' else 'bg-light text-dark'}}">Sales &amp; CRM</a>
+                    </li>
+                    <li class="nav-item">
+                        <a t-attf-href="/analytics?module=purchase_stock&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;partner_id={{selected_partner_id or ''}}&amp;channel={{selected_channel}}&amp;payment_mode={{selected_payment}}"
+                           t-attf-class="nav-link py-1 px-3 {{'active' if mod == 'purchase_stock' else 'bg-light text-dark'}}">Purchase &amp; Inventory</a>
+                    </li>
+                    <li class="nav-item">
+                        <a t-attf-href="/analytics?module=finance&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;partner_id={{selected_partner_id or ''}}&amp;channel={{selected_channel}}&amp;payment_mode={{selected_payment}}"
+                           t-attf-class="nav-link py-1 px-3 {{'active' if mod == 'finance' else 'bg-light text-dark'}}">Finance &amp; Cashflow</a>
+                    </li>
+                    <li class="nav-item">
+                        <a t-attf-href="/analytics?module=ops_hr&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;partner_id={{selected_partner_id or ''}}&amp;channel={{selected_channel}}&amp;payment_mode={{selected_payment}}"
+                           t-attf-class="nav-link py-1 px-3 {{'active' if mod == 'ops_hr' else 'bg-light text-dark'}}">Ops, HR &amp; Support</a>
+                    </li>
+                </ul>
+
+                <!-- Interactive Filter Bar (Customer, Channel, Payment, Date Range) -->
+                <form method="get" action="/analytics" class="card shadow-sm border-0 p-3 mb-4 bg-light">
+                    <input type="hidden" name="module" t-att-value="mod"/>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label small text-muted mb-1">Customer Filter</label>
+                            <select name="partner_id" class="form-select form-select-sm">
+                                <option value="">All Customers</option>
+                                <t t-foreach="customers or []" t-as="cust">
+                                    <option t-att-value="cust.id" t-att-selected="'selected' if cust.id == selected_partner_id else None" t-out="cust.display_name"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small text-muted mb-1">Channel</label>
+                            <select name="channel" class="form-select form-select-sm">
+                                <option value="">All Channels</option>
+                                <t t-foreach="channels or []" t-as="ch">
+                                    <option t-att-value="ch[0]" t-att-selected="'selected' if ch[0] == selected_channel else None" t-out="ch[1]"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small text-muted mb-1">Payment Mode</label>
+                            <select name="payment_mode" class="form-select form-select-sm">
+                                <option value="">All Modes</option>
+                                <option value="prepaid" t-att-selected="'selected' if selected_payment == 'prepaid' else None">Prepaid</option>
+                                <option value="cod" t-att-selected="'selected' if selected_payment == 'cod' else None">COD</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small text-muted mb-1">From</label>
+                            <input type="date" name="date_from" class="form-control form-control-sm" t-att-value="board.date_from"/>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small text-muted mb-1">To</label>
+                            <input type="date" name="date_to" class="form-control form-control-sm" t-att-value="board.date_to"/>
+                        </div>
+                        <div class="col-6 col-md-1 d-flex gap-1">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Apply</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Primary KPI Cards with Period-over-Period Comparison -->
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Confirmed Sales</span>
+                                <span t-attf-class="badge {{'bg-success' if board.sales_growth_pct &gt;= 0 else 'bg-danger'}}">
+                                    <t t-out="'+' if board.sales_growth_pct &gt; 0 else ''"/><t t-out="board.sales_growth_pct"/>%
+                                </span>
+                            </div>
+                            <div class="h4 mb-1"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.total_sales)"/></div>
+                            <div class="small text-muted">Prev: <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.prev_total_sales)"/> · <t t-out="board.order_count"/> orders</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Gross Margin</span>
+                                <span t-attf-class="badge {{'bg-success' if board.margin_growth_pct &gt;= 0 else 'bg-danger'}}">
+                                    <t t-out="'+' if board.margin_growth_pct &gt; 0 else ''"/><t t-out="board.margin_growth_pct"/>%
+                                </span>
+                            </div>
+                            <div class="h4 mb-1"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.total_margin)"/></div>
+                            <div class="small text-muted"><t t-out="board.margin_pct"/>% margin · Prev: <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.prev_total_margin)"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">Purchase Spend</span>
+                                <span t-attf-class="badge {{'bg-secondary' if board.purchase_growth_pct &gt;= 0 else 'bg-success'}}">
+                                    <t t-out="'+' if board.purchase_growth_pct &gt; 0 else ''"/><t t-out="board.purchase_growth_pct"/>%
+                                </span>
+                            </div>
+                            <div class="h4 mb-1"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.purchase_spend)"/></div>
+                            <div class="small text-muted"><t t-out="board.purchase_count"/> POs · Prev: <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.prev_purchase_spend)"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="d-flex justify-content-between">
+                                <span class="small text-muted">COD &amp; RTO Risk</span>
+                                <span class="badge bg-warning text-dark"><t t-out="board.rto_rate_pct"/>% RTO</span>
+                            </div>
+                            <div class="h4 mb-1"><t t-out="board.prepaid_order_count"/> Prepaid / <t t-out="board.cod_order_count"/> COD</div>
+                            <div class="small text-danger"><t t-out="board.rto_order_count"/> RTO flagged orders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module Summary Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3" t-if="mod in ('all', 'finance')">
+                        <div class="card shadow-sm border-0 p-3 bg-light h-100">
+                            <div class="small text-muted">Receivables / Payables</div>
+                            <div class="fw-bold"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.customer_receivable)"/> AR</div>
+                            <div class="small text-muted"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.vendor_payable)"/> AP · Inv <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.invoiced_revenue)"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3" t-if="mod in ('all', 'sales_crm')">
+                        <div class="card shadow-sm border-0 p-3 bg-light h-100">
+                            <div class="small text-muted">CRM Pipeline &amp; Subscriptions</div>
+                            <div class="fw-bold"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.crm_pipeline_value)"/> (<t t-out="board.crm_open_count"/>)</div>
+                            <div class="small text-muted">MRR: <t t-out="curr"/><t t-out="'{:,.2f}'.format(board.active_mrr)"/> · Rentals: <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.active_rental_total)"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3" t-if="mod in ('all', 'purchase_stock')">
+                        <div class="card shadow-sm border-0 p-3 bg-light h-100">
+                            <div class="small text-muted">Stock Valuation &amp; Alerts</div>
+                            <div class="fw-bold"><t t-out="curr"/><t t-out="'{:,.2f}'.format(board.inventory_value)"/></div>
+                            <div class="small text-danger"><t t-out="board.low_stock_count"/> low-stock SKUs (&lt;= 5)</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3" t-if="mod in ('all', 'ops_hr')">
+                        <div class="card shadow-sm border-0 p-3 bg-light h-100">
+                            <div class="small text-muted">HR, RMAs &amp; Support</div>
+                            <div class="fw-bold"><t t-out="board.open_rma_count"/> RMAs · <t t-out="board.open_ticket_count"/> Tickets</div>
+                            <div class="small text-muted"><t t-out="board.timesheet_hours"/>h · Payroll <t t-out="curr"/><t t-out="'{:,.0f}'.format(board.payroll_total)"/></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Chart.js Row 1: Period Comparison Trend + Cross-Module Comparison -->
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-7">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Sales vs Previous Period vs Purchase Trend</span>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" data-chart-switch="trend:line">Line</button>
+                                    <button type="button" class="btn btn-outline-primary" data-chart-switch="trend:bar">Bar</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="analyticsTrendChart" style="max-height: 280px;"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Cross-Module Comparison</span>
+                                <span class="badge bg-light text-dark">Current Period</span>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="analyticsModuleChart" style="max-height: 280px;"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Chart.js Row 2: Channels, Payment/RTO Mix & Top Customers -->
+                <div class="row g-3 mb-4" t-if="mod in ('all', 'sales_crm')">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Channel Comparison</span>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active" data-chart-switch="channel:bar">Bar</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-chart-switch="channel:doughnut">Donut</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="analyticsChannelChart" style="max-height: 240px;"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Prepaid vs COD vs RTO Split</div>
+                            <div class="card-body">
+                                <canvas id="analyticsPaymentChart" style="max-height: 240px;"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Top Customers Comparison</div>
+                            <div class="card-body">
+                                <canvas id="analyticsCustomerChart" style="max-height: 240px;"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drill-Down Tables: Channels + Customers -->
+                <div class="row g-3 mb-4" t-if="mod in ('all', 'sales_crm')">
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Sales Channel &amp; COD/RTO Breakdown</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Channel</th>
+                                            <th style="width: 26%;">Share</th>
+                                            <th class="text-end">Orders</th>
+                                            <th class="text-end">Revenue</th>
+                                            <th class="text-end">COD/RTO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="board.channel_line_ids" t-as="line">
+                                            <tr>
+                                                <td t-out="line.channel_name"/>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="progress flex-grow-1" style="height: 7px;">
+                                                            <div class="progress-bar bg-primary" role="progressbar" t-attf-style="width: {{line.bar_pct}}%;"/>
+                                                        </div>
+                                                        <span class="small text-muted"><t t-out="line.share_pct"/>%</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end" t-out="line.order_count"/>
+                                                <td class="text-end"><t t-out="curr"/><t t-out="'{:,.2f}'.format(line.revenue)"/></td>
+                                                <td class="text-end"><t t-out="line.cod_count"/> / <t t-out="line.rto_count"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr t-if="not board.channel_line_ids">
+                                            <td colspan="5" class="text-center text-muted py-3">No confirmed orders match current filters.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Top Customers (Click to Filter)</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th class="text-end">Orders</th>
+                                            <th class="text-end">Share</th>
+                                            <th class="text-end">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="board.customer_line_ids[:10]" t-as="cl">
+                                            <tr>
+                                                <td>
+                                                    <a t-attf-href="/analytics?partner_id={{cl.partner_id.id}}&amp;date_from={{board.date_from}}&amp;date_to={{board.date_to}}&amp;module={{mod}}"
+                                                       class="text-decoration-none fw-medium" t-out="cl.partner_id.display_name"/>
+                                                </td>
+                                                <td class="text-end" t-out="cl.order_count"/>
+                                                <td class="text-end"><t t-out="cl.share_pct"/>%</td>
+                                                <td class="text-end"><t t-out="curr"/><t t-out="'{:,.2f}'.format(cl.revenue)"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr t-if="not board.customer_line_ids">
+                                            <td colspan="4" class="text-center text-muted py-3">No customer orders match current filters.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Products & Top Vendors Side by Side -->
+                <div class="row g-3 mb-4" t-if="mod in ('all', 'sales_crm', 'purchase_stock')">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Top Selling Products</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th class="text-end">Units</th>
+                                            <th class="text-end">Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="board.product_line_ids[:10]" t-as="pl">
+                                            <tr>
+                                                <td t-out="pl.product_id.display_name"/>
+                                                <td class="text-end" t-out="pl.units_sold"/>
+                                                <td class="text-end"><t t-out="curr"/><t t-out="'{:,.2f}'.format(pl.revenue)"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr t-if="not board.product_line_ids">
+                                            <td colspan="3" class="text-center text-muted py-3">No product sales in this period.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold">Top Vendors by Purchase Spend</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Vendor</th>
+                                            <th class="text-end">POs</th>
+                                            <th class="text-end">Spend</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="board.vendor_line_ids[:10]" t-as="vl">
+                                            <tr>
+                                                <td t-out="vl.partner_id.display_name"/>
+                                                <td class="text-end" t-out="vl.po_count"/>
+                                                <td class="text-end"><t t-out="curr"/><t t-out="'{:,.2f}'.format(vl.total_spend)"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr t-if="not board.vendor_line_ids">
+                                            <td colspan="3" class="text-center text-muted py-3">No confirmed purchase orders in this period.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Valuation & Low Stock Watch -->
+                <div class="card shadow-sm border-0" t-if="mod in ('all', 'purchase_stock')">
+                    <div class="card-header bg-white fw-bold">Inventory Valuation &amp; Low-Stock Watchlist</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">On Hand</th>
+                                    <th class="text-end">Reserved</th>
+                                    <th class="text-end">Available</th>
+                                    <th class="text-end">Cost Value</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="board.stock_line_ids" t-as="sl">
+                                    <tr>
+                                        <td t-out="sl.product_id.display_name"/>
+                                        <td class="text-end" t-out="sl.qty_on_hand"/>
+                                        <td class="text-end" t-out="sl.qty_reserved"/>
+                                        <td class="text-end" t-out="sl.qty_available"/>
+                                        <td class="text-end"><t t-out="curr"/><t t-out="'{:,.2f}'.format(sl.stock_value)"/></td>
+                                        <td class="text-center">
+                                            <span t-if="sl.is_low_stock" class="badge bg-danger">Low Stock</span>
+                                            <span t-else="" class="badge bg-success">Healthy</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr t-if="not board.stock_line_ids">
+                                    <td colspan="6" class="text-center text-muted py-3">No internal stock quants recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Serialized Chart JSON + Bundled Local Chart.js v4.5.0 -->
+                <script id="analytics-chart-data" type="application/json" t-out="chart_json or board.get_chart_payload_json()"/>
+                <script src="/web/static/lib/Chart/Chart.js"/>
+                <script type="text/javascript">
+                <![CDATA[
+                    (function () {
+                        var dataEl = document.getElementById("analytics-chart-data");
+                        if (!dataEl || typeof window.Chart === "undefined") {
+                            return;
+                        }
+                        var payload = JSON.parse(dataEl.textContent || "{}");
+                        var palette = ["#0d6efd", "#198754", "#6610f2", "#fd7e14", "#20c997", "#dc3545", "#0dcaf0", "#6c757d"];
+                        var charts = {};
+
+                        function renderTrend(chartType) {
+                            var ctx = document.getElementById("analyticsTrendChart");
+                            if (!ctx || !payload.trend) return;
+                            if (charts.trend) charts.trend.destroy();
+                            charts.trend = new Chart(ctx, {
+                                type: chartType || "line",
+                                data: {
+                                    labels: payload.trend.labels,
+                                    datasets: [
+                                        {
+                                            label: "Current Sales",
+                                            data: payload.trend.sales,
+                                            borderColor: "#0d6efd",
+                                            backgroundColor: "rgba(13,110,253,0.20)",
+                                            tension: 0.3,
+                                            fill: chartType === "line"
+                                        },
+                                        {
+                                            label: "Previous Period Sales",
+                                            data: payload.trend.prev_sales,
+                                            borderColor: "#6c757d",
+                                            backgroundColor: "rgba(108,117,125,0.20)",
+                                            borderDash: [5, 5],
+                                            tension: 0.3
+                                        },
+                                        {
+                                            label: "Purchase Spend",
+                                            data: payload.trend.purchase,
+                                            borderColor: "#fd7e14",
+                                            backgroundColor: "rgba(253,126,20,0.25)",
+                                            tension: 0.3
+                                        }
+                                    ]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+                        }
+
+                        function renderModuleCompare() {
+                            var ctx = document.getElementById("analyticsModuleChart");
+                            if (!ctx || !payload.modules) return;
+                            charts.modules = new Chart(ctx, {
+                                type: "bar",
+                                data: {
+                                    labels: payload.modules.labels,
+                                    datasets: [{
+                                        label: payload.currency || "Amount",
+                                        data: payload.modules.current,
+                                        backgroundColor: palette
+                                    }]
+                                },
+                                options: {
+                                    indexAxis: "y",
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } }
+                                }
+                            });
+                        }
+
+                        function renderChannel(chartType) {
+                            var ctx = document.getElementById("analyticsChannelChart");
+                            if (!ctx || !payload.channels) return;
+                            if (charts.channel) charts.channel.destroy();
+                            charts.channel = new Chart(ctx, {
+                                type: chartType || "bar",
+                                data: {
+                                    labels: payload.channels.labels,
+                                    datasets: [{
+                                        label: "Revenue",
+                                        data: payload.channels.revenue,
+                                        backgroundColor: palette
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: chartType === "doughnut" } }
+                                }
+                            });
+                        }
+
+                        function renderPayment() {
+                            var ctx = document.getElementById("analyticsPaymentChart");
+                            if (!ctx || !payload.payment_mix) return;
+                            charts.payment = new Chart(ctx, {
+                                type: "doughnut",
+                                data: {
+                                    labels: payload.payment_mix.labels,
+                                    datasets: [{
+                                        data: payload.payment_mix.values,
+                                        backgroundColor: ["#198754", "#ffc107", "#dc3545"]
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+                        }
+
+                        function renderCustomers() {
+                            var ctx = document.getElementById("analyticsCustomerChart");
+                            if (!ctx || !payload.customers) return;
+                            charts.customers = new Chart(ctx, {
+                                type: "bar",
+                                data: {
+                                    labels: payload.customers.labels,
+                                    datasets: [{
+                                        label: "Revenue",
+                                        data: payload.customers.revenue,
+                                        backgroundColor: "#6610f2"
+                                    }]
+                                },
+                                options: {
+                                    indexAxis: "y",
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } }
+                                }
+                            });
+                        }
+
+                        renderTrend("line");
+                        renderModuleCompare();
+                        renderChannel("bar");
+                        renderPayment();
+                        renderCustomers();
+
+                        document.querySelectorAll("[data-chart-switch]").forEach(function (btn) {
+                            btn.addEventListener("click", function () {
+                                var parts = btn.getAttribute("data-chart-switch").split(":");
+                                var group = btn.closest(".btn-group");
+                                if (group) {
+                                    group.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+                                }
+                                btn.classList.add("active");
+                                if (parts[0] === "trend") renderTrend(parts[1]);
+                                if (parts[0] === "channel") renderChannel(parts[1]);
+                            });
+                        });
+                    })();
+                ]]>
+                </script>
+            </div>
+        </t>
+    </template>
+
+    <template id="roadmap_tracker_page" name="Scaling Roadmap Phase 1-5 Tracker">
+        <t t-call="website.layout">
+            <div class="container py-4">
+                <t t-set="curr" t-value="roadmap.currency_id.symbol or '₹'"/>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <div>
+                        <h1 class="h3 mb-1">Scaling Roadmap: Phase 1 → Phase 5 Tracker</h1>
+                        <p class="text-muted small mb-0">
+                            Evaluated <strong t-out="roadmap.evaluated_date"/> · Move up only when Gate Criteria clear for 3 consecutive months from profit.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/analytics" class="btn btn-outline-dark btn-sm">← Back to /analytics</a>
+                        <a href="/odoo" class="btn btn-primary btn-sm">Odoo Backend</a>
+                    </div>
+                </div>
+
+                <!-- 5-Step Phase Pipeline Stepper -->
+                <div class="row g-2 mb-4">
+                    <t t-foreach="phases or []" t-as="p">
+                        <div class="col-12 col-md">
+                            <div t-attf-class="card h-100 border-0 shadow-sm p-3 {{'bg-primary text-white' if p['is_current'] else ('bg-success text-white' if p['is_done'] else 'bg-light')}}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-dark">Phase <t t-out="p['key']"/></span>
+                                    <span class="small" t-if="p['is_done']">Cleared</span>
+                                    <span class="small fw-bold" t-elif="p['is_current']">Current</span>
+                                    <span class="small text-muted" t-else="">Locked</span>
+                                </div>
+                                <div class="fw-bold small" t-out="p['title']"/>
+                                <div t-attf-class="small {{'text-white-50' if (p['is_current'] or p['is_done']) else 'text-muted'}}" t-out="p['rev_band']"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Alert Banner & Next Phase Promotion Card -->
+                <div t-attf-class="alert {{'alert-success' if roadmap.alert_level == 'ready' else ('alert-warning' if roadmap.alert_level == 'warning' else 'alert-info')}} shadow-sm mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h5 class="alert-heading mb-1">
+                                <span t-if="roadmap.ready_for_next_phase">NEXT PHASE GATE CLEARED!</span>
+                                <span t-elif="roadmap.alert_level == 'warning'">APPROACHING NEXT PHASE GATE</span>
+                                <span t-else="">CURRENT PHASE PROGRESS</span>
+                            </h5>
+                            <p class="mb-1" t-out="roadmap.alert_banner"/>
+                            <div class="small">
+                                <strong>Next Milestone:</strong> <span t-out="roadmap.next_phase_label"/>
+                                · <strong>Unlocks:</strong> <span t-out="roadmap.next_phase_unlocks"/>
+                            </div>
+                        </div>
+                        <form t-if="roadmap.ready_for_next_phase and roadmap.current_phase != '5'" method="post" action="/analytics/roadmap/promote">
+                            <input type="hidden" name="csrf_token" t-att-value="request and request.csrf_token() or ''"/>
+                            <button type="submit" class="btn btn-success fw-bold">Move to Next Phase →</button>
+                        </form>
+                    </div>
+                    <div class="progress mt-3" style="height: 14px;">
+                        <div t-attf-class="progress-bar {{'bg-success' if roadmap.ready_for_next_phase else 'bg-primary'}}" role="progressbar" t-attf-style="width: {{roadmap.gate_progress_pct}}%;">
+                            <t t-out="roadmap.gate_progress_pct"/>% Ready
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Website / Business Unit Advisor Card -->
+                <div t-attf-class="card shadow-sm border-0 mb-4 {{'border-start border-4 border-success' if roadmap.ready_for_new_website else 'border-start border-4 border-secondary'}}">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <strong>New Website / Business Unit Advisor</strong>
+                                <span t-if="roadmap.ready_for_new_website" class="badge bg-success">Unlocked (Phase 5 Ready)</span>
+                                <span t-else="" class="badge bg-secondary">Use URL Paths in Current Phase</span>
+                                <span class="badge bg-light text-dark border">Websites: <t t-out="roadmap.active_websites"/></span>
+                            </div>
+                            <p class="small text-muted mb-0" t-out="roadmap.website_unit_advice"/>
+                        </div>
+                        <a href="/odoo/settings#website_settings" class="btn btn-sm btn-outline-primary">Website Settings</a>
+                    </div>
+                </div>
+
+                <!-- Trailing 3-Month Revenue Streak + Cash & Operations Summary -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="small text-muted">Last 30d Net Revenue</div>
+                            <div class="h5 mb-0"><t t-out="curr"/><t t-out="'{:,.0f}'.format(roadmap.net_revenue_30d)"/></div>
+                            <div class="small text-muted">Streak: <t t-out="roadmap.consecutive_months_cleared"/> / 3 months</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="small text-muted">Prev 31–60d / 61–90d</div>
+                            <div class="fw-bold"><t t-out="curr"/><t t-out="'{:,.0f}'.format(roadmap.net_revenue_m2)"/> / <t t-out="curr"/><t t-out="'{:,.0f}'.format(roadmap.net_revenue_m3)"/></div>
+                            <div class="small text-muted">Consecutive months check</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="small text-muted">Cash Reserve (Bank + Cash)</div>
+                            <div class="h5 mb-0"><t t-out="curr"/><t t-out="'{:,.0f}'.format(roadmap.cash_reserve)"/></div>
+                            <div class="small text-muted">Margin: <t t-out="roadmap.margin_pct"/>%</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <div class="small text-muted">Customers &amp; Repeat %</div>
+                            <div class="h5 mb-0"><t t-out="roadmap.total_customers"/> (<t t-out="roadmap.repeat_customer_pct"/>%)</div>
+                            <div class="small text-muted">RTO: <t t-out="roadmap.rto_rate_pct"/>% · WH/Stores: <t t-out="roadmap.active_warehouses"/></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase Gate Criteria Checklist Table -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        <span>Phase Gate Checklist (Must-Have, 3-Month Streak &amp; Signals)</span>
+                        <span class="small text-muted">Must-Have: <t t-out="roadmap.must_cleared_count"/>/<t t-out="roadmap.must_total_count"/> · Signals: <t t-out="roadmap.signal_cleared_count"/>/<t t-out="roadmap.signal_total_count"/></span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Criterion</th>
+                                    <th>Target</th>
+                                    <th>Live Actual</th>
+                                    <th style="width: 24%;">Progress</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="roadmap.criteria_line_ids" t-as="cr">
+                                    <tr>
+                                        <td>
+                                            <span t-if="cr.criteria_type == 'must'" class="badge bg-primary">Must-Have</span>
+                                            <span t-elif="cr.criteria_type == 'streak'" class="badge bg-info text-dark">3-Mo Streak</span>
+                                            <span t-else="" class="badge bg-secondary">Signal</span>
+                                        </td>
+                                        <td class="fw-medium" t-out="cr.name"/>
+                                        <td t-out="cr.target_display"/>
+                                        <td class="fw-bold" t-out="cr.actual_display"/>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 8px;">
+                                                    <div t-attf-class="progress-bar {{'bg-success' if cr.is_met else 'bg-warning'}}" role="progressbar" t-attf-style="width: {{cr.progress_pct}}%;"/>
+                                                </div>
+                                                <span class="small text-muted"><t t-out="cr.progress_pct"/>%</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-if="cr.is_met" class="badge bg-success">Cleared</span>
+                                            <span t-else="" class="badge bg-light text-dark border">Pending</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_analytics_board_user,custom.analytics.board.user,custom.analytics.board,base.group_user,crud,
+access_custom_analytics_channel_line_user,custom.analytics.channel.line.user,custom.analytics.channel.line,base.group_user,crud,
+access_custom_analytics_product_line_user,custom.analytics.product.line.user,custom.analytics.product.line,base.group_user,crud,
+access_custom_analytics_customer_line_user,custom.analytics.customer.line.user,custom.analytics.customer.line,base.group_user,crud,
+access_custom_analytics_vendor_line_user,custom.analytics.vendor.line.user,custom.analytics.vendor.line,base.group_user,crud,
+access_custom_analytics_stock_line_user,custom.analytics.stock.line.user,custom.analytics.stock.line,base.group_user,crud,
+access_custom_analytics_trend_line_user,custom.analytics.trend.line.user,custom.analytics.trend.line,base.group_user,crud,
+access_custom_roadmap_snapshot_user,custom.roadmap.snapshot.user,custom.roadmap.snapshot,base.group_user,crud,
+access_custom_roadmap_criteria_user,custom.roadmap.criteria.user,custom.roadmap.criteria,base.group_user,crud,

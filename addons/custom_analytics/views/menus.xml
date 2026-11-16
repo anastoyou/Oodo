@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_custom_analytics_root" name="Analytics" sequence="46"/>
+
+    <!-- 1. Executive Overview -->
+    <menuitem id="menu_analytics_overview_section" name="Executive Overview" parent="menu_custom_analytics_root" sequence="10"/>
+    <menuitem id="menu_analytics_live_board" name="Live Business Console" parent="menu_analytics_overview_section" action="action_custom_analytics_board" sequence="10"/>
+    <menuitem id="menu_analytics_web_dashboard" name="Visual Web Analytics (/analytics)" parent="menu_analytics_overview_section" action="action_open_analytics_web" sequence="20"/>
+    <menuitem id="menu_analytics_roadmap_tracker" name="Scaling Phase Tracker (1→5)" parent="menu_analytics_overview_section" action="action_custom_roadmap_tracker" sequence="25"/>
+    <menuitem id="menu_analytics_roadmap_web" name="Visual Roadmap (/analytics/roadmap)" parent="menu_analytics_overview_section" action="action_open_roadmap_web" sequence="28"/>
+    <menuitem id="menu_analytics_kpi_trends" name="Executive KPI Trends" parent="menu_analytics_overview_section" action="custom_enterprise.action_custom_kpi_snapshot" sequence="30"/>
+    <menuitem id="menu_analytics_formula_sheets" name="Live Formula Spreadsheets" parent="menu_analytics_overview_section" action="custom_operations_ui.action_custom_spreadsheet_sheet" sequence="40"/>
+
+    <!-- 2. Sales, Products & Recurring -->
+    <menuitem id="menu_analytics_sales_section" name="Sales &amp; Products" parent="menu_custom_analytics_root" sequence="20"/>
+    <menuitem id="menu_analytics_sales_channels" name="Sales Channels, COD &amp; RTO" parent="menu_analytics_sales_section" action="action_analytics_sales_channels" sequence="10"/>
+    <menuitem id="menu_analytics_top_products" name="Top Selling Products" parent="menu_analytics_sales_section" action="action_analytics_top_products" sequence="20"/>
+    <menuitem id="menu_analytics_sale_all" name="All-Channel Sales Analysis" parent="menu_analytics_sales_section" action="sale.action_order_report_all" sequence="30"/>
+    <menuitem id="menu_analytics_sale_customers" name="Customer Sales Ranking" parent="menu_analytics_sales_section" action="sale.action_order_report_customers" sequence="40"/>
+    <menuitem id="menu_analytics_subscriptions" name="Subscription MRR Analytics" parent="menu_analytics_sales_section" action="action_analytics_subscriptions" sequence="50"/>
+    <menuitem id="menu_analytics_rentals" name="Rental Revenue Analytics" parent="menu_analytics_sales_section" action="action_analytics_rentals" sequence="60"/>
+
+    <!-- 3. Purchase, Inventory & Courier -->
+    <menuitem id="menu_analytics_supply_section" name="Purchase &amp; Inventory" parent="menu_custom_analytics_root" sequence="30"/>
+    <menuitem id="menu_analytics_purchase_vendors" name="Vendor Spend (PO Analytics)" parent="menu_analytics_supply_section" action="action_analytics_purchase_vendors" sequence="10"/>
+    <menuitem id="menu_analytics_purchase_products" name="Purchased Products Breakdown" parent="menu_analytics_supply_section" action="action_analytics_purchase_products" sequence="20"/>
+    <menuitem id="menu_analytics_purchase_report" name="Purchase Line Analysis (Standard)" parent="menu_analytics_supply_section" action="purchase.action_purchase_order_report_all" sequence="30"/>
+    <menuitem id="menu_analytics_stock_quants" name="Warehouse Stock Quantities" parent="menu_analytics_supply_section" action="action_analytics_stock_quants" sequence="40"/>
+    <menuitem id="menu_analytics_stock_valuation" name="Stock Valuation Report" parent="menu_analytics_supply_section" action="account.action_report_stock_valuation" sequence="50"/>
+    <menuitem id="menu_analytics_logistics" name="Logistics &amp; Courier AWB" parent="menu_analytics_supply_section" action="action_analytics_logistics" sequence="60"/>
+    <menuitem id="menu_analytics_quality" name="Quality Control Pass/Fail" parent="menu_analytics_supply_section" action="action_analytics_quality" sequence="70"/>
+
+    <!-- 4. CRM & Finance -->
+    <menuitem id="menu_analytics_finance_section" name="CRM &amp; Finance" parent="menu_custom_analytics_root" sequence="40"/>
+    <menuitem id="menu_analytics_crm_pipeline" name="CRM Pipeline &amp; Channels" parent="menu_analytics_finance_section" action="action_analytics_crm" sequence="10"/>
+    <menuitem id="menu_analytics_invoices_bills" name="Invoices, Bills &amp; Receivables" parent="menu_analytics_finance_section" action="action_analytics_invoices_bills" sequence="20"/>
+    <menuitem id="menu_analytics_cashflow" name="Cash Flow Statement Analysis" parent="menu_analytics_finance_section" action="account.action_account_cashflow_analysis" sequence="30"/>
+    <menuitem id="menu_analytics_financial_pl_bs" name="Dynamic P&amp;L &amp; Balance Sheet" parent="menu_analytics_finance_section" action="custom_enterprise.action_custom_financial_statement_wizard" sequence="40"/>
+    <menuitem id="menu_analytics_invoice_report" name="Customer Invoice Analysis" parent="menu_analytics_finance_section" action="account.action_account_invoice_report_all" sequence="50"/>
+    <menuitem id="menu_analytics_vendor_bill_report" name="Vendor Bill Analysis" parent="menu_analytics_finance_section" action="account.action_account_invoice_report_all_supp" sequence="60"/>
+    <menuitem id="menu_analytics_analytic_items" name="Analytic Accounting Report" parent="menu_analytics_finance_section" action="account.action_analytic_reporting" sequence="70"/>
+
+    <!-- 5. Operations, HR & After-Sales -->
+    <menuitem id="menu_analytics_ops_support_section" name="Operations, HR &amp; After-Sales" parent="menu_custom_analytics_root" sequence="50"/>
+    <menuitem id="menu_analytics_shopfloor" name="Shop Floor Workcenters" parent="menu_analytics_ops_support_section" action="action_analytics_shopfloor" sequence="10"/>
+    <menuitem id="menu_analytics_timesheets" name="Employee Timesheet Hours" parent="menu_analytics_ops_support_section" action="action_analytics_timesheets" sequence="20"/>
+    <menuitem id="menu_analytics_payroll" name="HR Payroll Cost Analytics" parent="menu_analytics_ops_support_section" action="action_analytics_payroll" sequence="30"/>
+    <menuitem id="menu_analytics_support_tickets" name="Support &amp; Exchange Analytics" parent="menu_analytics_ops_support_section" action="action_analytics_support" sequence="40"/>
+    <menuitem id="menu_analytics_rma_requests" name="RMA Return &amp; Reason Analytics" parent="menu_analytics_ops_support_section" action="action_analytics_rma" sequence="50"/>
+    <menuitem id="menu_analytics_warranty_claims" name="Warranty Claims Analytics" parent="menu_analytics_ops_support_section" action="action_analytics_warranty" sequence="60"/>
+</odoo>

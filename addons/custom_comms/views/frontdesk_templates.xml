@@ -44,7 +44,7 @@
                                     <select name="host_employee_id" class="form-select">
                                         <option value="">Reception Desk / Any Available Host</option>
                                         <t t-foreach="employees" t-as="emp">
-                                            <option t-att-value="emp.id"><t t-esc="emp.name"/></option>
+                                            <option t-att-value="emp.id"><t t-out="emp.name"/></option>
                                         </t>
                                     </select>
                                 </div>

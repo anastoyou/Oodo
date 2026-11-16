@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_instagram_account_user,custom.instagram.account.user,custom.instagram.account,base.group_user,r,
+access_custom_instagram_account_admin,custom.instagram.account.admin,custom.instagram.account,base.group_system,crud,
+access_custom_instagram_product_sync_user,custom.instagram.product.sync.user,custom.instagram.product.sync,base.group_user,crud,
+access_custom_instagram_rule_user,custom.instagram.rule.user,custom.instagram.rule,base.group_user,crud,
+access_custom_instagram_message_user,custom.instagram.message.user,custom.instagram.message,base.group_user,crud,
+access_custom_instagram_webhook_log_user,custom.instagram.webhook.log.user,custom.instagram.webhook.log,base.group_user,crud,
+access_custom_instagram_send_link_wizard_user,custom.instagram.send.link.wizard.user,custom.instagram.send.link.wizard,base.group_user,crud,
+

@@ -31,6 +31,23 @@ services:
           - postgres
           - shared-db
 
+  # Development-only Cloudflare Tunnel (not included in docker-compose.prod.yml)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: odoo-dev-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --protocol http2 --config /etc/cloudflared/config.yml run
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      - shared-db-network
+
 volumes:
   shared-postgres-data:
     name: shared-postgres-data

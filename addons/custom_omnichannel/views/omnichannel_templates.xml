@@ -65,14 +65,14 @@
         <xpath expr="//div[@id='o_wsale_product_cta_section']" position="after">
             <div t-if="product.x_is_subscription" class="alert alert-info small mb-3">
                 <strong>Recurring Subscription:</strong>
-                Billed automatically per <span t-esc="product.x_subscription_plan_id.name or 'Subscription Plan'"/> after order confirmation.
+                Billed automatically per <span t-out="product.x_subscription_plan_id.name or 'Subscription Plan'"/> after order confirmation.
             </div>
 
             <div t-if="product.x_is_rental" class="border rounded p-3 mb-3 bg-light">
                 <h6 class="fw-bold mb-2">Reserve for Occasion / Event Rental</h6>
                 <p class="small text-muted mb-2">
-                    Default term: <t t-esc="product.x_rental_default_days or 3"/> days
-                    <t t-if="product.x_rental_deposit"> · Refundable Deposit: ₹<t t-esc="int(product.x_rental_deposit)"/></t>
+                    Default term: <t t-out="product.x_rental_default_days or 3"/> days
+                    <t t-if="product.x_rental_deposit"> · Refundable Deposit: ₹<t t-out="int(product.x_rental_deposit)"/></t>
                 </p>
                 <form action="/shop/rental/book" method="post" class="row g-2">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
