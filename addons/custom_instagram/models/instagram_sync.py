@@ -50,8 +50,12 @@ class CustomInstagramProductSync(models.Model):
     dm_click_count = fields.Integer(string="DM Link Clicks", default=0, readonly=True)
 
     def _compute_urls(self):
+        fallback_base = (
+            self.env["ir.config_parameter"].sudo().get_str("web.base.url")
+            or self.env["custom.instagram.account"]._read_env_setting("ODOO_URL")
+        ).rstrip("/")
         for rec in self:
-            base = rec.account_id._unit_base_url() if rec.account_id else "http://localhost:8069"
+            base = rec.account_id._unit_base_url() if rec.account_id else fallback_base
             tmpl = rec.product_tmpl_id
             path = (tmpl.website_url or f"/shop/{tmpl.id}") if tmpl else "/shop"
             if not path.startswith("/"):

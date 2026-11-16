@@ -10,9 +10,9 @@ _logger = logging.getLogger(__name__)
 class CustomInstagramController(http.Controller):
     """Handles Instagram Login OAuth callbacks, Meta Webhooks, and Tracked Direct DM Links."""
 
-    @http.route(["/instagram/oauth/callback"], type="http", auth="user", methods=["GET"], website=False)
+    @http.route(["/instagram/oauth/callback"], type="http", auth="public", methods=["GET"], website=False)
     def instagram_oauth_callback(self, code="", state="", error="", error_description="", **kwargs):
-        account = request.env["custom.instagram.account"]._verify_oauth_state(state)
+        account = request.env["custom.instagram.account"].sudo()._verify_oauth_state(state)
         if error:
             if account:
                 account.sudo().write({"last_error": f"{error}: {error_description}"})
@@ -30,7 +30,12 @@ class CustomInstagramController(http.Controller):
         # Strip optional Meta OAuth '#_' suffix from authorization code
         clean_code = code.split("#", 1)[0].strip()
         account.sudo()._exchange_oauth_code(clean_code)
-        return request.redirect(f"/odoo/custom.instagram.account/{account.id}")
+        if request.env.user and not request.env.user._is_public():
+            return request.redirect(f"/odoo/custom.instagram.account/{account.id}")
+        return request.make_response(
+            f"Connected @{account.ig_username or account.ig_user_id} ({account.name}). You can close this tab and refresh Odoo.",
+            headers=[("Content-Type", "text/plain")],
+        )
 
     @http.route(
         [

@@ -138,8 +138,9 @@ class CustomInstagramMessage(models.Model):
     website_id = fields.Many2one(related="account_id.website_id", string="Business Unit", store=True)
     sender_ig_id = fields.Char(string="Customer IG User ID (IGSID)")
     sender_username = fields.Char(string="Customer @Handle")
-    comment_id = fields.Char(string="IG Comment ID")
+    comment_id = fields.Char(string="IG Comment ID", index=True)
     media_id = fields.Char(string="IG Media ID")
+    is_echo = fields.Boolean(string="From IG Echo", default=False, readonly=True)
 
     partner_id = fields.Many2one("res.partner", string="CRM Contact")
     lead_id = fields.Many2one("crm.lead", string="Linked CRM Lead")
@@ -158,7 +159,7 @@ class CustomInstagramMessage(models.Model):
         default="draft",
         tracking=True,
     )
-    external_message_id = fields.Char(string="Meta Message ID", readonly=True)
+    external_message_id = fields.Char(string="Meta Message ID (MID)", readonly=True, index=True)
     error_message = fields.Char(string="Error", readonly=True)
 
     @api.model_create_multi
@@ -360,12 +361,12 @@ class CustomInstagramWebhookLog(models.Model):
     @api.model
     def ingest_payload(self, account, payload, event_type=None, is_simulated=False, signature_valid=True):
         raw_str = json.dumps(payload, indent=2, ensure_ascii=False)
-        parsed = self._extract_first_event(payload)
+        events = self._extract_events(payload)
+        parsed = events[0] if events else self._empty_event()
         detected_type = event_type or parsed["event_type"]
         sender_id = parsed["sender_id"]
         sender_user = parsed["sender_username"]
         comment_id = parsed["comment_id"]
-        media_id = parsed["media_id"]
         text = parsed["text"]
 
         log = self.sudo().create({
@@ -381,35 +382,152 @@ class CustomInstagramWebhookLog(models.Model):
             "raw_payload": raw_str,
             "process_status": "received",
         })
-        if not account or not signature_valid or parsed["is_echo"] or not (text or parsed["is_postback"]):
+        if not account or not signature_valid or not events:
             log.write({
                 "process_status": "ignored",
-                "result_summary": "Invalid signature, echo event, or missing text.",
+                "result_summary": "Invalid signature, missing account, or empty webhook event.",
             })
             return log
 
-        log._process_extracted_event(account, detected_type, sender_id, sender_user, comment_id, media_id, text)
+        for ev in events:
+            ev_type = event_type or ev["event_type"]
+            if not (ev["text"] or ev["is_postback"] or ev["has_attachment"]):
+                continue
+            log._process_extracted_event(
+                account,
+                ev_type,
+                ev["sender_id"],
+                ev["sender_username"],
+                ev["comment_id"],
+                ev["media_id"],
+                ev["text"] or "[Attachment]",
+                mid=ev["mid"],
+                recipient_id=ev["recipient_id"],
+                is_echo=ev["is_echo"],
+            )
+        if log.process_status == "received":
+            log.write({
+                "process_status": "ignored",
+                "result_summary": "No processable text, attachment, or postback in payload.",
+            })
         return log
 
     def action_reprocess(self):
         for log in self:
             payload = json.loads(log.raw_payload or "{}")
-            parsed = log._extract_first_event(payload)
-            if log.account_id and not parsed["is_echo"]:
-                log._process_extracted_event(
-                    log.account_id,
-                    parsed["event_type"],
-                    parsed["sender_id"],
-                    parsed["sender_username"],
-                    parsed["comment_id"],
-                    parsed["media_id"],
-                    parsed["text"],
-                )
+            events = log._extract_events(payload)
+            if log.account_id and events:
+                for ev in events:
+                    if not (ev["text"] or ev["is_postback"] or ev["has_attachment"]):
+                        continue
+                    log._process_extracted_event(
+                        log.account_id,
+                        ev["event_type"],
+                        ev["sender_id"],
+                        ev["sender_username"],
+                        ev["comment_id"],
+                        ev["media_id"],
+                        ev["text"] or "[Attachment]",
+                        mid=ev["mid"],
+                        recipient_id=ev["recipient_id"],
+                        is_echo=ev["is_echo"],
+                    )
         return True
 
-    def _process_extracted_event(self, account, event_type, sender_id, sender_user, comment_id, media_id, text):
+    def _find_duplicate_message(self, account, direction, mid=None, comment_id=None):
+        Msg = self.env["custom.instagram.message"].sudo()
+        if mid:
+            dup = Msg.search([
+                ("account_id", "=", account.id),
+                ("direction", "=", direction),
+                ("external_message_id", "=", mid),
+            ], limit=1)
+            if dup:
+                return dup
+        if comment_id:
+            dup = Msg.search([
+                ("account_id", "=", account.id),
+                ("direction", "=", direction),
+                ("comment_id", "=", comment_id),
+            ], limit=1)
+            if dup:
+                return dup
+        return Msg
+
+    def _process_extracted_event(
+        self,
+        account,
+        event_type,
+        sender_id,
+        sender_user,
+        comment_id,
+        media_id,
+        text,
+        mid="",
+        recipient_id="",
+        is_echo=False,
+    ):
         self.ensure_one()
         ev_kind = "comment" if event_type == "comments" else "dm"
+        is_outbound_echo = bool(
+            is_echo
+            or (sender_id and account.ig_user_id and sender_id == account.ig_user_id)
+            or (sender_user and account.ig_username and sender_user.strip("@").lower() == account.ig_username.strip("@").lower())
+        )
+        customer_ig_id = recipient_id if is_outbound_echo else sender_id
+        Msg = self.env["custom.instagram.message"].sudo()
+
+        # 1. Manage Echoes (messages sent from Odoo already stored, or manual replies sent via Instagram App)
+        if is_outbound_echo:
+            existing_out = self._find_duplicate_message(account, "outbound", mid=mid, comment_id=comment_id)
+            if existing_out:
+                if not existing_out.is_echo:
+                    existing_out.write({"is_echo": True})
+                self.write({
+                    "process_status": "processed",
+                    "reply_message_id": existing_out.id,
+                    "result_summary": _("Outbound echo matched existing message %s (deduplicated; no duplicate stored).") % existing_out.name,
+                })
+                return
+
+            sync_rec = self._match_sync_product_from_text(account, text)
+            partner = False
+            lead = False
+            if customer_ig_id:
+                partner, lead = self._find_or_create_partner_and_lead(
+                    account, customer_ig_id, "", text, sync_rec, create_lead=False
+                )
+            echo_msg = Msg.create({
+                "direction": "outbound",
+                "channel_event": "comment_reply" if ev_kind == "comment" else "dm",
+                "account_id": account.id,
+                "sender_ig_id": customer_ig_id,
+                "comment_id": comment_id or False,
+                "media_id": media_id or False,
+                "partner_id": partner.id if partner else False,
+                "lead_id": lead.id if lead else False,
+                "body": text,
+                "state": "sent",
+                "is_echo": True,
+                "external_message_id": mid or False,
+            })
+            self.write({
+                "process_status": "processed",
+                "reply_message_id": echo_msg.id,
+                "result_summary": _("Stored outbound echo %s (sent from external Instagram app/suite; no auto-reply triggered).") % echo_msg.name,
+            })
+            return
+
+        # 2. Deduplicate Inbound Webhook Retries by Meta MID / Comment ID
+        existing_in = self._find_duplicate_message(account, "inbound", mid=mid, comment_id=comment_id)
+        if existing_in:
+            self.write({
+                "process_status": "ignored",
+                "inbound_message_id": existing_in.id,
+                "result_summary": _("Duplicate inbound event skipped (already stored as %s).") % existing_in.name,
+            })
+            return
+
         rules = self.env["custom.instagram.rule"].sudo().search(
             [("account_id", "=", account.id), ("active", "=", True)],
             order="sequence asc, id asc",
@@ -428,7 +546,7 @@ class CustomInstagramWebhookLog(models.Model):
         create_lead = matched_rule.auto_create_lead if matched_rule else account.auto_create_crm_lead
         partner, lead = self._find_or_create_partner_and_lead(account, sender_id, sender_user, text, sync_rec, create_lead=create_lead)
 
-        inbound = self.env["custom.instagram.message"].sudo().create({
+        inbound = Msg.create({
             "direction": "inbound",
             "channel_event": "comment" if ev_kind == "comment" else ("postback" if event_type == "messaging_postbacks" else "dm"),
             "account_id": account.id,
@@ -442,6 +560,7 @@ class CustomInstagramWebhookLog(models.Model):
             "rule_id": matched_rule.id if matched_rule else False,
             "body": text or "[Postback]",
             "state": "received",
+            "external_message_id": mid or False,
         })
 
         # Send Meesho-style direct link reply if a rule matched OR a synced unit product matched/exists
@@ -503,51 +622,61 @@ class CustomInstagramWebhookLog(models.Model):
         })
 
     @staticmethod
-    def _extract_first_event(payload):
-        out = {
+    def _empty_event():
+        return {
             "event_type": "unknown",
+            "mid": "",
             "sender_id": "",
+            "recipient_id": "",
             "sender_username": "",
             "comment_id": "",
             "media_id": "",
             "text": "",
             "is_echo": False,
             "is_postback": False,
+            "has_attachment": False,
         }
-        entries = payload.get("entry") or []
-        if not entries:
-            return out
-        entry = entries[0]
 
-        if entry.get("messaging"):
-            ev = entry["messaging"][0]
-            out["sender_id"] = str((ev.get("sender") or {}).get("id") or "")
-            msg = ev.get("message") or {}
-            postback = ev.get("postback") or {}
-            out["is_echo"] = bool(msg.get("is_echo"))
-            if postback:
-                out["event_type"] = "messaging_postbacks"
-                out["text"] = postback.get("title") or postback.get("payload") or ""
-                out["is_postback"] = True
-            else:
-                out["event_type"] = "messages"
-                out["text"] = msg.get("text") or ""
-            return out
+    @classmethod
+    def _extract_events(cls, payload):
+        events = []
+        for entry in payload.get("entry") or []:
+            for ev in entry.get("messaging") or []:
+                msg = ev.get("message") or {}
+                postback = ev.get("postback") or {}
+                item = cls._empty_event()
+                item["sender_id"] = str((ev.get("sender") or {}).get("id") or "")
+                item["recipient_id"] = str((ev.get("recipient") or {}).get("id") or "")
+                item["mid"] = str(msg.get("mid") or "")
+                item["is_echo"] = bool(msg.get("is_echo"))
+                item["has_attachment"] = bool(msg.get("attachments"))
+                if postback:
+                    item["event_type"] = "messaging_postbacks"
+                    item["text"] = postback.get("title") or postback.get("payload") or ""
+                    item["is_postback"] = True
+                else:
+                    item["event_type"] = "messages"
+                    item["text"] = msg.get("text") or ""
+                events.append(item)
 
-        if entry.get("changes"):
-            ch = entry["changes"][0]
-            field = ch.get("field") or "unknown"
-            val = ch.get("value") or {}
-            out["event_type"] = "comments" if "comment" in field else "unknown"
-            out["comment_id"] = str(val.get("id") or "")
-            out["media_id"] = str((val.get("media") or {}).get("id") or "")
-            frm = val.get("from") or {}
-            out["sender_id"] = str(frm.get("id") or "")
-            out["sender_username"] = frm.get("username") or ""
-            out["text"] = val.get("text") or ""
-            return out
+            for ch in entry.get("changes") or []:
+                field = ch.get("field") or "unknown"
+                val = ch.get("value") or {}
+                item = cls._empty_event()
+                item["event_type"] = "comments" if "comment" in field else "unknown"
+                item["comment_id"] = str(val.get("id") or "")
+                item["media_id"] = str((val.get("media") or {}).get("id") or "")
+                frm = val.get("from") or {}
+                item["sender_id"] = str(frm.get("id") or "")
+                item["sender_username"] = frm.get("username") or ""
+                item["text"] = val.get("text") or ""
+                events.append(item)
+        return events
 
-        return out
+    @classmethod
+    def _extract_first_event(cls, payload):
+        events = cls._extract_events(payload)
+        return events[0] if events else cls._empty_event()
 
 
 class CustomInstagramSendLinkWizard(models.TransientModel):
@@ -566,7 +695,18 @@ class CustomInstagramSendLinkWizard(models.TransientModel):
         required=True,
         domain="[('account_id', '=', account_id)]",
     )
-    recipient_ig_id = fields.Char(string="Recipient IG User ID (IGSID)", required=True, default="17899000112233")
+    def _default_recipient_ig_id(self):
+        msg = self.env["custom.instagram.message"].search(
+            [("direction", "=", "inbound"), ("sender_ig_id", "!=", False)],
+            limit=1,
+        )
+        return msg.sender_ig_id if msg else False
+
+    recipient_ig_id = fields.Char(
+        string="Recipient IG User ID (IGSID)",
+        required=True,
+        default=_default_recipient_ig_id,
+    )
     recipient_username = fields.Char(string="Recipient @Handle")
     comment_id = fields.Char(string="Reply to Comment ID (Optional)")
     use_generic_card = fields.Boolean(string="Send Clickable Product Card (Generic Template)", default=True)

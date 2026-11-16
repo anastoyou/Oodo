@@ -27,12 +27,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_open_oauth_login" string="Connect with Instagram Login" type="object" class="oe_highlight"/>
-                    <button name="action_test_connection" string="Verify / Fetch IG Profile" type="object" class="btn-secondary"/>
-                    <button name="action_refresh_access_token" string="Refresh 60-Day Token" type="object" class="btn-secondary"/>
-                    <button name="action_subscribe_webhooks" string="Subscribe Webhooks" type="object" class="btn-secondary"/>
-                    <button name="action_sync_all_unit_products" string="Sync All Unit Products" type="object" class="btn-secondary"/>
-                    <button name="action_simulate_test_webhook" string="Simulate Comment-to-DM Test" type="object" class="btn-secondary"/>
+                    <button name="action_open_oauth_login" string="Connect Instagram" type="object" class="oe_highlight"/>
+                    <button name="action_sync_all_unit_products" string="Sync Unit Products" type="object" class="btn-secondary"/>
                     <field name="connection_state" widget="statusbar" statusbar_visible="disconnected,expiring_soon,connected"/>
                 </header>
                 <sheet>
@@ -53,22 +49,22 @@
 
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="e.g. Unit 1 - Ethnic Apparel IG"/>
+                            <field name="name" placeholder="e.g. Unit 1 Instagram"/>
                         </h1>
                     </div>
 
                     <group>
-                        <group string="Business Unit Binding">
+                        <group string="Business Unit">
                             <field name="website_id"/>
-                            <field name="company_id"/>
-                            <field name="active"/>
                             <field name="sandbox_mode"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
-                        <group string="Connected Instagram Business Profile">
+                        <group string="Connected Profile">
                             <field name="ig_username" placeholder="@brand_handle"/>
                             <field name="ig_user_id"/>
                             <field name="account_type"/>
-                            <field name="token_type"/>
+                            <field name="days_until_expiry"/>
                         </group>
                     </group>
 
@@ -78,43 +74,53 @@
                     </div>
 
                     <notebook>
-                        <page string="Credentials &amp; Instagram Login Token" name="credentials">
+                        <page string="Connection &amp; Token" name="credentials">
+                            <div class="alert alert-info mb-3" role="status">
+                                App ID, App Secret, and Webhook Verify Token are loaded centrally from <code>.env</code> (shared across all Units). Each Unit stores its own <strong>Access Token</strong> below.
+                            </div>
                             <group>
-                                <group string="Meta Instagram Login App Credentials">
-                                    <field name="app_id" placeholder="Meta App ID / Instagram App ID"/>
-                                    <field name="app_secret" password="True"/>
+                                <group string="Meta App OAuth (.env + URLs)">
+                                    <field name="env_app_configured"/>
+                                    <field name="effective_app_id"/>
+                                    <field name="redirect_uri" widget="CopyClipboardChar"/>
                                     <field name="api_version"/>
                                     <field name="oauth_scopes"/>
-                                    <field name="redirect_uri" widget="CopyClipboardChar"/>
                                 </group>
-                                <group string="Latest Token Lifecycle (Auto-Refreshed Daily)">
+                                <group string="Access Token Lifecycle">
                                     <field name="access_token" password="True"/>
+                                    <field name="token_type"/>
                                     <field name="token_obtained_at"/>
                                     <field name="token_expires_at"/>
                                     <field name="last_refreshed_at"/>
-                                    <field name="days_until_expiry"/>
+                                    <div class="d-flex gap-2 mt-2" colspan="2">
+                                        <button name="action_test_connection" string="Verify Profile" type="object" class="btn-secondary"/>
+                                        <button name="action_refresh_access_token" string="Refresh 60-Day Token" type="object" class="btn-secondary"/>
+                                    </div>
                                 </group>
                             </group>
                         </page>
 
-                        <page string="Webhook Configuration" name="webhooks">
+                        <page string="Webhooks" name="webhooks">
                             <group>
-                                <group string="Meta Webhook Endpoint">
-                                    <field name="public_base_url" placeholder="https://localapi.locanydm.online"/>
+                                <group string="Webhook Endpoint (.env / Unit Domain)">
+                                    <field name="public_base_url" placeholder="Optional override (defaults to Website domain / .env)"/>
                                     <field name="webhook_url" widget="CopyClipboardChar"/>
-                                    <field name="webhook_verify_token" widget="CopyClipboardChar"/>
                                     <field name="verify_signature"/>
                                     <field name="webhook_subscribed_at"/>
                                 </group>
-                                <group string="Subscribed Webhook Fields">
+                                <group string="Subscribed Events &amp; Tools">
                                     <field name="subscribe_messages"/>
                                     <field name="subscribe_comments"/>
                                     <field name="subscribe_postbacks"/>
+                                    <div class="d-flex gap-2 mt-2" colspan="2">
+                                        <button name="action_subscribe_webhooks" string="Subscribe Webhooks" type="object" class="btn-primary"/>
+                                        <button name="action_simulate_test_webhook" string="Simulate Test Event" type="object" class="btn-secondary"/>
+                                    </div>
                                 </group>
                             </group>
                         </page>
 
-                        <page string="Product Sync &amp; DM Automation" name="automation">
+                        <page string="Product Sync &amp; DM Rules" name="automation">
                             <group>
                                 <group string="New Product Auto-Sync">
                                     <field name="auto_sync_new_products"/>
@@ -264,6 +270,7 @@
                 <field name="create_date"/>
                 <field name="website_id"/>
                 <field name="direction"/>
+                <field name="is_echo" optional="show"/>
                 <field name="channel_event"/>
                 <field name="sender_username"/>
                 <field name="sender_ig_id"/>
@@ -294,6 +301,7 @@
                             <field name="account_id"/>
                             <field name="website_id"/>
                             <field name="direction"/>
+                            <field name="is_echo"/>
                             <field name="channel_event"/>
                             <field name="sender_username"/>
                             <field name="sender_ig_id"/>

@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import os
+import time
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlencode
@@ -57,6 +58,14 @@ class CustomInstagramAccount(models.Model):
         groups="base.group_system",
         help="Optional per-unit override; defaults to INSTAGRAM_APP_SECRET from .env.",
     )
+    effective_app_id = fields.Char(
+        string="Active Meta App ID (.env)",
+        compute="_compute_effective_env_info",
+    )
+    env_app_configured = fields.Boolean(
+        string="App Credentials Loaded from .env",
+        compute="_compute_effective_env_info",
+    )
     api_version = fields.Char(string="Graph API Version", default="v22.0", required=True)
     oauth_scopes = fields.Char(string="OAuth Scopes", default=DEFAULT_IG_SCOPES, required=True)
     redirect_uri = fields.Char(
@@ -90,8 +99,8 @@ class CustomInstagramAccount(models.Model):
 
     # Webhook Management
     public_base_url = fields.Char(
-        string="Public Webhook / Tunnel URL",
-        help="Optional public HTTPS origin (e.g. https://localapi.locanydm.online) for Meta Webhook & OAuth callbacks.",
+        string="Unit Public URL Override",
+        help="Optional per-unit HTTPS URL override. Leave blank to use Website Domain, INSTAGRAM_PUBLIC_URL (.env), or web.base.url.",
     )
     webhook_url = fields.Char(
         string="Webhook Callback URL",
@@ -159,17 +168,43 @@ class CustomInstagramAccount(models.Model):
     webhook_log_count = fields.Integer(compute="_compute_counts")
 
     def _global_base_url(self):
-        return (self.env["ir.config_parameter"].sudo().get_str("web.base.url") or "http://localhost:8069").rstrip("/")
+        return (
+            self.env["ir.config_parameter"].sudo().get_str("web.base.url")
+            or self._read_env_setting("ODOO_URL")
+        ).rstrip("/")
+
+    def _effective_public_base_url(self):
+        self.ensure_one()
+        if (self.public_base_url or "").strip():
+            base = self.public_base_url.strip()
+        elif self.website_id and (self.website_id.domain or "").strip():
+            dom = self.website_id.domain.strip()
+            base = dom if dom.startswith(("http://", "https://")) else f"https://{dom}"
+        elif self._read_env_setting("INSTAGRAM_PUBLIC_URL"):
+            base = self._read_env_setting("INSTAGRAM_PUBLIC_URL")
+        else:
+            base = self._global_base_url()
+        return base.rstrip("/")
+
+    def _effective_webhook_path(self):
+        self.ensure_one()
+        env_path = self._read_env_setting("INSTAGRAM_WEBHOOK_PATH")
+        if env_path:
+            return env_path if env_path.startswith("/") else f"/{env_path}"
+        return f"/instagram/webhook/{self.id}" if self.id else "/instagram/webhook"
 
     def _compute_endpoint_urls(self):
-        global_base = self._global_base_url()
         for rec in self:
-            base = (rec.public_base_url or global_base).strip().rstrip("/")
-            rec.redirect_uri = f"{base}/instagram/oauth/callback"
-            if rec.public_base_url:
-                rec.webhook_url = f"{base}/api/crm/webhooks/instagram"
-            else:
-                rec.webhook_url = f"{base}/instagram/webhook/{rec.id}" if rec.id else f"{base}/instagram/webhook"
+            base = rec._effective_public_base_url()
+            rec.redirect_uri = f"{base}/instagram/oauth/callback" if base else "/instagram/oauth/callback"
+            rec.webhook_url = f"{base}{rec._effective_webhook_path()}" if base else rec._effective_webhook_path()
+
+    def _compute_effective_env_info(self):
+        for rec in self:
+            rec.effective_app_id = rec._effective_app_id()
+            rec.env_app_configured = bool(
+                rec._effective_app_id() and rec._effective_app_secret() and rec._effective_verify_token()
+            )
 
     @api.depends("access_token", "token_expires_at", "last_error", "sandbox_mode")
     def _compute_token_status(self):
@@ -219,21 +254,26 @@ class CustomInstagramAccount(models.Model):
     def _sign_oauth_state(self):
         self.ensure_one()
         secret = self.env["ir.config_parameter"].sudo().get_str("database.secret") or "odoo-ig-secret"
-        payload = str(self.id)
+        ts = str(int(time.time()))
+        payload = f"{self.id}:{ts}"
         sig = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()[:24]
         return f"{payload}:{sig}"
 
     @api.model
     def _verify_oauth_state(self, state):
-        if not state or ":" not in state:
+        if not state:
             return self.browse()
-        raw_id, sig = state.split(":", 1)
-        if not raw_id.isdigit():
+        parts = state.split(":")
+        if len(parts) != 3 or not (parts[0].isdigit() and parts[1].isdigit()):
+            return self.browse()
+        raw_id, ts_str, sig = parts
+        if abs(int(time.time()) - int(ts_str)) > 900:
             return self.browse()
         rec = self.sudo().browse(int(raw_id)).exists()
         if not rec:
             return self.browse()
-        expected = rec._sign_oauth_state().split(":", 1)[1]
+        secret = self.env["ir.config_parameter"].sudo().get_str("database.secret") or "odoo-ig-secret"
+        expected = hmac.new(secret.encode("utf-8"), f"{raw_id}:{ts_str}".encode("utf-8"), hashlib.sha256).hexdigest()[:24]
         return rec if hmac.compare_digest(sig, expected) else self.browse()
 
     @api.model
@@ -277,9 +317,10 @@ class CustomInstagramAccount(models.Model):
 
     def _graph_request(self, method, path, params=None, json_body=None, use_bearer=False):
         self.ensure_one()
-        version = (self.api_version or "v22.0").strip("/")
+        graph_base = self._read_env_setting("INSTAGRAM_GRAPH_BASE_URL", "https://graph.instagram.com").rstrip("/")
+        version = (self.api_version or self._read_env_setting("INSTAGRAM_API_VERSION", "v22.0")).strip("/")
         clean_path = path.lstrip("/")
-        url = f"https://graph.instagram.com/{version}/{clean_path}" if version else f"https://graph.instagram.com/{clean_path}"
+        url = f"{graph_base}/{version}/{clean_path}" if version else f"{graph_base}/{clean_path}"
         req_params = dict(params or {})
         headers = {}
         if use_bearer:
@@ -316,9 +357,10 @@ class CustomInstagramAccount(models.Model):
             "scope": self.oauth_scopes or DEFAULT_IG_SCOPES,
             "state": self._sign_oauth_state(),
         })
+        auth_base = self._read_env_setting("INSTAGRAM_OAUTH_AUTHORIZE_URL", "https://www.instagram.com/oauth/authorize")
         return {
             "type": "ir.actions.act_url",
-            "url": f"https://www.instagram.com/oauth/authorize?{query}",
+            "url": f"{auth_base}?{query}",
             "target": "new",
         }
 
@@ -330,8 +372,9 @@ class CustomInstagramAccount(models.Model):
             raise UserError(_("Instagram App ID and App Secret (in record or .env) are required to exchange the OAuth code."))
 
         # Step 1: Exchange authorization code for short-lived token (Instagram Login API)
+        token_url = self._read_env_setting("INSTAGRAM_OAUTH_TOKEN_URL", "https://api.instagram.com/oauth/access_token")
         resp = requests.post(
-            "https://api.instagram.com/oauth/access_token",
+            token_url,
             data={
                 "client_id": app_id,
                 "client_secret": app_secret,
@@ -354,8 +397,9 @@ class CustomInstagramAccount(models.Model):
         expires_in = 3600
 
         # Step 2: Upgrade short-lived token to 60-day long-lived token via graph.instagram.com
+        graph_base = self._read_env_setting("INSTAGRAM_GRAPH_BASE_URL", "https://graph.instagram.com").rstrip("/")
         ll_resp = requests.get(
-            "https://graph.instagram.com/access_token",
+            f"{graph_base}/access_token",
             params={
                 "grant_type": "ig_exchange_token",
                 "client_secret": app_secret,
@@ -399,8 +443,9 @@ class CustomInstagramAccount(models.Model):
             if not rec.access_token:
                 raise UserError(_("Connect with Instagram Login or enter an access token before refreshing."))
             try:
+                graph_base = rec._read_env_setting("INSTAGRAM_GRAPH_BASE_URL", "https://graph.instagram.com").rstrip("/")
                 resp = requests.get(
-                    "https://graph.instagram.com/refresh_access_token",
+                    f"{graph_base}/refresh_access_token",
                     params={"grant_type": "ig_refresh_token", "access_token": rec.access_token},
                     timeout=15,
                 )
@@ -431,7 +476,7 @@ class CustomInstagramAccount(models.Model):
             if rec.sandbox_mode or not rec.access_token:
                 now = fields.Datetime.now()
                 rec.write({
-                    "ig_user_id": rec.ig_user_id or f"178414000{rec.id:05d}",
+                    "ig_user_id": rec.ig_user_id or f"sim_ig_unit_{rec.id}",
                     "ig_username": rec.ig_username or f"{(rec.website_id.name or 'unit').lower().replace(' ', '_')}_official",
                     "account_type": "BUSINESS",
                     "token_obtained_at": rec.token_obtained_at or now,
@@ -503,18 +548,24 @@ class CustomInstagramAccount(models.Model):
             limit=1,
         )
         keyword = (sample_rule.keywords or "LINK").split(",")[0].strip() if sample_rule else "LINK"
+        recent_in = self.env["custom.instagram.message"].search(
+            [("account_id", "=", self.id), ("direction", "=", "inbound"), ("sender_ig_id", "!=", False)],
+            limit=1,
+        )
+        sample_sender_id = recent_in.sender_ig_id if recent_in else f"sim_customer_{self.id}"
+        sample_sender_handle = recent_in.sender_username if recent_in else "demo_shopper"
         payload = {
             "object": "instagram",
             "entry": [
                 {
-                    "id": self.ig_user_id or f"178414000{self.id:05d}",
+                    "id": self.ig_user_id or f"sim_ig_unit_{self.id}",
                     "changes": [
                         {
                             "field": "comments",
                             "value": {
                                 "id": f"sim_cmt_{self.id}_{int(fields.Datetime.now().timestamp())}",
                                 "text": f"Hi please share {keyword}",
-                                "from": {"id": "17899000112233", "username": "demo_shopper_in"},
+                                "from": {"id": sample_sender_id, "username": sample_sender_handle},
                             },
                         }
                     ],
