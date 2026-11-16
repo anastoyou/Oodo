@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "odoo": {
+      "command": "C:\\Users\\HP\\.local\\bin\\uvx.exe",
+      "args": [
+        "--env-file",
+        "e:\\Code\\Oodo\\.env",
+        "mcp-server-odoo"
+      ]
+    }
+  }
+}
+
+
+
+.\.venv\Scripts\python.exe .\scripts\odoo_ctl.py upgrade --skip-pull
+
+
+
+
+
+.\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\odoo.conf
