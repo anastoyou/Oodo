@@ -18,4 +18,7 @@ ingress:
   - hostname: localapi.locanydm.online
     service: http://host.docker.internal:8069
 
+  - hostname: mcp.locanydm.online
+    service: http://host.docker.internal:8090
+
   - service: http_status:404

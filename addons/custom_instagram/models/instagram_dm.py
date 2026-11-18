@@ -563,9 +563,18 @@ class CustomInstagramWebhookLog(models.Model):
             "external_message_id": mid or False,
         })
 
-        # Send Meesho-style direct link reply if a rule matched OR a synced unit product matched/exists
+        # Send Meesho-style direct link reply if rule matched, DM received, or comment matched a product keyword/SKU
+        cleaned_text = (text or "").strip().lower()
+        exact_kw_match = bool(
+            sync_rec
+            and cleaned_text
+            and any(
+                code and code.strip().lower() in cleaned_text
+                for code in (sync_rec.keyword_code, sync_rec.product_tmpl_id.default_code)
+            )
+        )
         reply_msg = False
-        if matched_rule or (sync_rec and ev_kind == "dm"):
+        if matched_rule or (sync_rec and (ev_kind == "dm" or exact_kw_match)):
             if matched_rule:
                 reply_text = matched_rule._render_reply(sync_rec)
                 use_card = matched_rule.use_generic_card

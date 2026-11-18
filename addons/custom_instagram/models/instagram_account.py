@@ -249,7 +249,7 @@ class CustomInstagramAccount(models.Model):
             if not domain.startswith(("http://", "https://")):
                 domain = f"https://{domain}"
             return domain.rstrip("/")
-        return self._global_base_url()
+        return self._effective_public_base_url()
 
     def _sign_oauth_state(self):
         self.ensure_one()
@@ -527,9 +527,36 @@ class CustomInstagramAccount(models.Model):
             rec.message_post(body=_("Subscribed Instagram webhooks on Meta: %s") % ", ".join(fields_list))
         return True
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        Rule = self.env["custom.instagram.rule"].sudo()
+        for rec in records:
+            if not Rule.search([("account_id", "=", rec.id)], limit=1):
+                Rule.create({
+                    "name": f"{rec.name}: Comment & DM Link Auto-Reply (LINK / PRICE / BUY)",
+                    "account_id": rec.id,
+                    "trigger_on": "both",
+                    "keywords": "LINK, PRICE, PP, BUY, ORDER, COST, RATE",
+                    "match_mode": "contains",
+                    "use_generic_card": True,
+                    "auto_create_lead": rec.auto_create_crm_lead,
+                })
+            if rec.active and rec.auto_sync_new_products:
+                rec.action_sync_all_unit_products()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if any(k in vals for k in ("auto_sync_new_products", "sync_shared_products", "sync_service_products", "website_id")) and vals.get("auto_sync_new_products", True):
+            for rec in self.filtered(lambda r: r.active and r.auto_sync_new_products):
+                rec.action_sync_all_unit_products()
+        return res
+
     def action_sync_all_unit_products(self):
         Sync = self.env["custom.instagram.product.sync"]
         Product = self.env["product.template"]
+        total_synced = self.env["custom.instagram.product.sync"]
         for rec in self:
             domain = [
                 ("sale_ok", "=", True),
@@ -538,8 +565,17 @@ class CustomInstagramAccount(models.Model):
             if not rec.sync_service_products:
                 domain.append(("type", "!=", "service"))
             products = Product.search(domain)
-            Sync.sync_products_for_account(rec, products)
-        return True
+            total_synced |= Sync.sync_products_for_account(rec, products)
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Instagram Product Sync"),
+                "message": _("Synced %s product(s) for selected Unit Instagram account(s).") % len(total_synced),
+                "type": "success" if total_synced else "warning",
+                "sticky": False,
+            },
+        }
 
     def action_simulate_test_webhook(self):
         self.ensure_one()

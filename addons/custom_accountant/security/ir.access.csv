@@ -1,0 +1,36 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_bank_reconcile_wizard_user,custom.bank.reconcile.wizard.user,custom.bank.reconcile.wizard,base.group_user,crud,
+access_custom_bank_reconcile_line_user,custom.bank.reconcile.line.user,custom.bank.reconcile.line,base.group_user,crud,
+access_custom_bill_ocr_wizard_user,custom.bill.ocr.wizard.user,custom.bill.ocr.wizard,base.group_user,crud,
+access_custom_consolidation_wizard_user,custom.consolidation.wizard.user,custom.consolidation.wizard,base.group_user,crud,
+access_custom_consolidation_line_user,custom.consolidation.line.user,custom.consolidation.line,base.group_user,crud,
+access_custom_tax_lock_wizard_user,custom.tax.lock.wizard.user,custom.tax.lock.wizard,base.group_user,crud,
+access_custom_equity_holder_user,custom.equity.holder.user,custom.equity.holder,base.group_user,crud,
+access_custom_equity_grant_user,custom.equity.grant.user,custom.equity.grant,base.group_user,crud,
+access_custom_accounting_report_readonly,custom.accounting.report.readonly,custom.accounting.report,account.group_account_readonly,crud,
+access_custom_accounting_report_line_readonly,custom.accounting.report.line.readonly,custom.accounting.report.line,account.group_account_readonly,crud,
+access_custom_accounting_report_user,custom.accounting.report.user,custom.accounting.report,base.group_user,crud,
+access_custom_accounting_report_line_user,custom.accounting.report.line.user,custom.accounting.report.line,base.group_user,crud,
+access_custom_followup_level_invoice,custom.followup.level.invoice,custom.followup.level,account.group_account_invoice,r,
+access_custom_followup_level_manager,custom.followup.level.manager,custom.followup.level,account.group_account_manager,crud,
+rule_custom_followup_level_company,Follow-up Level multi-company,custom.followup.level,,crud,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
+access_custom_batch_payment_user,custom.batch.payment.user,custom.batch.payment,account.group_account_invoice,crud,
+access_custom_batch_payment_manager,custom.batch.payment.manager,custom.batch.payment,account.group_account_manager,crud,
+rule_custom_batch_payment_company,Batch Payment multi-company,custom.batch.payment,,crud,"[('company_id', 'in', company_ids)]"
+access_custom_fiscal_year_readonly,custom.fiscal.year.readonly,custom.fiscal.year,account.group_account_readonly,r,
+access_custom_fiscal_year_manager,custom.fiscal.year.manager,custom.fiscal.year,account.group_account_manager,crud,
+rule_custom_fiscal_year_company,Fiscal Year multi-company,custom.fiscal.year,,crud,"[('company_id', 'in', company_ids)]"
+access_custom_auto_transfer_readonly,custom.auto.transfer.readonly,custom.auto.transfer,account.group_account_readonly,r,
+access_custom_auto_transfer_user,custom.auto.transfer.user,custom.auto.transfer,account.group_account_user,crud,
+rule_custom_auto_transfer_company,Auto Transfer multi-company,custom.auto.transfer,,crud,"[('company_id', 'in', company_ids)]"
+access_custom_auto_transfer_line_readonly,custom.auto.transfer.line.readonly,custom.auto.transfer.line,account.group_account_readonly,r,
+access_custom_auto_transfer_line_user,custom.auto.transfer.line.user,custom.auto.transfer.line,account.group_account_user,crud,
+access_custom_disallowed_expense_cat_readonly,custom.disallowed.expense.category.readonly,custom.disallowed.expense.category,account.group_account_readonly,r,
+access_custom_disallowed_expense_cat_manager,custom.disallowed.expense.category.manager,custom.disallowed.expense.category,account.group_account_manager,crud,
+rule_custom_disallowed_expense_cat_company,Disallowed Expense Category multi-company,custom.disallowed.expense.category,,crud,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
+access_custom_disallowed_expense_rate_readonly,custom.disallowed.expense.rate.readonly,custom.disallowed.expense.rate,account.group_account_readonly,r,
+access_custom_disallowed_expense_rate_manager,custom.disallowed.expense.rate.manager,custom.disallowed.expense.rate,account.group_account_manager,crud,
+access_custom_disallowed_expense_report_user,custom.disallowed.expense.report.user,custom.disallowed.expense.report,account.group_account_readonly,crud,
+access_custom_disallowed_expense_report_line_user,custom.disallowed.expense.report.line.user,custom.disallowed.expense.report.line,account.group_account_readonly,crud,
+access_custom_asset_disposal_wizard,custom.asset.disposal.wizard.user,custom.asset.disposal.wizard,account.group_account_user,crud,
+access_custom_asset_modify_wizard,custom.asset.modify.wizard.user,custom.asset.modify.wizard,account.group_account_user,crud,

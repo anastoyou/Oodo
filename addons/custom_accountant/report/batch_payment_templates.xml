@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_batch_payment" model="ir.actions.report">
+        <field name="name">Batch Payment / Deposit Slip</field>
+        <field name="model">custom.batch.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_accountant.report_batch_payment_doc</field>
+        <field name="binding_model_id" ref="model_custom_batch_payment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_batch_payment_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Batch Payment Slip: <span t-field="o.name"/></h2>
+                        <div class="row mt-3 mb-3">
+                            <div class="col-6">
+                                <strong>Bank Journal:</strong> <span t-field="o.journal_id.name"/><br/>
+                                <strong>Batch Type:</strong> <span t-field="o.batch_type"/>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Date:</strong> <span t-field="o.date"/><br/>
+                                <strong>Total Payments:</strong> <span t-field="o.payment_count"/><br/>
+                                <strong>Total Amount:</strong> <span t-field="o.amount"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Payment #</th>
+                                    <th>Date</th>
+                                    <th>Partner</th>
+                                    <th>Memo</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.payment_ids" t-as="pay">
+                                    <td><span t-field="pay.name"/></td>
+                                    <td><span t-field="pay.date"/></td>
+                                    <td><span t-field="pay.partner_id.name"/></td>
+                                    <td><span t-field="pay.memo"/></td>
+                                    <td class="text-end"><span t-field="pay.amount"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Check / Payment Voucher Report on account.payment -->
+    <record id="action_report_payment_voucher" model="ir.actions.report">
+        <field name="name">Payment Voucher / Check Remittance</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_accountant.report_payment_voucher_doc</field>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_payment_voucher_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="border p-4 rounded">
+                            <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
+                                <h3>Payment Voucher: <span t-field="o.name"/></h3>
+                                <span>Date: <strong t-field="o.date"/></span>
+                            </div>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th style="width:25%">Payee / Partner:</th>
+                                    <td><span t-field="o.partner_id.name"/></td>
+                                    <th style="width:20%">Payment Type:</th>
+                                    <td><span t-field="o.payment_type"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Journal / Bank:</th>
+                                    <td><span t-field="o.journal_id.name"/></td>
+                                    <th>Amount:</th>
+                                    <td class="fs-5 fw-bold"><span t-field="o.amount"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Reference / Memo:</th>
+                                    <td colspan="3"><span t-field="o.memo"/></td>
+                                </tr>
+                            </table>
+                            <div class="row mt-5 pt-4 text-center">
+                                <div class="col-4 border-top pt-1">Prepared By</div>
+                                <div class="col-4"></div>
+                                <div class="col-4 border-top pt-1">Authorized Signatory</div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

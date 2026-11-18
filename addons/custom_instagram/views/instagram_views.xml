@@ -173,8 +173,9 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_sync_now" string="Sync / Publish to Instagram" type="object" class="oe_highlight"/>
-                    <button name="action_open_send_dm_wizard" string="Send Direct Link DM Now" type="object" class="btn-primary"/>
+                    <button name="action_sync_now" string="Sync DM Link Now" type="object" class="oe_highlight"/>
+                    <button name="action_publish_to_feed" string="Publish Post to IG Feed" type="object" class="btn-secondary"/>
+                    <button name="action_open_send_dm_wizard" string="Send Direct Link DM" type="object" class="btn-secondary"/>
                     <field name="sync_state" widget="statusbar" statusbar_visible="pending,ready,published,error"/>
                 </header>
                 <sheet>
@@ -437,7 +438,8 @@
                             <field name="x_ig_dm_keyword" placeholder="e.g. KURTI101 (defaults to SKU or BUY&lt;ID&gt;)"/>
                         </group>
                         <group>
-                            <button name="action_sync_to_instagram" string="Sync to Unit Instagram Now" type="object" class="btn-primary"/>
+                            <button name="action_sync_to_instagram" string="Sync DM Link Now" type="object" class="btn-primary"/>
+                            <button name="action_publish_ig_feed" string="Publish Post to IG Feed" type="object" class="btn-secondary"/>
                             <button name="action_open_send_ig_dm" string="Send Direct Link to DM" type="object" class="btn-secondary"/>
                         </group>
                     </group>

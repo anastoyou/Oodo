@@ -230,9 +230,10 @@ class CustomBillOcrWizard(models.TransientModel):
             "invoice_line_ids": [Command.create(line_vals)],
         })
         if self.pdf_file:
+            raw_bytes = self.pdf_file.content if hasattr(self.pdf_file, "content") else base64.b64decode(self.pdf_file)
             self.env["ir.attachment"].create({
                 "name": self.pdf_filename or "vendor_bill.pdf",
-                "datas": self.pdf_file,
+                "raw": raw_bytes,
                 "res_model": "account.move",
                 "res_id": bill.id,
             })
@@ -441,4 +442,3 @@ class CustomEquityGrant(models.Model):
     face_value = fields.Float(string="Face Value / Share", default=10.0)
     currency_id = fields.Many2one(related="holder_id.currency_id", readonly=True)
     paid_amount = fields.Monetary(string="Total Paid Capital", required=True)
-

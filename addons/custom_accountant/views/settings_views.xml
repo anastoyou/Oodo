@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_accountant" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.accountant</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='account']" position="attributes">
+                <attribute name="data-string">Accounting</attribute>
+                <attribute name="string">Accounting</attribute>
+            </xpath>
+
+            <xpath expr="//setting[@id='fiscalyear']" position="replace">
+                <setting id="fiscalyear" string="Fiscal Year" company_dependent="1" help="Last day of your fiscal year and fiscal year records">
+                    <div class="content-group">
+                        <div class="row mt8">
+                            <label for="fiscalyear_last_month" string="Last Day" class="col-lg-3 o_light_label"/>
+                            <field name="fiscalyear_last_month" class="w-auto me-2"/>
+                            <field name="fiscalyear_last_day" class="w-auto"/>
+                        </div>
+                        <div class="mt8">
+                            <button type="action" name="%(custom_accountant.action_custom_fiscal_year)d" string="Fiscal Years" class="btn-link" icon="east"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting id="lock_dates_settings" string="Accounting Period &amp; Tax Lock Dates" company_dependent="1" help="Prevent posting or modifying entries on or before lock dates">
+                    <div class="content-group">
+                        <div class="row mt8">
+                            <label for="tax_lock_date" class="col-lg-5 o_light_label"/>
+                            <field name="tax_lock_date"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="sale_lock_date" class="col-lg-5 o_light_label"/>
+                            <field name="sale_lock_date"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="purchase_lock_date" class="col-lg-5 o_light_label"/>
+                            <field name="purchase_lock_date"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="fiscalyear_lock_date" class="col-lg-5 o_light_label"/>
+                            <field name="fiscalyear_lock_date"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="hard_lock_date" class="col-lg-5 o_light_label"/>
+                            <field name="hard_lock_date"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting id="enterprise_accounting_shortcuts" string="Enterprise Accounting Tools" help="Quick access to Assets, Deferred Schedules, Auto-Transfers, Follow-ups, and Disallowed Expenses">
+                    <div class="d-flex flex-wrap gap-2 mt8">
+                        <button type="action" name="%(custom_enterprise.action_custom_asset_category)d" string="Asset Categories" class="btn-link"/>
+                        <button type="action" name="%(custom_accountant.action_custom_followup_level)d" string="Follow-up Levels" class="btn-link"/>
+                        <button type="action" name="%(custom_accountant.action_custom_auto_transfer)d" string="Auto-Transfers" class="btn-link"/>
+                        <button type="action" name="%(custom_accountant.action_custom_disallowed_expense_category)d" string="Disallowed Expenses" class="btn-link"/>
+                        <button type="action" name="%(custom_enterprise.action_custom_account_budget)d" string="Budgets" class="btn-link"/>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

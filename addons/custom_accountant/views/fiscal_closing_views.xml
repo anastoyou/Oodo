@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fiscal Years -->
+    <record id="view_custom_fiscal_year_list" model="ir.ui.view">
+        <field name="name">custom.fiscal.year.list</field>
+        <field name="model">custom.fiscal.year</field>
+        <field name="arch" type="xml">
+            <list string="Fiscal Years">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="net_profit"/>
+                <field name="closing_move_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'open'" decoration-muted="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_fiscal_year_form" model="ir.ui.view">
+        <field name="name">custom.fiscal.year.form</field>
+        <field name="model">custom.fiscal.year</field>
+        <field name="arch" type="xml">
+            <form string="Fiscal Year">
+                <header>
+                    <button name="action_close_fiscal_year" string="Close Fiscal Year &amp; Post Year-End Entry" type="object" class="oe_highlight" invisible="state != 'open'"/>
+                    <button name="action_reopen" string="Reopen" type="object" invisible="state != 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="retained_earnings_account_id"/>
+                            <field name="closing_journal_id"/>
+                            <field name="net_profit"/>
+                            <field name="closing_move_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_fiscal_year" model="ir.actions.act_window">
+        <field name="name">Fiscal Years</field>
+        <field name="res_model">custom.fiscal.year</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Automatic Transfers -->
+    <record id="view_custom_auto_transfer_list" model="ir.ui.view">
+        <field name="name">custom.auto.transfer.list</field>
+        <field name="model">custom.auto.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Automatic Transfers">
+                <field name="name"/>
+                <field name="frequency"/>
+                <field name="date_start"/>
+                <field name="date_stop"/>
+                <field name="journal_id"/>
+                <field name="move_count"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'in_progress'" decoration-muted="state == 'disabled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_auto_transfer_form" model="ir.ui.view">
+        <field name="name">custom.auto.transfer.form</field>
+        <field name="model">custom.auto.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Automatic Transfer Rule">
+                <header>
+                    <button name="action_activate" string="Activate" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_compute_transfer" string="Run Transfer Now" type="object" class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_disable" string="Disable" type="object" invisible="state != 'in_progress'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_moves" type="object" class="oe_stat_button" icon="fa-exchange" invisible="move_count == 0">
+                            <field name="move_count" widget="statinfo" string="Transfers"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Shared Ad Spend Split (Apparel / Gadgets)"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="frequency"/>
+                            <field name="date_start"/>
+                            <field name="date_stop"/>
+                        </group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="origin_account_ids" widget="many2many_tags"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Destination Allocation (Must Total 100%)">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="account_id"/>
+                                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+                                    <field name="percent" sum="Total %"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_auto_transfer" model="ir.actions.act_window">
+        <field name="name">Automatic Transfers</field>
+        <field name="res_model">custom.auto.transfer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Disallowed Expenses -->
+    <record id="view_custom_disallowed_expense_category_list" model="ir.ui.view">
+        <field name="name">custom.disallowed.expense.category.list</field>
+        <field name="model">custom.disallowed.expense.category</field>
+        <field name="arch" type="xml">
+            <list string="Disallowed Expense Categories">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_disallowed_expense_category_form" model="ir.ui.view">
+        <field name="name">custom.disallowed.expense.category.form</field>
+        <field name="model">custom.disallowed.expense.category</field>
+        <field name="arch" type="xml">
+            <form string="Disallowed Expense Category">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Rates Over Time">
+                            <field name="rate_ids">
+                                <list editable="bottom">
+                                    <field name="date_from"/>
+                                    <field name="rate"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Linked Accounts">
+                            <field name="account_ids" readonly="1">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_disallowed_expense_category" model="ir.actions.act_window">
+        <field name="name">Disallowed Expense Categories</field>
+        <field name="res_model">custom.disallowed.expense.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_account_form_disallowed_ext" model="ir.ui.view">
+        <field name="name">account.account.form.disallowed.ext</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="disallowed_expense_category_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_custom_disallowed_expense_report_form" model="ir.ui.view">
+        <field name="name">custom.disallowed.expense.report.form</field>
+        <field name="model">custom.disallowed.expense.report</field>
+        <field name="arch" type="xml">
+            <form string="Disallowed Expenses Report" create="false" delete="false">
+                <header>
+                    <button name="action_compute" string="Compute" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="total_book_expense"/>
+                            <field name="total_disallowed"/>
+                            <field name="total_deductible"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="category_id"/>
+                            <field name="account_id"/>
+                            <field name="disallowed_rate"/>
+                            <field name="book_amount" sum="Book Expense"/>
+                            <field name="disallowed_amount" sum="Non-Deductible"/>
+                            <field name="deductible_amount" sum="Tax Deductible"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_disallowed_expense_report" model="ir.actions.server">
+        <field name="name">Disallowed Expenses Report</field>
+        <field name="model_id" ref="model_custom_disallowed_expense_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_disallowed_report()</field>
+    </record>
+
+    <!-- Lock Date Exceptions & Audit Trail -->
+    <record id="view_account_lock_exception_list" model="ir.ui.view">
+        <field name="name">account.lock_exception.list</field>
+        <field name="model">account.lock_exception</field>
+        <field name="arch" type="xml">
+            <list string="Lock Date Exceptions" create="false">
+                <field name="create_date"/>
+                <field name="create_uid"/>
+                <field name="user_id"/>
+                <field name="lock_date_field"/>
+                <field name="lock_date"/>
+                <field name="company_lock_date"/>
+                <field name="reason"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_custom_lock_exceptions" model="ir.actions.act_window">
+        <field name="name">Lock Date Exceptions</field>
+        <field name="res_model">account.lock_exception</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_custom_audit_trail" model="ir.actions.act_window">
+        <field name="name">Accounting Audit Trail</field>
+        <field name="res_model">mail.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('model', '=', 'account.move'), ('tracking_value_ids', '!=', False)]</field>
+        <field name="context">{'create': False}</field>
+    </record>
+</odoo>

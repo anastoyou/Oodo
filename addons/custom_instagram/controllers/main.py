@@ -1,5 +1,9 @@
+import base64
+import io
 import json
 import logging
+
+from PIL import Image
 
 from odoo import http
 from odoo.http import request
@@ -129,4 +133,24 @@ class CustomInstagramController(http.Controller):
             return request.redirect("/shop/cart")
         target = sync.direct_shop_url or "/shop"
         return request.redirect(target, local=not target.startswith(("http://", "https://")))
+
+    @http.route(["/ig/img/<int:tmpl_id>.jpg"], type="http", auth="public", methods=["GET"], csrf=False)
+    def instagram_product_jpeg(self, tmpl_id, **kwargs):
+        """Serve product image as public RGB JPEG for Meta Instagram Content Publishing API."""
+        tmpl = request.env["product.template"].sudo().browse(tmpl_id).exists()
+        raw_img = tmpl.image_1024 or tmpl.image_1920 if tmpl else False
+        if not raw_img:
+            return request.not_found()
+        img_bytes = raw_img.content if hasattr(raw_img, "content") else base64.b64decode(raw_img)
+        with Image.open(io.BytesIO(img_bytes)) as im:
+            rgb = im.convert("RGB")
+            buf = io.BytesIO()
+            rgb.save(buf, format="JPEG", quality=90)
+        return request.make_response(
+            buf.getvalue(),
+            headers=[
+                ("Content-Type", "image/jpeg"),
+                ("Cache-Control", "public, max-age=3600"),
+            ],
+        )
 

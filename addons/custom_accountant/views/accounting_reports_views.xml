@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_accounting_report_form" model="ir.ui.view">
+        <field name="name">custom.accounting.report.form</field>
+        <field name="model">custom.accounting.report</field>
+        <field name="arch" type="xml">
+            <form string="Enterprise Financial Report" create="false" delete="false">
+                <header>
+                    <button name="action_recompute" string="Refresh / Compute" type="object" class="btn-primary"/>
+                    <button name="action_print_pdf" string="Print PDF" type="object" class="btn-secondary"/>
+                    <button name="action_export_csv" string="Export CSV" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title mb-2">
+                        <span class="o_form_label"><field name="company_id" readonly="1" options="{'no_open': True}"/></span>
+                        <h2><field name="name" readonly="1"/></h2>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="report_type"/>
+                            <field name="date_from" invisible="report_type in ('balance_sheet', 'aged_receivable', 'aged_payable')"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="compare_previous" invisible="report_type not in ('pnl', 'balance_sheet')"/>
+                            <field name="include_unposted"/>
+                            <field name="hide_zero"/>
+                            <field name="summary_headline" invisible="1"/>
+                            <field name="primary_total" string="Headline Figure"/>
+                        </group>
+                    </group>
+                    <group string="Optional Filters" col="3">
+                        <field name="journal_ids" widget="many2many_tags"/>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                        <field name="analytic_account_ids" widget="many2many_tags" groups="analytic.group_analytic_accounting"/>
+                    </group>
+
+                    <!-- Statements: P&L, Balance Sheet, Executive Summary, Cash Flow, Tax Return -->
+                    <field name="line_ids" readonly="1" invisible="report_type not in ('pnl', 'balance_sheet', 'executive_summary', 'cashflow', 'tax_report')">
+                        <list decoration-bf="line_type in ('section', 'subtotal', 'total')"
+                              decoration-info="line_type == 'section'"
+                              decoration-primary="line_type == 'total'">
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="is_ratio" column_invisible="1"/>
+                            <field name="account_id" column_invisible="1"/>
+                            <field name="tax_id" column_invisible="1"/>
+                            <field name="name" string="Line / Account"/>
+                            <field name="initial_balance" string="Taxable Base" column_invisible="parent.report_type != 'tax_report'"/>
+                            <field name="amount" string="Amount / Balance"/>
+                            <field name="compare_amount" column_invisible="not parent.compare_previous"/>
+                            <field name="variance" column_invisible="not parent.compare_previous"/>
+                            <field name="variance_pct" column_invisible="not parent.compare_previous"/>
+                            <button name="action_open_journal_items" string="Journal Items" type="object" class="btn-link"
+                                    invisible="not account_id and not tax_id"/>
+                        </list>
+                    </field>
+
+                    <!-- Ledgers & Audits: General Ledger, Trial Balance, Partner Ledger, Journal Audit -->
+                    <field name="line_ids" readonly="1" invisible="report_type not in ('general_ledger', 'trial_balance', 'partner_ledger', 'journal_audit')">
+                        <list decoration-bf="line_type == 'total'" decoration-primary="line_type == 'total'">
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="account_id" column_invisible="1"/>
+                            <field name="partner_id" column_invisible="1"/>
+                            <field name="journal_id" column_invisible="1"/>
+                            <field name="code" column_invisible="parent.report_type == 'partner_ledger'"/>
+                            <field name="name" string="Account / Partner / Journal"/>
+                            <field name="initial_balance" string="Initial Balance" column_invisible="parent.report_type == 'journal_audit'"/>
+                            <field name="debit"/>
+                            <field name="credit"/>
+                            <field name="amount" string="Ending Balance"/>
+                            <button name="action_open_journal_items" string="Journal Items" type="object" class="btn-link"
+                                    invisible="line_type == 'total'"/>
+                        </list>
+                    </field>
+
+                    <!-- Aged Receivable / Aged Payable -->
+                    <field name="line_ids" readonly="1" invisible="report_type not in ('aged_receivable', 'aged_payable')">
+                        <list decoration-bf="line_type == 'total'" decoration-primary="line_type == 'total'">
+                            <field name="line_type" column_invisible="1"/>
+                            <field name="partner_id" column_invisible="1"/>
+                            <field name="name" string="Partner"/>
+                            <field name="bucket_0" string="Not Due"/>
+                            <field name="bucket_30" string="1–30 Days"/>
+                            <field name="bucket_60" string="31–60 Days"/>
+                            <field name="bucket_90" string="61–90 Days"/>
+                            <field name="bucket_120" string="91–120 Days"/>
+                            <field name="bucket_older" string="Older"/>
+                            <field name="amount" string="Total"/>
+                            <button name="action_open_journal_items" string="Open Items" type="object" class="btn-link"
+                                    invisible="line_type == 'total'"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Server actions to open each Enterprise Report directly with live data -->
+    <record id="action_report_pnl" model="ir.actions.server">
+        <field name="name">Profit and Loss</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('pnl')</field>
+    </record>
+    <record id="action_report_balance_sheet" model="ir.actions.server">
+        <field name="name">Balance Sheet</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('balance_sheet')</field>
+    </record>
+    <record id="action_report_executive_summary" model="ir.actions.server">
+        <field name="name">Executive Summary</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('executive_summary')</field>
+    </record>
+    <record id="action_report_cashflow" model="ir.actions.server">
+        <field name="name">Cash Flow Statement</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('cashflow')</field>
+    </record>
+    <record id="action_report_general_ledger" model="ir.actions.server">
+        <field name="name">General Ledger</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('general_ledger')</field>
+    </record>
+    <record id="action_report_trial_balance" model="ir.actions.server">
+        <field name="name">Trial Balance</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('trial_balance')</field>
+    </record>
+    <record id="action_report_partner_ledger" model="ir.actions.server">
+        <field name="name">Partner Ledger</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('partner_ledger')</field>
+    </record>
+    <record id="action_report_aged_receivable" model="ir.actions.server">
+        <field name="name">Aged Receivable</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('aged_receivable')</field>
+    </record>
+    <record id="action_report_aged_payable" model="ir.actions.server">
+        <field name="name">Aged Payable</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('aged_payable')</field>
+    </record>
+    <record id="action_report_tax_return" model="ir.actions.server">
+        <field name="name">Tax Return / GST Summary</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('tax_report')</field>
+    </record>
+    <record id="action_report_journal_audit" model="ir.actions.server">
+        <field name="name">Journal Audit</field>
+        <field name="model_id" ref="model_custom_accounting_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_report('journal_audit')</field>
+    </record>
+</odoo>

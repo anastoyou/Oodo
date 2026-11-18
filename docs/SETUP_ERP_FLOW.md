@@ -680,7 +680,7 @@ Every step from **1 to 67** is documented in **strict setup dependency order** a
     ```powershell
     .\upgrade.bat
     ```
-    (Or selectively: `.\upgrade.bat --skip-pull --modules custom_erp,custom_store,custom_enterprise,custom_accounting_pro,custom_comms,custom_omnichannel,custom_operations_ui,custom_scaling_ops,custom_analytics` and restart `odoo-bin`).
+    (Or selectively: `.\upgrade.bat --skip-pull --modules custom_erp,custom_store,custom_enterprise,custom_accountant,custom_comms,custom_omnichannel,custom_operations_ui,custom_scaling_ops,custom_analytics` and restart `odoo-bin`).
 
 ### 65. Integration Testing
 - **When:** `Phase 1 (Pre-Launch)` & Every Module Upgrade | **Layer:** `QA / Verification`

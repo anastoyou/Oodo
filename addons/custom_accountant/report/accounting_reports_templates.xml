@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_custom_accounting_pdf" model="ir.actions.report">
+        <field name="name">Financial / Audit Report PDF</field>
+        <field name="model">custom.accounting.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_accountant.report_accounting_statement_doc</field>
+    </record>
+
+    <template id="report_accounting_statement_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="d-flex justify-content-between align-items-baseline border-bottom pb-2 mb-3">
+                            <div>
+                                <h2 class="mb-0" t-field="o.name"/>
+                                <div class="text-muted small">
+                                    Company: <span t-field="o.company_id.name"/>
+                                    | Period: <span t-field="o.date_from"/> to <span t-field="o.date_to"/>
+                                    <t t-if="o.include_unposted"> | Including Draft Entries</t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Standard Statements (P&L, BS, Executive, Cash Flow, Tax) -->
+                        <t t-if="o.report_type in ('pnl', 'balance_sheet', 'executive_summary', 'cashflow', 'tax_report')">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Account / Section</th>
+                                        <th t-if="o.report_type == 'tax_report'" class="text-end">Taxable Base</th>
+                                        <th class="text-end">Amount</th>
+                                        <th t-if="o.compare_previous" class="text-end">Previous</th>
+                                        <th t-if="o.compare_previous" class="text-end">Variance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.line_ids" t-as="l">
+                                        <tr t-att-class="'table-secondary fw-bold' if l.line_type == 'section' else ('fw-bold border-top' if l.line_type == 'subtotal' else ('table-dark fw-bold' if l.line_type == 'total' else ''))">
+                                            <td t-att-style="'padding-left: 20px;' if l.level == 1 else ''"><span t-field="l.name"/></td>
+                                            <td t-if="o.report_type == 'tax_report'" class="text-end">
+                                                <span t-if="l.line_type == 'detail'" t-field="l.initial_balance"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-if="l.line_type != 'section'">
+                                                    <span t-if="not l.is_ratio" t-field="l.amount"/>
+                                                    <span t-else="" t-out="'%.2f' % l.amount"/>
+                                                </t>
+                                            </td>
+                                            <td t-if="o.compare_previous" class="text-end">
+                                                <span t-if="l.line_type != 'section'" t-field="l.compare_amount"/>
+                                            </td>
+                                            <td t-if="o.compare_previous" class="text-end">
+                                                <span t-if="l.line_type != 'section'" t-field="l.variance"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- General Ledger, Trial Balance, Partner Ledger, Journal Audit -->
+                        <t t-if="o.report_type in ('general_ledger', 'trial_balance', 'partner_ledger', 'journal_audit')">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Account / Partner / Journal</th>
+                                        <th t-if="o.report_type != 'journal_audit'" class="text-end">Initial Balance</th>
+                                        <th class="text-end">Debit</th>
+                                        <th class="text-end">Credit</th>
+                                        <th class="text-end">Ending Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.line_ids" t-as="l">
+                                        <tr t-att-class="'table-secondary fw-bold' if l.line_type == 'total' else ''">
+                                            <td><span t-field="l.name"/></td>
+                                            <td t-if="o.report_type != 'journal_audit'" class="text-end"><span t-field="l.initial_balance"/></td>
+                                            <td class="text-end"><span t-field="l.debit"/></td>
+                                            <td class="text-end"><span t-field="l.credit"/></td>
+                                            <td class="text-end"><span t-field="l.amount"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Aged Receivable / Aged Payable -->
+                        <t t-if="o.report_type in ('aged_receivable', 'aged_payable')">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Partner</th>
+                                        <th class="text-end">Not Due</th>
+                                        <th class="text-end">1–30</th>
+                                        <th class="text-end">31–60</th>
+                                        <th class="text-end">61–90</th>
+                                        <th class="text-end">91–120</th>
+                                        <th class="text-end">Older</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.line_ids" t-as="l">
+                                        <tr t-att-class="'table-secondary fw-bold' if l.line_type == 'total' else ''">
+                                            <td><span t-field="l.name"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_0"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_30"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_60"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_90"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_120"/></td>
+                                            <td class="text-end"><span t-field="l.bucket_older"/></td>
+                                            <td class="text-end fw-bold"><span t-field="l.amount"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -2,6 +2,7 @@ import logging
 from urllib.parse import quote_plus
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class CustomInstagramProductSync(models.Model):
             sep = "&" if "?" in path else "?"
             rec.direct_shop_url = f"{base}{path}{sep}utm_source=instagram&utm_medium=dm&utm_campaign={utm_camp}&utm_content={utm_kw}"
             rec.tracked_dm_url = f"{base}/ig/go/{rec.id}" if rec.id else rec.direct_shop_url
-            rec.public_image_url = f"{base}/web/image/product.template/{tmpl.id}/image_1024" if (tmpl and tmpl.image_1920) else False
+            rec.public_image_url = f"{base}/ig/img/{tmpl.id}.jpg" if (tmpl and tmpl.image_1920) else False
 
     def _default_keyword(self, tmpl):
         if tmpl.x_ig_dm_keyword:
@@ -81,7 +82,7 @@ class CustomInstagramProductSync(models.Model):
             f"Comment '{keyword}' or DM '{keyword}' now and receive the direct checkout link instantly!"
         )
 
-    def action_sync_now(self):
+    def action_sync_now(self, publish_feed=False):
         for rec in self:
             tmpl = rec.product_tmpl_id
             kw = rec.keyword_code or rec._default_keyword(tmpl)
@@ -94,17 +95,26 @@ class CustomInstagramProductSync(models.Model):
             }
 
             acc = rec.account_id
-            if acc.auto_publish_to_feed:
+            if acc.auto_publish_to_feed or publish_feed:
                 img_url = rec.public_image_url
-                is_public_https = bool(img_url and img_url.startswith("https://") and "localhost" not in img_url)
-                if acc.sandbox_mode or not (acc.access_token and acc.ig_user_id) or not is_public_https:
-                    updates["sync_state"] = "published" if acc.sandbox_mode else "ready"
-                    if acc.sandbox_mode:
-                        updates["ig_media_id"] = rec.ig_media_id or f"sim_media_{rec.id}"
-                    elif not is_public_https:
-                        updates["last_error"] = _(
-                            "DM direct link is active locally; Instagram Feed auto-publish skipped because product image URL (%s) must be public HTTPS."
-                        ) % (img_url or "missing")
+                is_public_https = bool(img_url and img_url.startswith("https://") and not img_url.startswith("https://localhost"))
+                if acc.sandbox_mode:
+                    updates["sync_state"] = "published"
+                    updates["ig_media_id"] = rec.ig_media_id or f"sim_media_{rec.id}"
+                elif not (acc.access_token and acc.ig_user_id):
+                    msg = _("Connect an Instagram Login token and IG User ID on account '%s' before publishing to Feed.") % acc.name
+                    if publish_feed:
+                        raise UserError(msg)
+                    updates["sync_state"] = "ready"
+                    updates["last_error"] = msg
+                elif not is_public_https:
+                    msg = _(
+                        "Upload a product image and ensure a public HTTPS URL is configured (current image URL: %s)."
+                    ) % (img_url or "missing")
+                    if publish_feed:
+                        raise UserError(msg)
+                    updates["sync_state"] = "ready"
+                    updates["last_error"] = msg
                 else:
                     ok_c, c_data = acc._graph_request(
                         "POST",
@@ -133,6 +143,22 @@ class CustomInstagramProductSync(models.Model):
 
             rec.write(updates)
         return True
+
+    def action_publish_to_feed(self):
+        self.action_sync_now(publish_feed=True)
+        failed = self.filtered(lambda s: s.sync_state == "error")
+        if failed:
+            raise UserError(failed[0].last_error or _("Instagram Feed publish failed."))
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Instagram Feed Publish"),
+                "message": _("Published %s product post(s) to Instagram Feed.") % len(self),
+                "type": "success",
+                "sticky": False,
+            },
+        }
 
     def action_open_send_dm_wizard(self):
         self.ensure_one()
@@ -176,20 +202,31 @@ class CustomInstagramProductSync(models.Model):
         return synced
 
     @api.model
-    def sync_product_across_matching_units(self, products):
+    def sync_product_across_matching_units(self, products, force_manual=False):
         Account = self.env["custom.instagram.account"].sudo()
-        active_accounts = Account.search([("active", "=", True), ("auto_sync_new_products", "=", True)])
+        acc_domain = [("active", "=", True)]
+        if not force_manual:
+            acc_domain.append(("auto_sync_new_products", "=", True))
+        active_accounts = Account.search(acc_domain)
+        synced = self.browse()
         for tmpl in products:
-            if not tmpl.sale_ok or not tmpl.x_ig_auto_sync:
+            if not force_manual and (not tmpl.sale_ok or not tmpl.x_ig_auto_sync):
                 continue
             if tmpl.website_id:
                 target_accs = active_accounts.filtered(lambda a: a.website_id == tmpl.website_id)
             else:
-                target_accs = active_accounts.filtered(lambda a: a.sync_shared_products)
+                target_accs = active_accounts if force_manual else active_accounts.filtered(lambda a: a.sync_shared_products)
+            if force_manual and not target_accs:
+                unit_label = tmpl.website_id.name if tmpl.website_id else _("any Website")
+                raise UserError(_(
+                    "No active Instagram Business account found for unit '%s'. "
+                    "Create one under Instagram DM -> Units, Credentials & Webhooks -> Unit Accounts & Tokens."
+                ) % unit_label)
             for acc in target_accs:
-                if tmpl.type == "service" and not acc.sync_service_products:
+                if not force_manual and tmpl.type == "service" and not acc.sync_service_products:
                     continue
-                self.sudo().sync_products_for_account(acc, tmpl)
+                synced |= self.sudo().sync_products_for_account(acc, tmpl)
+        return synced
 
 
 class ProductTemplateInstagram(models.Model):
@@ -226,8 +263,21 @@ class ProductTemplateInstagram(models.Model):
         return res
 
     def action_sync_to_instagram(self):
-        self.env["custom.instagram.product.sync"].sync_product_across_matching_units(self)
-        return True
+        synced = self.env["custom.instagram.product.sync"].sync_product_across_matching_units(self, force_manual=True)
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Instagram Sync Complete"),
+                "message": _("Synced to %s Unit Instagram record(s). Direct DM link is ready.") % len(synced),
+                "type": "success",
+                "sticky": False,
+            },
+        }
+
+    def action_publish_ig_feed(self):
+        synced = self.env["custom.instagram.product.sync"].sync_product_across_matching_units(self, force_manual=True)
+        return synced.action_publish_to_feed()
 
     def action_view_ig_syncs(self):
         self.ensure_one()
