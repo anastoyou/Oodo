@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_custom_operations_ui_root" name="Operations UI &amp; BI" sequence="42"/>
+    <menuitem id="menu_custom_operations_ui_root" name="Operations UI &amp; BI" web_icon="custom_operations_ui,static/description/icon.png" sequence="42"/>
 
     <menuitem id="menu_custom_shopfloor_section" name="Shop Floor &amp; Barcode" parent="menu_custom_operations_ui_root" sequence="10"/>
     <menuitem id="menu_custom_shopfloor_workorders" name="Shop Floor Work Orders" parent="menu_custom_shopfloor_section" action="action_custom_shopfloor_workorder" sequence="10"/>

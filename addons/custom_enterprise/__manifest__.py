@@ -1,8 +1,8 @@
 {
-    "name": "Custom Enterprise Suite (Community Edition)",
+    "name": "Custom Enterprise Suite(C)",
     "version": "20.0.1.0.0",
     "category": "Operations/Enterprise",
-    "summary": "Custom Odoo Community implementations of Enterprise apps: Accounting+, Helpdesk SLA/CSAT, Payroll & Appraisals, Approvals, DMS, Barcode Scan, QC, PLM, Sign, Subscriptions, Rental, Marketing Automation, Social, Field Service, Planning, KPIs & Studio-Lite",
+    "summary": "Community Enterprise: Helpdesk, Payroll, DMS, PLM & KPIs.",
     "author": "Custom Store",
     "depends": [
         "custom_erp",

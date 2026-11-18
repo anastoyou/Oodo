@@ -1,5 +1,8 @@
-Custom Apparel ERP & Phase-1 Operations
-=========================================
+Custom Apparel ERP – Phase 1(C)
+================================
+
+Upgrade-safe D2C apparel operations, Indian GST slab checks, COD/RTO workflow,
+CRM/Inventory/Invoicing UX & Support Tickets.
 
 Version-controlled ERP addon built in ``addons/custom_erp`` so ``odoo/`` can be
 pulled cleanly without losing business rules, operational views, or master data.

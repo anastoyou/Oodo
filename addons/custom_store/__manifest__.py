@@ -1,8 +1,8 @@
 {
-    "name": "Custom Store Website & eCommerce",
+    "name": "Custom Store eCommerce(C)",
     "version": "20.0.2.0.0",
     "category": "Website/eCommerce",
-    "summary": "Custom version-controlled storefront, eCommerce, cart, checkout, portal, and support UI extensions",
+    "summary": "D2C Storefront, Cart, Checkout, Portal & Support UI.",
     "author": "Custom Store",
     "depends": [
         "website",

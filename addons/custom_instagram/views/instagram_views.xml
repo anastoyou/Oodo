@@ -497,7 +497,7 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="menu_custom_instagram_root" name="Instagram DM" sequence="39"/>
+    <menuitem id="menu_custom_instagram_root" name="Instagram DM" web_icon="custom_instagram,static/description/icon.png" sequence="39"/>
 
     <menuitem id="menu_custom_instagram_inbox" name="DM &amp; Comment Inbox" parent="menu_custom_instagram_root" sequence="10"/>
     <menuitem id="menu_custom_instagram_messages" name="Messages &amp; Private Replies" parent="menu_custom_instagram_inbox" action="action_custom_instagram_message" sequence="10"/>

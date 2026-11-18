@@ -1,8 +1,15 @@
 {
-    "name": "Custom Analytics Hub (Cross-ERP Visual Dashboard, Graph & Pivot Suite)",
+    "name": "Custom Analytics Hub(C)",
     "version": "20.0.2.0.0",
     "category": "Reporting/Analytics",
-    "summary": "All-domain Analytics hub: /analytics Chart.js BI dashboard, Scaling Roadmap Phase 1-5 Progress & Next-Phase Alerts (/analytics/roadmap), Sales/Purchase/Inventory/CRM/Finance/HR/Ops Graph & Pivot",
+    "summary": "Cross-ERP BI Dashboard, Roadmap, Graph & Pivot Suite.",
+    "description": """
+All-domain Analytics hub:
+
+- /analytics Chart.js BI dashboard
+- Scaling Roadmap Phase 1-5 Progress & Next-Phase Alerts (/analytics/roadmap)
+- Sales, Purchase, Inventory, CRM, Finance, HR & Ops Graph & Pivot views
+    """,
     "author": "Custom Store",
     "depends": [
         "custom_scaling_ops",

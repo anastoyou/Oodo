@@ -1,4 +1,6 @@
-# `custom_store` — Version-Controlled Website, eCommerce, Checkout, Portal & Support Addon
+# Custom Store eCommerce(C) — Version-Controlled Website, eCommerce, Checkout, Portal & Support Addon
+
+Custom version-controlled storefront, eCommerce, cart, checkout, portal, and support UI extensions.
 
 This module lives in `e:\Code\Oodo\addons\custom_store` (tracked in Git, completely outside the gitignored `odoo/` directory) and builds on top of `custom_erp`.
 Core `website`, `website_sale`, `website_sale_loyalty`, `portal`, `auth_signup`, and `theme_default` stay untouched inside `odoo/addons/` so upstream Odoo `20.0` updates (`upgrade.bat`) never conflict with your storefront or customer portal customizations.

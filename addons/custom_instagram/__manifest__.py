@@ -1,8 +1,16 @@
 {
-    "name": "Custom Instagram Business & Unit DM Commerce",
+    "name": "Custom Instagram Commerce(C)",
     "version": "20.0.1.0.0",
     "category": "Sales/Social",
-    "summary": "Per-Unit Instagram API with Instagram Login (60-day auto-refresh token), Automatic Product-to-Instagram Sync, Meesho-style Direct Product Link DM Cards & Comment-to-DM Webhooks",
+    "summary": "Instagram Login, Product Sync & DM Commerce Webhooks.",
+    "description": """
+Per-Unit Instagram Business & DM Commerce integration:
+
+- Per-Unit Instagram API with Instagram Login (60-day auto-refresh token)
+- Automatic Product-to-Instagram Sync
+- Meesho-style Direct Product Link DM Cards
+- Comment-to-DM Webhooks
+    """,
     "author": "Custom Store",
     "depends": [
         "custom_erp",

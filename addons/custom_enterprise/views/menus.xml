@@ -33,15 +33,15 @@
     <menuitem id="menu_custom_mrp_mps" name="MPS Demand Replenishment" parent="menu_custom_inventory_enterprise" action="action_custom_mrp_mps" sequence="40"/>
 
     <!-- Standalone Enterprise Suite Apps -->
-    <menuitem id="menu_custom_approvals_root" name="Approvals" sequence="58" groups="base.group_user"/>
+    <menuitem id="menu_custom_approvals_root" name="Approvals" web_icon="custom_enterprise,static/description/icon.png" sequence="58" groups="base.group_user"/>
     <menuitem id="menu_custom_approval_requests" name="Approval Requests" parent="menu_custom_approvals_root" action="action_custom_approval_request" sequence="10"/>
     <menuitem id="menu_custom_approval_categories" name="Approval Types" parent="menu_custom_approvals_root" action="action_custom_approval_category" sequence="20"/>
 
-    <menuitem id="menu_custom_documents_root" name="Documents" sequence="59" groups="base.group_user"/>
+    <menuitem id="menu_custom_documents_root" name="Documents" web_icon="custom_enterprise,static/description/icon.png" sequence="59" groups="base.group_user"/>
     <menuitem id="menu_custom_documents_all" name="All Documents" parent="menu_custom_documents_root" action="action_custom_document" sequence="10"/>
     <menuitem id="menu_custom_document_folders" name="Folders" parent="menu_custom_documents_root" action="action_custom_document_folder" sequence="20"/>
 
-    <menuitem id="menu_custom_enterprise_ops_root" name="Enterprise Suite" sequence="62" groups="base.group_user"/>
+    <menuitem id="menu_custom_enterprise_ops_root" name="Enterprise Suite" web_icon="custom_enterprise,static/description/icon.png" sequence="62" groups="base.group_user"/>
     <menuitem id="menu_custom_kpi_snapshot" name="Executive KPIs" parent="menu_custom_enterprise_ops_root" action="action_custom_kpi_snapshot" sequence="5"/>
     <menuitem id="menu_custom_sign_request" name="e-Signatures" parent="menu_custom_enterprise_ops_root" action="action_custom_sign_request" sequence="10"/>
     <menuitem id="menu_custom_sign_template" name="e-Sign Templates" parent="menu_custom_enterprise_ops_root" action="action_custom_sign_template" sequence="12"/>

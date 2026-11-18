@@ -1,8 +1,8 @@
 {
-    "name": "Custom Apparel ERP & Phase-1 Operations",
+    "name": "Custom Apparel ERP – Phase 1(C)",
     "version": "20.0.2.0.0",
     "category": "Sales/Sales",
-    "summary": "Upgrade-safe D2C apparel operations, Indian GST slab checks, COD/RTO workflow, CRM/Inventory/Invoicing UX & Support Tickets",
+    "summary": "D2C Apparel ERP: GST, COD/RTO, CRM & Inventory.",
     "author": "Custom Store",
     "depends": [
         "sale_management",

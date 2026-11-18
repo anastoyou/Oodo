@@ -1,8 +1,15 @@
 {
-    "name": "Custom Communications (WhatsApp Cloud, VoIP Call Log & Frontdesk Kiosk)",
+    "name": "Custom Communications(C)",
     "version": "20.0.1.0.0",
     "category": "Discuss/Communications",
-    "summary": "WhatsApp Business Cloud API connector & templates, VoIP call logging/click-to-call, and Frontdesk Visitor Check-In Kiosk",
+    "summary": "WhatsApp Cloud API, VoIP Call Log & Frontdesk Kiosk.",
+    "description": """
+Unified business communications suite:
+
+- WhatsApp Business Cloud API connector & templates
+- VoIP call logging & click-to-call
+- Frontdesk Visitor Check-In Kiosk
+    """,
     "author": "Custom Store",
     "depends": [
         "custom_enterprise",

@@ -1,8 +1,16 @@
 {
-    "name": "Accounting (Enterprise Edition)",
+    "name": "Accounting Enterprise Suite(C)",
     "version": "20.0.1.0.0",
     "category": "Accounting/Accounting",
-    "summary": "Full Odoo Enterprise Edition Accounting suite: Dynamic Financial Statements (P&L, Balance Sheet, Cash Flow, Executive Summary, GL, Trial Balance, Aged AR/AP, Partner Ledger, Tax/GST Return, Multi-Company Consolidation), Interactive Bank Reconciliation & Models, Bill PDF OCR, Auto-Asset & Auto-Deferred from Bills/Invoices, Batch Payments, Customer Follow-ups, Fiscal Years, Auto-Transfers, Disallowed Expenses, Equity Cap Table & Audit Trail",
+    "summary": "Financial Statements, Bank Recon, OCR, Assets & GST.",
+    "description": """
+Full Odoo Enterprise Edition Accounting suite:
+
+- Dynamic Financial Statements (P&L, Balance Sheet, Cash Flow, Executive Summary, GL, Trial Balance, Aged AR/AP, Partner Ledger, Tax/GST Return, Multi-Company Consolidation)
+- Interactive Bank Reconciliation & Models, Bill PDF OCR
+- Auto-Asset & Auto-Deferred from Bills/Invoices
+- Batch Payments, Customer Follow-ups, Fiscal Years, Auto-Transfers, Disallowed Expenses, Equity Cap Table & Audit Trail
+    """,
     "author": "Custom Store",
     "depends": [
         "account",

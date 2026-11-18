@@ -162,6 +162,7 @@
     <menuitem
         id="menu_custom_helpdesk_root"
         name="Helpdesk"
+        web_icon="custom_erp,static/description/icon.png"
         sequence="55"
         groups="base.group_user"/>
 

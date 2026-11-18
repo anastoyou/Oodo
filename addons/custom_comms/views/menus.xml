@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_custom_comms_root" name="Comms &amp; Frontdesk" sequence="38"/>
+    <menuitem id="menu_custom_comms_root" name="Comms &amp; Frontdesk" web_icon="custom_comms,static/description/icon.png" sequence="38"/>
 
     <menuitem id="menu_custom_comms_whatsapp_section" name="WhatsApp Business" parent="menu_custom_comms_root" sequence="10"/>
     <menuitem id="menu_custom_whatsapp_messages" name="WhatsApp Messages" parent="menu_custom_comms_whatsapp_section" action="action_custom_whatsapp_message" sequence="10"/>

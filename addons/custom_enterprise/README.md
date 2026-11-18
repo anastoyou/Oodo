@@ -1,5 +1,10 @@
-Custom Enterprise Suite (Community Edition)
-=============================================
+Custom Enterprise Suite(C)
+===========================
+
+Custom Odoo Community implementations of Enterprise apps: Accounting+, Helpdesk
+SLA/CSAT, Payroll & Appraisals, Approvals, DMS, Barcode Scan, QC, PLM, Sign,
+Subscriptions, Rental, Marketing Automation, Social, Field Service, Planning,
+KPIs & Studio-Lite.
 
 Upgrade-safe custom Odoo 20.0 Community module delivering custom equivalents of
 Odoo Enterprise capabilities without per-user license fees:

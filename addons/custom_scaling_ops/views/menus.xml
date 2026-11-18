@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_custom_scaling_ops_root" name="Scaling Ops (P2-P5)" sequence="44"/>
+    <menuitem id="menu_custom_scaling_ops_root" name="Scaling Ops (P2-P5)" web_icon="custom_scaling_ops,static/description/icon.png" sequence="44"/>
 
     <menuitem id="menu_scaling_returns_logistics" name="Returns &amp; Courier" parent="menu_custom_scaling_ops_root" sequence="10"/>
     <menuitem id="menu_custom_rma_requests" name="Returns &amp; Size Exchanges (RMA)" parent="menu_scaling_returns_logistics" action="action_custom_rma_request" sequence="10"/>
