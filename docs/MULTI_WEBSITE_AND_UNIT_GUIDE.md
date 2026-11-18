@@ -7,15 +7,23 @@
 
 ---
 
-## 1. Create the New Website (New Unit) in Odoo
+## 1. Create a New Website / Isolated Store
 
+There are two ways depending on whether you want a **dedicated addon codebase (`addons/custom_store_<slug>/`)** or just a **UI-only Builder website**:
+
+### Recommended (With Separate Addon Codebase — One Command Only)
+You do **not** need to create the website manually in the Odoo UI first. As long as the target Company already exists in **Settings → Users & Companies → Companies**, just run:
+```powershell
+.\new_store.bat <slug> "<Website Name>" --company "<Company Name>" --domain "<Domain>" --install
+```
+- **If the website does not exist yet:** `--install` creates the `website` record in Odoo automatically, sets `x_store_code`, attaches isolated `ir.asset` SCSS/JS, and seeds a Builder-editable starter homepage & footer.
+- **If you already created the website in the UI first:** running `.\new_store.bat` with the matching website name links to the existing `website` record without creating a duplicate.
+
+### Alternative (UI-Only Without a Custom Addon Folder)
+If you only want a quick Builder-only site without its own `addons/` folder:
 1. Log in as Administrator and go to **Website → Configuration → Settings**.
 2. Click **+ New Website** (or go to **Website → Configuration → Websites → New**).
-3. Fill in the unit details:
-   * **Website Name:** e.g. `YourBrand Gadgets` or `YourBrand Partners`
-   * **Website Domain:** e.g. `http://unit2.localhost:8069` (local dev) or `https://gadgetbrand.in` (production)
-   * **Company:** Select your main company (shared inventory/accounting) or a separate Phase 5 subsidiary company (e.g., `YourBrand Tech LLP`).
-4. Pick a starter theme (`theme_default`) when the Website Builder configurator opens.
+3. Fill in **Website Name**, **Website Domain**, and **Company**, then pick a starter theme.
 
 ---
 

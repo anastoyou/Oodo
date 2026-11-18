@@ -50,11 +50,12 @@ After editing files in `addons/custom_store/` (or any `addons/custom_store_<slug
 
 Each new website can have its own isolated addon folder (`addons/custom_store_<slug>/`) scoped via `website.x_store_code`, while staying 100% editable in the **Website Builder**:
 
-* **Create & install a new isolated store addon:**
+* **Create & install a new isolated store addon (no need to create the website manually in UI first):**
   ```powershell
   .\new_store.bat fairtag "FAIRTAG" --company "FAIRTAG" --domain "http://fairtag.localhost:8069" --install
   .\new_store.bat zoira "ZOIRA LAWNS" --company "ZOIRA LAWNS" --domain "http://zoira.localhost:8069" --install
   ```
+  > Running `.\new_store.bat ... --install` creates both the `addons/custom_store_<slug>/` folder **and** the Odoo `website` record automatically (or links to it if you already created it in the UI with the same name). Just make sure the `--company` already exists in Odoo.
 * **Pull visual Website Builder edits from DB back into addon XML (`views/`):**
   ```powershell
   .\sync_store.bat pull custom_store
