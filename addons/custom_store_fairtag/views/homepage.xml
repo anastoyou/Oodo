@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Builder-compatible starter Homepage seeded into FAIRTAG on install (syncable with sync_store.bat) -->
+    <template id="homepage_tmpl" name="FAIRTAG Starter Homepage">
+        <t t-call="website.layout" pageName.f="homepage">
+            <div id="wrap" class="oe_structure">
+                <section class="s_cover o_cc o_cc5 pt96 pb96 o_colored_level" data-snippet="s_cover" data-name="Hero Cover">
+                    <div class="container s_allow_columns text-center">
+                        <span class="badge text-bg-primary text-uppercase mb-3 px-3 py-2">FAIRTAG</span>
+                        <h1 class="display-3 fw-bold mb-3">FAIRTAG Official Store</h1>
+                        <p class="lead mb-4">
+                            Discover curated products from FAIRTAG &#8212; managed by ZOEE GLOBAL PRIVATE LIMITED.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a href="/shop" class="btn btn-primary btn-lg px-4 o_translate_inline">Shop Now</a>
+                            <a href="/contactus" class="btn btn-outline-light btn-lg px-4 o_translate_inline">Contact Us</a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="s_three_columns o_cc o_cc1 pt48 pb48 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Highlights">
+                    <div class="container s_allow_columns">
+                        <div class="row g-3">
+                            <div class="col-md-4 pt8 pb8">
+                                <div class="s_card o_fairtag_card card h-100 o_cc o_cc2 p-4" data-vxml="001" data-snippet="s_card" data-name="Highlight Card">
+                                    <h3 class="h5 card-title">Curated Catalog</h3>
+                                    <p class="card-text small text-muted mb-0">Dedicated products, suppliers, and inventory scoped cleanly to FAIRTAG.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 pt8 pb8">
+                                <div class="s_card o_fairtag_card card h-100 o_cc o_cc2 p-4" data-vxml="001" data-snippet="s_card" data-name="Highlight Card">
+                                    <h3 class="h5 card-title">Fast Dispatch</h3>
+                                    <p class="card-text small text-muted mb-0">Pan-India doorstep delivery with live order and portal tracking.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 pt8 pb8">
+                                <div class="s_card o_fairtag_card card h-100 o_cc o_cc2 p-4" data-vxml="001" data-snippet="s_card" data-name="Highlight Card">
+                                    <h3 class="h5 card-title">Trusted Support</h3>
+                                    <p class="card-text small text-muted mb-0">Backed by ZOEE GLOBAL PRIVATE LIMITED with GST-compliant billing.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

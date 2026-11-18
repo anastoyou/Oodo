@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="shop_zoira" inherit_id="website_sale.products" name="ZOIRA LAWNS Shop Page">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="t-attf-class" add="#{'o_zoira_shop' if (website and website.x_store_code == 'zoira') else ''}" separator=" "/>
+        </xpath>
+        <xpath expr="//header[@id='o_wsale_products_header']" position="before">
+            <div t-if="website and website.x_store_code == 'zoira'" class="o_zoira_shop_banner p-4 mb-4 rounded">
+                <span class="badge text-bg-primary text-uppercase mb-2">ZOIRA LAWNS</span>
+                <h2 class="h4 text-white mb-1">ZOIRA LAWNS Collection</h2>
+                <p class="small text-white-50 mb-0">Curated items exclusively for ZOIRA LAWNS.</p>
+            </div>
+        </xpath>
+    </template>
+</odoo>

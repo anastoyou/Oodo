@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="header_fairtag" inherit_id="website.layout" name="FAIRTAG Header" priority="30">
+        <xpath expr="//header[@id='top']" position="attributes">
+            <attribute name="t-attf-class" add="#{'o_fairtag_header' if (website and website.x_store_code == 'fairtag') else ''}" separator=" "/>
+        </xpath>
+    </template>
+
+    <template id="header_disclaimer_fairtag" inherit_id="website.option_header_disclaimer" name="FAIRTAG Header Announcement" priority="25">
+        <xpath expr="//div[hasclass('s_headline')]" position="before">
+            <div t-if="website and website.x_store_code == 'fairtag'" class="s_headline oe_no_drop_above o_colored_level o_cc o_cc5 pt4 pb4">
+                <div class="text-center px-3">
+                    <small>Welcome to FAIRTAG &#183; Managed by ZOEE GLOBAL PRIVATE LIMITED</small>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('s_headline')][last()]" position="attributes">
+            <attribute name="t-if">not (website and website.x_store_code == 'fairtag')</attribute>
+        </xpath>
+    </template>
+</odoo>

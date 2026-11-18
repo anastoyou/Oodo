@@ -39,7 +39,25 @@
 
 
 
+---
+
+## Running & Multi-Store Commands
+
+```powershell
+# Start local Odoo server
 .\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\odoo.conf
+
+# Upgrade custom addons (stops local Odoo, backs up DB, upgrades)
+.\upgrade.bat --skip-pull
+
+# Create & install a new isolated, Builder-compatible store addon (addons/custom_store_<slug>/)
+.\new_store.bat fairtag "FAIRTAG" --company "FAIRTAG" --domain "http://fairtag.localhost:8069" --install
+.\new_store.bat zoira "ZOIRA LAWNS" --company "ZOIRA LAWNS" --domain "http://zoira.localhost:8069" --install
+
+# Sync Website Builder edits <-> addon XML (views/homepage.xml, footer.xml, synced_pages.xml)
+.\sync_store.bat pull fairtag
+.\sync_store.bat push fairtag
+```
 
 
 

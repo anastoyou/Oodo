@@ -2,11 +2,11 @@
 <odoo>
     <template id="shop_products_custom" inherit_id="website_sale.products" name="Custom Store Shop Page">
         <xpath expr="//div[@id='wrap']" position="attributes">
-            <attribute name="class" add="o_custom_store_shop" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_shop' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
 
         <xpath expr="//header[@id='o_wsale_products_header']" position="before">
-            <div class="o_custom_store_shop_banner p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_shop_banner p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                 <div>
                     <span class="badge text-bg-primary text-uppercase mb-2">Season Collection</span>
                     <h2 class="h4 text-white mb-1">Curated Apparel, Fabrics &amp; Everyday Essentials</h2>

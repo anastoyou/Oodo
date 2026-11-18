@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Builder-compatible starter Footer seeded into ZOIRA LAWNS on install (syncable with sync_store.bat) -->
+    <template id="footer_tmpl" name="ZOIRA LAWNS Starter Footer">
+        <div id="footer" class="oe_structure oe_structure_solo o_zoira_footer border text-break" t-ignore="true" t-if="not no_footer" style="--box-border-left-width: 0px; --box-border-right-width: 0px;">
+            <section class="s_text_block pt40 pb24 o_colored_level" data-snippet="s_text_block" data-name="Footer Content">
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-lg-4 col-sm-6 pt16 pb16">
+                            <h5>ZOIRA LAWNS</h5>
+                            <p class="small mb-0">
+                                Official online storefront for ZOIRA LAWNS, a brand managed by ZOEE GLOBAL PRIVATE LIMITED.
+                            </p>
+                        </div>
+                        <div class="col-lg-4 col-sm-6 pt16 pb16">
+                            <h5>Quick Links</h5>
+                            <ul class="list-unstyled d-flex flex-column gap-1">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/shop">Shop</a></li>
+                                <li><a href="/my">My Account</a></li>
+                                <li><a href="/support">Support</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-4 col-sm-6 pt16 pb16">
+                            <h5>Contact</h5>
+                            <ul class="list-unstyled d-flex flex-column gap-1 small">
+                                <li><a href="/contactus">Contact Form</a></li>
+                                <li><a href="/privacy">Privacy Policy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </template>
+</odoo>

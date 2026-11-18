@@ -3,13 +3,13 @@
     <!-- 5. Customer Portal: Login, Registration, Dashboard, Details & Order History -->
     <template id="login_layout_custom" inherit_id="website.login_layout" name="Custom Store Login Card">
         <xpath expr="//div[hasclass('oe_website_login_container')]" position="attributes">
-            <attribute name="class" add="o_custom_store_auth" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_auth' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
     </template>
 
     <template id="login_page_custom" inherit_id="web.login" name="Custom Store Login Header">
         <xpath expr="//form[contains(@t-attf-class, 'oe_login_form')]/input[@name='csrf_token']" position="after">
-            <div class="text-center mb-3 pb-2 border-bottom">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="text-center mb-3 pb-2 border-bottom">
                 <span class="badge text-bg-light border text-uppercase mb-2">Customer Account</span>
                 <h4 class="mb-1">Sign in to Your Store</h4>
                 <p class="small text-muted mb-0">
@@ -21,7 +21,7 @@
 
     <template id="signup_page_custom" inherit_id="auth_signup.signup" name="Custom Store Signup Header">
         <xpath expr="//form[hasclass('oe_signup_form')]/input[@name='csrf_token']" position="after">
-            <div class="text-center mb-3 pb-2 border-bottom">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="text-center mb-3 pb-2 border-bottom">
                 <span class="badge text-bg-light border text-uppercase mb-2">Join Us</span>
                 <h4 class="mb-1">Create Your Account</h4>
                 <p class="small text-muted mb-0">
@@ -33,7 +33,7 @@
 
     <template id="portal_my_home_custom" inherit_id="portal.portal_my_home" name="Custom Store Portal Hero">
         <xpath expr="//div[@id='oe_structure_portal_my_home_1']" position="inside">
-            <div class="o_custom_store_portal_hero p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_portal_hero p-4 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                 <div>
                     <span class="badge text-bg-primary text-uppercase mb-2">Customer Portal</span>
                     <h2 class="h4 text-white mb-1">

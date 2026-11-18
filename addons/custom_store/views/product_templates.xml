@@ -2,11 +2,11 @@
 <odoo>
     <template id="product_page_custom" inherit_id="website_sale.product" name="Custom Store Product Page">
         <xpath expr="//div[@id='wrap']" position="attributes">
-            <attribute name="class" add="o_custom_store_product" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_product' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
 
         <xpath expr="//t[@name='variant_info']" position="after">
-            <div class="mb-3 d-flex flex-wrap align-items-center gap-3">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="mb-3 d-flex flex-wrap align-items-center gap-3">
                 <a href="/size-guide" target="_blank" class="small text-decoration-underline fw-semibold">
                     <i class="fa fa-arrows-h me-1" aria-hidden="true"/>View Apparel Size Guide
                 </a>
@@ -18,7 +18,7 @@
 
         <xpath expr="//div[@id='o_wsale_product_cta_section']" position="after">
             <div class="border rounded p-3 mb-3 small o_custom_store_specs"
-                t-if="product.x_fabric or product.x_fit_type or product.x_wash_care or product.x_dispatch_days">
+                t-if="(website and website.x_store_code == 'custom_store') and (product.x_fabric or product.x_fit_type or product.x_wash_care or product.x_dispatch_days)">
                 <div t-if="product.x_dispatch_days" class="mb-1">
                     <strong>Dispatch:</strong> Within <t t-out="product.x_dispatch_days"/> business days &#183; 7-day easy size exchange
                 </div>
@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="o_custom_store_trust_pills d-flex flex-wrap gap-2 mb-4">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_trust_pills d-flex flex-wrap gap-2 mb-4">
                 <span class="badge rounded-pill px-3 py-2">
                     <i class="fa fa-check-circle me-1" aria-hidden="true"/>QC Verified Garment
                 </span>

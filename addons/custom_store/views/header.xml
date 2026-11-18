@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Hook every Theme Builder Header preset cleanly via website.layout -->
+    <!-- Expose data-store-code on <html> for all websites and scope custom_store header styling -->
     <template id="header_custom" inherit_id="website.layout" name="Custom Store Header" priority="25">
+        <xpath expr="//html" position="attributes">
+            <attribute name="t-att-data-store-code">(website and website.x_store_code) or 'default'</attribute>
+        </xpath>
         <xpath expr="//header[@id='top']" position="attributes">
-            <attribute name="t-attf-class" add="o_custom_store_header" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_header' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
     </template>
 
-    <!-- Customize Odoo's built-in Header Disclaimer bar so Show Disclaimer + Header Presets + Builder Save work cleanly -->
+    <!-- Scope custom_store announcement bar to x_store_code == 'custom_store' -->
     <template id="header_disclaimer_custom" inherit_id="website.option_header_disclaimer" name="Custom Store Header Announcement" priority="20">
-        <xpath expr="//div[hasclass('s_headline')]" position="replace">
-            <div class="s_headline oe_no_drop_above o_colored_level o_cc o_cc5 pt4 pb4">
+        <xpath expr="//div[hasclass('s_headline')]" position="attributes">
+            <attribute name="t-if">not (website and website.x_store_code == 'custom_store')</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('s_headline')]" position="after">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="s_headline oe_no_drop_above o_colored_level o_cc o_cc5 pt4 pb4">
                 <div class="text-center px-3">
                     <small>
                         Free Pan-India shipping on prepaid orders above Rs. 999 &#183; 7-day easy size exchanges

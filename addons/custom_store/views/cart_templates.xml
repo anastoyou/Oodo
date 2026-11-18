@@ -2,11 +2,11 @@
 <odoo>
     <template id="cart_custom" inherit_id="website_sale.cart" name="Custom Store Cart Page">
         <xpath expr="//div[@id='shop_cart']" position="attributes">
-            <attribute name="class" add="o_custom_store_cart" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_cart' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
 
         <xpath expr="//t[@t-call='website_sale.cart_lines']" position="after">
-            <div class="o_custom_store_cart_notice rounded p-3 mt-3 small">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_cart_notice rounded p-3 mt-3 small">
                 <div class="fw-semibold mb-1">
                     <i class="fa fa-bolt me-1 text-primary" aria-hidden="true"/>Fast Dispatch, Promo Codes &amp; Easy Exchanges
                 </div>

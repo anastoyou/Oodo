@@ -67,58 +67,35 @@ Inside the same Odoo database, records can either be **shared across all website
 
 Do **not** edit files inside `odoo/`. Keep every business unit's code inside `addons/` just like [`addons/custom_store/`](../addons/custom_store/README.md).
 
-### Option A: Create a Dedicated Unit Module (Recommended for Separate Brand / Unit)
-Create `addons/custom_unit2/`:
-```text
-addons/custom_unit2/
-├── __init__.py
-├── __manifest__.py
-├── data/
-│   └── website_unit2_data.xml
-├── static/src/scss/
-│   └── unit2_styles.scss
-└── views/
-    └── unit2_pages.xml
+### Option A: Create a Dedicated Store Addon Automatically (`new_store.bat`)
+Use [`new_store.bat`](../new_store.bat) ([`scripts/new_store.py`](../scripts/new_store.py)) to scaffold an isolated, Website-Builder-compatible module under `addons/custom_store_<slug>/` (scoped via `website.x_store_code` and `ir.asset` `website_id`, so websites never overwrite each other):
+
+```powershell
+# Example: FAIRTAG & ZOIRA LAWNS under their branches
+.\new_store.bat fairtag "FAIRTAG" --company "FAIRTAG" --domain "http://fairtag.localhost:8069" --install
+.\new_store.bat zoira "ZOIRA LAWNS" --company "ZOIRA LAWNS" --domain "http://zoira.localhost:8069" --install
+
+# Start Odoo again after --install finishes
+.\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\data\odoo.runtime.conf
 ```
 
-**`addons/custom_unit2/__manifest__.py`:**
-```python
-{
-    "name": "Custom Unit 2 Website",
-    "version": "20.0.1.0.0",
-    "category": "Website/eCommerce",
-    "depends": ["website", "website_sale", "theme_default"],
-    "data": [
-        "data/website_unit2_data.xml",
-        "views/unit2_pages.xml",
-    ],
-    "assets": {
-        "web.assets_frontend": [
-            "custom_unit2/static/src/scss/unit2_styles.scss",
-        ],
-    },
-    "installable": True,
-    "license": "LGPL-3",
-}
-```
+Each generated `addons/custom_store_<slug>/` folder includes its own `views/` (`homepage.xml`, `footer.xml`, `header.xml`, `shop_templates.xml`, `product_templates.xml`, `cart_templates.xml`, `checkout_templates.xml`), `static/src/scss/` (`primary_variables.scss`, `<slug>.scss`), and `static/src/js/<slug>.js`.
 
-> [!IMPORTANT]
-> **Asset Scoping Warning (`web.assets_frontend`):**
-> `web.assets_frontend` is compiled globally for the database, whereas custom SCSS variables (`user_values.scss`) set in Website Builder are stored per website. Do **not** override global `$o-brand-primary` inside a second addon's `web._assets_primary_variables`, or it will overwrite Site 1's colors! Instead, customize colors per site in **Website → Edit → Theme**, or wrap CSS rules inside `[data-website-id="2"] { ... }`.
+### Option B: Syncing Visual Website Builder Edits <-> Addon Code (`sync_store.bat`)
 
-### Option B: Exporting Pages Built with Odoo Website Builder Into Your Addon
-
-1. Design your new page visually using Odoo's drag-and-drop **Edit (Website Builder)** on Site 2 and click **Save**.
-2. Inspect/export the saved QWeb view XML for that `website_id` from `odoo-bin shell`:
-   ```python
-   # Run via: .\.venv\Scripts\python.exe .\odoo\odoo-bin shell -c .\data\odoo.runtime.conf -d zoeemasterdb --no-http
-   for page in env["website.page"].search([("website_id", "=", 2)]):
-       print("=== URL:", page.url, "| KEY:", page.view_id.key, "===")
-       print(page.view_id.arch_db)
-   ```
-3. Paste the exported `<t t-call="website.layout">...</t>` XML into `addons/custom_unit2/views/unit2_pages.xml` and install/upgrade with:
+1. Design or edit pages visually using Odoo's drag-and-drop **Edit (Website Builder)** on any store and click **Save**.
+2. Pull the Builder-edited `homepage`, `footer`, and custom `website.page` records from PostgreSQL directly into `addons/custom_store_<slug>/views/`:
    ```powershell
-   .\.venv\Scripts\python.exe .\scripts\odoo_ctl.py upgrade --skip-pull --install --modules custom_unit2
+   .\sync_store.bat pull custom_store
+   .\sync_store.bat pull fairtag
+   ```
+3. Or push XML edits made in VS Code (`homepage.xml` / `footer.xml`) back into that store's Builder views in DB:
+   ```powershell
+   .\sync_store.bat push fairtag
+   ```
+4. Restart Odoo after upgrading/pushing:
+   ```powershell
+   .\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\data\odoo.runtime.conf
    ```
 
 ---

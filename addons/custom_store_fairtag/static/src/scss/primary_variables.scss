@@ -1,0 +1,29 @@
+// Isolated color palette for FAIRTAG (custom_store_fairtag)
+$o-color-palettes: map-merge($o-color-palettes, (
+    'store-fairtag': (
+        'o-color-1': #1d4ed8,
+        'o-color-2': #0f172a,
+        'o-color-3': #F1F5F9,
+        'o-color-4': #FFFFFF,
+        'o-color-5': #0f172a,
+        'o-cc5-headings': #FFFFFF,
+        'o-cc5-link': #E2E8F0,
+        'menu': 1,
+        'footer': 5,
+        'copyright': 5,
+    ),
+));
+
+$o-gray-color-palettes: map-merge($o-gray-color-palettes, (
+    'store-fairtag': map-get($o-gray-color-palettes, 'base-1'),
+));
+
+$o-theme-color-palettes: map-merge($o-theme-color-palettes, (
+    'store-fairtag': map-get($o-theme-color-palettes, 'base-1'),
+));
+
+$o-selected-color-palettes-names: append($o-selected-color-palettes-names, 'store-fairtag');
+
+$o-user-website-values: map-merge((
+    'color-palettes-name': 'store-fairtag',
+), $o-user-website-values);

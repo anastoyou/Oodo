@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="shop_fairtag" inherit_id="website_sale.products" name="FAIRTAG Shop Page">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="t-attf-class" add="#{'o_fairtag_shop' if (website and website.x_store_code == 'fairtag') else ''}" separator=" "/>
+        </xpath>
+        <xpath expr="//header[@id='o_wsale_products_header']" position="before">
+            <div t-if="website and website.x_store_code == 'fairtag'" class="o_fairtag_shop_banner p-4 mb-4 rounded">
+                <span class="badge text-bg-primary text-uppercase mb-2">FAIRTAG</span>
+                <h2 class="h4 text-white mb-1">FAIRTAG Collection</h2>
+                <p class="small text-white-50 mb-0">Curated items exclusively for FAIRTAG.</p>
+            </div>
+        </xpath>
+    </template>
+</odoo>

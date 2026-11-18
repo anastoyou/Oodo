@@ -37,10 +37,36 @@ All storefront & eCommerce code lives in [`addons/custom_store/`](../addons/cust
 | Policy & support pages (`/size-guide`, `/shipping-policy`, `/return-policy`, `/support`) | `addons/custom_store/views/pages/*.xml` (`size_guide.xml`, `shipping_policy.xml`, `return_policy.xml`, `support.xml`) |
 | Web controllers | [`controllers/main.py`](../addons/custom_store/controllers/main.py), [`controllers/portal.py`](../addons/custom_store/controllers/portal.py) |
 
-After editing files in `addons/custom_store/`, reload them into PostgreSQL:
+After editing files in `addons/custom_store/` (or any `addons/custom_store_<slug>/`), reload them into PostgreSQL and start Odoo:
 
-```bat
+```powershell
 .\upgrade.bat --skip-pull
-.\start.bat
+.\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\data\odoo.runtime.conf
 ```
+
+---
+
+## Option C: Multi-Website Isolated Stores & Builder Sync (`new_store.bat` / `sync_store.bat`)
+
+Each new website can have its own isolated addon folder (`addons/custom_store_<slug>/`) scoped via `website.x_store_code`, while staying 100% editable in the **Website Builder**:
+
+* **Create & install a new isolated store addon:**
+  ```powershell
+  .\new_store.bat fairtag "FAIRTAG" --company "FAIRTAG" --domain "http://fairtag.localhost:8069" --install
+  .\new_store.bat zoira "ZOIRA LAWNS" --company "ZOIRA LAWNS" --domain "http://zoira.localhost:8069" --install
+  ```
+* **Pull visual Website Builder edits from DB back into addon XML (`views/`):**
+  ```powershell
+  .\sync_store.bat pull custom_store
+  .\sync_store.bat pull fairtag
+  ```
+* **Push edited addon XML (`homepage.xml` / `footer.xml`) & assets into DB:**
+  ```powershell
+  .\sync_store.bat push fairtag
+  ```
+* **Start Odoo after installing/pushing:**
+  ```powershell
+  .\.venv\Scripts\python.exe .\odoo\odoo-bin -c .\data\odoo.runtime.conf
+  ```
+
 

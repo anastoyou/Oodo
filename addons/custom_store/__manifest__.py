@@ -1,8 +1,8 @@
 {
     "name": "Custom Store eCommerce(C)",
-    "version": "20.0.2.0.0",
+    "version": "20.0.2.1.0",
     "category": "Website/eCommerce",
-    "summary": "D2C Storefront, Cart, Checkout, Portal & Support UI.",
+    "summary": "Multi-Website-Safe D2C Storefront, Cart, Checkout, Portal & Support UI.",
     "author": "Custom Store",
     "depends": [
         "website",
@@ -18,6 +18,7 @@
     "data": [
         "data/public_category_data.xml",
         "data/portal_entry_data.xml",
+        "views/website_views.xml",
         "views/header.xml",
         "views/homepage.xml",
         "views/footer.xml",
@@ -31,19 +32,11 @@
         "views/pages/shipping_policy.xml",
         "views/pages/return_policy.xml",
         "views/pages/support.xml",
+        "data/store_isolation_data.xml",
     ],
     "assets": {
-        "web._assets_primary_variables": [
-            (
-                "before",
-                "website/static/src/scss/options/user_values.scss",
-                "custom_store/static/src/scss/primary_variables.scss",
-            ),
-        ],
         "web.assets_frontend": [
-            "custom_store/static/src/scss/custom_store.scss",
-            "custom_store/static/src/js/custom_store.js",
-            'custom_store/static/src/js/product_new_tab.js'
+            "custom_store/static/src/js/product_new_tab.js",
         ],
     },
     "installable": True,

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Exported & customized Footer (website.footer_custom) outside core odoo/. -->
-    <template id="footer_custom" inherit_id="website.footer_custom" name="Custom Store Footer">
-        <xpath expr="//div[@id='footer']" position="replace">
-            <div id="footer" class="oe_structure oe_structure_solo o_custom_store_footer border text-break" t-ignore="true" t-if="not no_footer" style="--box-border-left-width: 0px; --box-border-right-width: 0px;">
+    <!-- Standalone Builder-compatible Footer template seeded into Website 1 only (never leaks to new websites). -->
+    <template id="footer_custom_tmpl" name="Custom Store Starter Footer">
+        <div id="footer" class="oe_structure oe_structure_solo o_custom_store_footer border text-break" t-ignore="true" t-if="not no_footer" style="--box-border-left-width: 0px; --box-border-right-width: 0px;">
                 <section class="s_text_block pt40 pb24 o_colored_level" data-snippet="s_text_block" data-name="Container">
                     <div class="container">
                         <div class="row g-4">
@@ -63,7 +62,6 @@
                         </div>
                     </div>
                 </section>
-            </div>
-        </xpath>
+        </div>
     </template>
 </odoo>

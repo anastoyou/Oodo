@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cart_zoira" inherit_id="website_sale.cart" name="ZOIRA LAWNS Cart Page">
+        <xpath expr="//div[@id='shop_cart']" position="attributes">
+            <attribute name="t-attf-class" add="#{'o_zoira_cart' if (website and website.x_store_code == 'zoira') else ''}" separator=" "/>
+        </xpath>
+    </template>
+</odoo>

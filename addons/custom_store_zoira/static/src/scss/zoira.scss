@@ -1,0 +1,18 @@
+// Isolated frontend styles for ZOIRA LAWNS (custom_store_zoira)
+html[data-store-code="zoira"] {
+    --store-accent: var(--primary, #1d4ed8);
+    --store-dark: var(--secondary, #0f172a);
+
+    .o_zoira_shop_banner {
+        background: linear-gradient(135deg, var(--store-dark) 0%, color-mix(in srgb, var(--store-dark) 80%, var(--store-accent)) 100%);
+    }
+
+    .o_zoira_card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+    }
+}

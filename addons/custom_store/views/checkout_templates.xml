@@ -3,13 +3,13 @@
     <!-- 4. Checkout Flow: Shared Layout, Customer Details, Payment & Confirmation -->
     <template id="checkout_layout_custom" inherit_id="website_sale.checkout_layout" name="Custom Store Checkout Layout">
         <xpath expr="//div[@id='wrap']" position="attributes">
-            <attribute name="class" add="o_custom_store_checkout" separator=" "/>
+            <attribute name="t-attf-class" add="#{'o_custom_store_checkout' if (website and website.x_store_code == 'custom_store') else ''}" separator=" "/>
         </xpath>
     </template>
 
     <template id="checkout_address_custom" inherit_id="website_sale.checkout" name="Custom Store Checkout Address">
         <xpath expr="//div[@id='shop_checkout']" position="before">
-            <div class="o_custom_store_checkout_strip p-3 mb-4 small">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_checkout_strip p-3 mb-4 small">
                 <div class="fw-semibold mb-1">
                     <i class="fa fa-truck me-1 text-primary" aria-hidden="true"/>Delivery &amp; Size Assurance
                 </div>
@@ -22,7 +22,7 @@
 
     <template id="checkout_payment_custom" inherit_id="website_sale.payment" name="Custom Store Checkout Payment">
         <xpath expr="//div[@id='payment_method']" position="before">
-            <div class="o_custom_store_checkout_strip p-3 mb-3 small">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_checkout_strip p-3 mb-3 small">
                 <div class="fw-semibold mb-1">
                     <i class="fa fa-shield me-1 text-primary" aria-hidden="true"/>Choose Prepaid (Priority Dispatch) or Cash on Delivery
                 </div>
@@ -35,7 +35,7 @@
 
     <template id="checkout_confirmation_custom" inherit_id="website_sale.confirmation" name="Custom Store Order Confirmation">
         <xpath expr="//div[@id='oe_structure_website_sale_confirmation_1']" position="inside">
-            <div class="o_custom_store_checkout_strip p-4 mt-4">
+            <div t-if="website and website.x_store_code == 'custom_store'" class="o_custom_store_checkout_strip p-4 mt-4">
                 <h5 class="mb-2">What happens next with your order?</h5>
                 <div class="row g-3 small text-muted">
                     <div class="col-md-4">

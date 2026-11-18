@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_website_form_store_code" model="ir.ui.view">
+        <field name="name">website.form.store.code</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='domain']/field[@name='domain']" position="after">
+                <field name="x_store_code" placeholder="e.g. fairtag, zoira, custom_store"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_website_tree_store_code" model="ir.ui.view">
+        <field name="name">website.list.store.code</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='domain']" position="after">
+                <field name="x_store_code" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

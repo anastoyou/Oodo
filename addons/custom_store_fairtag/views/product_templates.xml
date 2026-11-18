@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_fairtag" inherit_id="website_sale.product" name="FAIRTAG Product Page">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="t-attf-class" add="#{'o_fairtag_product' if (website and website.x_store_code == 'fairtag') else ''}" separator=" "/>
+        </xpath>
+    </template>
+</odoo>
