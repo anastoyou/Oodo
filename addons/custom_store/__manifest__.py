@@ -16,9 +16,11 @@
         "custom_erp",
     ],
     "data": [
+        "security/ir.access.csv",
         "data/public_category_data.xml",
         "data/portal_entry_data.xml",
         "views/website_views.xml",
+        "views/custom_pdp_views.xml",
         "views/header.xml",
         "views/homepage.xml",
         "views/footer.xml",

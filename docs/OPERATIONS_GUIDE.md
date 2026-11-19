@@ -8,6 +8,7 @@
 | [`MODULES_AND_DB_PORTABILITY.md`](./MODULES_AND_DB_PORTABILITY.md) | `addons_path`, activating built-in apps (`point_of_sale`), installing custom addons, and moving DB + `filestore` |
 | [`WEBSITE_AND_ECOMMERCE_EDITING.md`](./WEBSITE_AND_ECOMMERCE_EDITING.md) | Where to edit Website & eCommerce (Browser Builder / Backend vs `addons/custom_store/` files) |
 | [`CUSTOM_PRODUCT_PDP.md`](./CUSTOM_PRODUCT_PDP.md) | 4 ways to create a custom Product Detail Page (`/shop/<product>`) per SKU |
+| [`PER_WEBSITE_CUSTOM_PDP_ENGINE.md`](./PER_WEBSITE_CUSTOM_PDP_ENGINE.md) | Per-website, per-product `new_pdp.bat` CLI, Native QWeb & React + Tailwind PDP engine, and `unlink()` auto-cleanup |
 | [`AUTHENTICATION_AND_GOOGLE_OAUTH.md`](./AUTHENTICATION_AND_GOOGLE_OAUTH.md) | Enabling Google Sign-In (`auth_oauth`), other OAuth2 providers, and custom auth (OTP / Code-Flow OAuth) |
 | [`MULTIPLE_STORES_CLOTHING_GADGETS.md`](./MULTIPLE_STORES_CLOTHING_GADGETS.md) | When to launch a Gadgets store and how to configure Multi-Website, `website_id`, `custom_store`, and Nginx |
 | [`PARTNER_VERTICAL_ACCESS_CONTROL.md`](./PARTNER_VERTICAL_ACCESS_CONTROL.md) | Isolating Ladies, Children, Gadgets, and Custom Stitches managers (Roles/Teams, `ir.access`, Multi-Company) |

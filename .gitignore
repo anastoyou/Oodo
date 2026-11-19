@@ -21,3 +21,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
+# Frontend React/Tailwind PDP build cache & dependencies
+frontend_pdp/node_modules/
+frontend_pdp/.generated/
+
+

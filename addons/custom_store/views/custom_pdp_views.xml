@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- React + Tailwind PDP shell preserving the website Header and Footer -->
+    <template id="react_pdp_shell" name="Custom React PDP Shell" track="1">
+        <t t-call="website.layout" additional_title="product.name">
+            <link t-if="pdp_bundle_css_url" rel="stylesheet" t-att-href="pdp_bundle_css_url"/>
+            <div
+                id="wrap"
+                class="o_wsale_product_page"
+                t-att-data-name="product.name"
+            >
+                <div
+                    id="custom-react-pdp-root"
+                    t-att-data-store-code="website.x_store_code or ''"
+                    t-att-data-pdp-folder="custom_pdp.folder_name"
+                    t-att-data-bootstrap="pdp_bootstrap_json"
+                >
+                    <div class="container py-5 text-center text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"/>
+                        Loading product experience...
+                    </div>
+                </div>
+            </div>
+            <script type="module" t-att-src="pdp_bundle_js_url"/>
+        </t>
+    </template>
+
+    <!-- Backend views for managing per-(website, product) custom PDPs -->
+    <record id="view_custom_store_product_pdp_search" model="ir.ui.view">
+        <field name="name">custom.store.product.pdp.search</field>
+        <field name="model">custom.store.product.pdp</field>
+        <field name="arch" type="xml">
+            <search string="Search Custom PDPs">
+                <field name="product_tmpl_id"/>
+                <field name="website_id"/>
+                <field name="folder_name"/>
+                <filter string="Active (Custom UI)" name="active_only" domain="[('active', '=', True)]"/>
+                <filter string="Off (Default Odoo Page)" name="paused_only" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_custom_store_product_pdp_list" model="ir.ui.view">
+        <field name="name">custom.store.product.pdp.list</field>
+        <field name="model">custom.store.product.pdp</field>
+        <field name="arch" type="xml">
+            <list string="Custom Product PDPs" create="0" delete="1" editable="bottom">
+                <field name="website_id" readonly="1"/>
+                <field name="product_tmpl_id" readonly="1"/>
+                <field name="mode" readonly="1"/>
+                <field
+                    name="status"
+                    widget="badge"
+                    decoration-success="status == 'active'"
+                    decoration-muted="status == 'paused'"
+                />
+                <field name="addon_name" readonly="1" optional="show"/>
+                <field name="folder_name" readonly="1" optional="show"/>
+                <field name="active" string="Enabled" widget="boolean_toggle"/>
+                <button
+                    name="action_delete_with_code"
+                    type="object"
+                    string="Delete Code"
+                    icon="fa-trash"
+                    class="btn-link text-danger"
+                    confirm="Permanently remove this Custom PDP override and delete its code folder from disk? To keep your code while using the default Odoo page, toggle Enabled OFF instead."
+                />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_custom_store_product_pdp_form" model="ir.ui.view">
+        <field name="name">custom.store.product.pdp.form</field>
+        <field name="model">custom.store.product.pdp</field>
+        <field name="arch" type="xml">
+            <form string="Custom Product PDP" create="0" delete="1">
+                <header>
+                    <button
+                        name="action_delete_with_code"
+                        type="object"
+                        string="Delete Override &amp; Code Folder"
+                        class="btn-secondary text-danger"
+                        confirm="Permanently remove this Custom PDP override and delete its code folder from disk? To keep your code while showing the default Odoo page, toggle Enabled OFF instead."
+                    />
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info mb-3" role="status">
+                        New custom PDPs are scaffolded via <code>.\new_pdp.bat</code>.
+                        Turn <strong>Enabled</strong> OFF to fall back to Odoo's default product page while keeping code on disk,
+                        or click <strong>Delete Override &amp; Code Folder</strong> to remove both.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="website_id" readonly="1"/>
+                            <field name="product_tmpl_id" readonly="1"/>
+                            <field name="mode" readonly="1"/>
+                            <field name="active" string="Enabled" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="addon_name" readonly="1"/>
+                            <field name="folder_name" readonly="1"/>
+                            <field name="template_key" readonly="1" invisible="mode != 'native'"/>
+                            <field name="view_id" readonly="1" invisible="mode != 'native'"/>
+                            <field name="bundle_js" readonly="1" invisible="mode != 'react'"/>
+                            <field name="bundle_css" readonly="1" invisible="mode != 'react'"/>
+                            <field name="bundle_full_js" readonly="1" invisible="mode != 'react'"/>
+                            <field name="bundle_full_css" readonly="1" invisible="mode != 'react'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_store_product_pdp" model="ir.actions.act_window">
+        <field name="name">Custom Product PDPs</field>
+        <field name="res_model">custom.store.product.pdp</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_custom_store_product_pdp_search"/>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <menuitem
+        id="menu_custom_store_product_pdp"
+        name="Custom PDPs"
+        parent="website.menu_website_global_configuration"
+        action="action_custom_store_product_pdp"
+        groups="base.group_system"
+        sequence="95"
+    />
+
+    <!-- Show Custom PDPs tab on Product Template form (designers/admins only, without Add a line) -->
+    <record id="product_template_form_view_custom_pdp" model="ir.ui.view">
+        <field name="name">product.template.form.custom.pdp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page
+                    string="Custom PDPs"
+                    name="custom_pdps"
+                    groups="website.group_website_designer"
+                    invisible="custom_pdp_count == 0"
+                >
+                    <field name="custom_pdp_count" invisible="1"/>
+                    <div class="alert alert-info py-2 mb-3" role="status">
+                        Turn <strong>Enabled</strong> OFF to use Odoo's default product page while keeping your code files on disk (toggle back ON anytime).
+                        Use <strong>Delete Code</strong> (or <code>.\new_pdp.bat --remove</code>) to permanently remove the override and delete the folder.
+                        To add a new custom PDP, run <code>.\new_pdp.bat</code>.
+                    </div>
+                    <field name="custom_pdp_ids" context="{'active_test': False}">
+                        <list create="0" delete="0" editable="bottom">
+                            <field name="website_id" readonly="1"/>
+                            <field name="mode" readonly="1"/>
+                            <field
+                                name="status"
+                                widget="badge"
+                                decoration-success="status == 'active'"
+                                decoration-muted="status == 'paused'"
+                            />
+                            <field name="addon_name" readonly="1" optional="hide"/>
+                            <field name="folder_name" readonly="1" optional="show"/>
+                            <field name="active" string="Enabled" widget="boolean_toggle"/>
+                            <button
+                                name="action_delete_with_code"
+                                type="object"
+                                string="Delete Code"
+                                icon="fa-trash"
+                                class="btn-link text-danger"
+                                context="{'from_product_form': 1}"
+                                confirm="Permanently remove this Custom PDP override and delete its code folder from disk? To keep your code while using the default Odoo page, toggle Enabled OFF instead."
+                            />
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id,group_id/id,operation,domain
+access_custom_store_product_pdp_user,custom.store.product.pdp.user,custom.store.product.pdp,base.group_user,r,
+access_custom_store_product_pdp_designer,custom.store.product.pdp.designer,custom.store.product.pdp,website.group_website_designer,rud,
+access_custom_store_product_pdp_system,custom.store.product.pdp.system,custom.store.product.pdp,base.group_system,crud,
+access_custom_store_product_pdp_portal,custom.store.product.pdp.portal,custom.store.product.pdp,base.group_portal,r,
+access_custom_store_product_pdp_public,custom.store.product.pdp.public,custom.store.product.pdp,base.group_public,r,

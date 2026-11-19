@@ -1,5 +1,7 @@
 # Creating a Custom PDP (Product Detail Page) for Each Product
 
+> **New Per-Website + Per-Product Custom PDP Engine (`new_pdp.bat`):** To scaffold an isolated `native` (Page Builder) or `react` (React + Tailwind CSS) PDP folder inside `addons/<store_addon>/custom_pdp/<id>_<slug>/` with automatic cleanup on product deletion, see [`PER_WEBSITE_CUSTOM_PDP_ENGINE.md`](./PER_WEBSITE_CUSTOM_PDP_ENGINE.md).
+
 In Odoo `20.0` (`website_sale`), every product page (`/shop/<product>`) is rendered by `WebsiteSale.product()` ([`website_sale/controllers/main.py`](../odoo/addons/website_sale/controllers/main.py)) using the template `website_sale.product` ([`product_page_templates.xml`](../odoo/addons/website_sale/templates/product_page_templates.xml)).
 
 Depending on how unique each SKU page needs to be, choose from these **4 approaches**:

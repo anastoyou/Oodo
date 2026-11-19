@@ -5,6 +5,7 @@
 | `MODULES_AND_DB_PORTABILITY.md` | `addons_path`, activating built-in apps (`point_of_sale`), adding/updating addons, and DB + `filestore` portability |
 | `WEBSITE_AND_ECOMMERCE_EDITING.md` | Where to edit Website & eCommerce (live Browser Builder / Backend vs `addons/custom_store/`) |
 | `CUSTOM_PRODUCT_PDP.md` | 4 ways to create a custom Product Detail Page (`/shop/<product>`) per product |
+| `PER_WEBSITE_CUSTOM_PDP_ENGINE.md` | Per-website, per-product `new_pdp.bat` CLI, Native QWeb & React + Tailwind PDP engine, and `unlink()` auto-cleanup |
 | `AUTHENTICATION_AND_GOOGLE_OAUTH.md` | Enabling Google Sign-In (`auth_oauth`), implicit OAuth2 providers, and custom auth (OTP / Code-Flow OAuth) |
 | `MULTIPLE_STORES_CLOTHING_GADGETS.md` | When to launch a Gadgets store and how to configure Multi-Website, `website_id`, `custom_store`, and Nginx |
 | `PARTNER_VERTICAL_ACCESS_CONTROL.md` | Giving separate ERP control for Ladies, Children, Gadgets, and Custom Stitches (Teams/Roles, `ir.access`, Multi-Company) |
